@@ -155,21 +155,18 @@ bool CItem::CollisionBall(void)
 
 	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
 	{
-		for (int nCntObj = 0; nCntObj < MAX_OBJECT; nCntObj++)
+		CObject *pObject = CObject::GetTop(nCntPrt);
+
+		while ((pObject != nullptr))
 		{
-			CObject *pObj;
-
-			//オブジェクトを取得
-			pObj = CObject::GetObject(nCntPrt, nCntObj);
-
-			if (pObj != nullptr)
-			{//NULLチェック
-				CObject::TYPE type = pObj->GetType();
+			if (pObject != nullptr)
+			{
+				CObject::TYPE type = pObject->GetType();	//今回のオブジェクトのタイプ
 
 				if (type == CObject::TYPE_PLAYER)
 				{//プレイヤ―だったら
-					Objpos = pObj->GetPos();
-					Objsize = pObj->GetSize();
+					Objpos = pObject->GetPos();
+					Objsize = pObject->GetSize();
 
 					CPlayer *pPlayer = CGame::GetPlayer();
 					Objpos.y += pPlayer->GetHeartPos();
@@ -200,6 +197,11 @@ bool CItem::CollisionBall(void)
 						return TRUE;
 					}
 				}
+				pObject = pObject->GetNext();
+			}
+			else
+			{// (pObject == NULL) == Endまで行ったってことでこの優先度は終了
+				break;
 			}
 		}
 	}

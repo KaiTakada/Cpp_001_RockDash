@@ -658,34 +658,31 @@ void CPlayer::PullItem(void)
 
 	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
 	{
-		for (int nCntObj = 0; nCntObj < MAX_OBJECT; nCntObj++)
+		CObject *pObject = CObject::GetTop(nCntPrt);
+
+		while ((pObject != nullptr))
 		{
-			CObject *pObj;
-
-			//オブジェクトを取得
-			pObj = CObject::GetObject(nCntPrt, nCntObj);
-
-			if (pObj != nullptr)
-			{//NULLチェック
-				CObject::TYPE type = pObj->GetType();
+			if (pObject != nullptr)
+			{
+				CObject::TYPE type = pObject->GetType();	//今回のオブジェクトのタイプ
 
 				if (type == CObject::TYPE_ITEM ||
 					type == CObject::TYPE_EXP)
 				{//アイテムだったら
-					Objpos = pObj->GetPos();
-					Objsize = pObj->GetSize();
+					Objpos = pObject->GetPos();
+					Objsize = pObject->GetSize();
 
 					float fObjsize = (Objsize.x + Objsize.z) * 0.5f;		//オブジェクトの半径
 
 					float fLength = fSize + fObjsize;		//2点間の長さ
 					float fColl = 0.0f;						//当たり判定範囲
 
-					//判定
+															//判定
 					fColl = hypotf((m_pos.x - Objpos.x), (m_pos.z - Objpos.z));
 
 					if (fColl <= fLength)
 					{
-						D3DXVECTOR3 ObjMove = pObj->GetMove();
+						D3DXVECTOR3 ObjMove = pObject->GetMove();
 
 						float fRotMove = atan2f(ObjMove.x, ObjMove.y);							//現在の移動方向(角度)
 						float fRotDest = atan2f(Objpos.x - m_pos.x, Objpos.z - m_pos.z);		//目標の移動方向(角度)
@@ -706,15 +703,20 @@ void CPlayer::PullItem(void)
 
 						if ((fLength - fColl) <= NUM_COLL && type == CObject::TYPE_EXP)
 						{//触れていたら取得
-							//CExperience *pExp = pObj;
+						 //CExperience *pExp = pObj;
 						}
 
 						ObjMove.x = sinf(fRotMove + 1.0f * D3DX_PI) * fSpeed;		//x
 						ObjMove.z = cosf(fRotMove + 1.0f * D3DX_PI) * fSpeed;		//y
 						(Objpos.y > 50.0f) ? ObjMove.y = -fSpeed : ObjMove.y = fSpeed;	//y
-						pObj->SetMove(ObjMove);
+						pObject->SetMove(ObjMove);
 					}
 				}
+				pObject = pObject->GetNext();
+			}
+			else
+			{// (pObject == NULL) == Endまで行ったってことでこの優先度は終了
+				break;
 			}
 		}
 	}
@@ -738,18 +740,6 @@ void CPlayer::CntExp(const float fExp)
 	m_fExp += fExp;
 
 	float fRatio = m_fExp / m_fExpMax;
-
-	if (fRatio >= 1.0f)
-	{
-		CGrowSelecter *pGrow = CGrowSelecter::Create();
-
-		if (FAILED(CGame::SetGrow(pGrow)))
-		{
-			pGrow->Uninit();
-		}
-
-		m_fExpMax *= EXP_MAX_MGNFC;
-	}
 
 	//加算結果の割合で設定
 	m_pGaugeExp->SetRatio(fRatio);
@@ -1141,23 +1131,25 @@ void CPlayer::CollisionField(D3DXVECTOR3 pos)
 
 	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
 	{
-		for (int nCntObj = 0; nCntObj < MAX_OBJECT; nCntObj++)
+		CObject *pObject = CObject::GetTop(nCntPrt);
+
+		while ((pObject != nullptr))
 		{
-			CObject *pObj;
-
-			//オブジェクトを取得
-			pObj = CObject::GetObject(nCntPrt, nCntObj);
-
-			if (pObj != nullptr)
-			{//NULLチェック
-				CObject::TYPE type = pObj->GetType();
+			if (pObject != nullptr)
+			{
+				CObject::TYPE type = pObject->GetType();	//今回のオブジェクトのタイプ
 
 				if (type == CObject::TYPE_FIELD)
-				{//地面だったら
-					
-					CField *pField = (CField*)pObj;
+				{//アイテムだったら
+
+					CField *pField = (CField*)pObject;
 					fHeight = pField->GetHeight(pos);
 				}
+				pObject = pObject->GetNext();
+			}
+			else
+			{// (pObject == NULL) == Endまで行ったってことでこの優先度は終了
+				break;
 			}
 		}
 	}

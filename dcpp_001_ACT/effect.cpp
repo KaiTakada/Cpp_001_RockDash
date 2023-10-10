@@ -173,12 +173,6 @@ CEffect * CEffect::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3
 
 		if (pEffect != nullptr)
 		{//¶¬o—ˆ‚½‚ç
-			if (pEffect->GetID() >= MAX_OBJECT ||
-				pEffect->GetID() < 0)
-			{
-				delete pEffect;
-				return nullptr;
-			}
 
 			if (FAILED(pEffect->Init(pos, rot)))
 			{

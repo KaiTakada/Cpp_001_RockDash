@@ -192,7 +192,6 @@ void CGrowSelecter::Update(void)
 		}
 
 		CManager::SetGrow(false);
-		CGame::NullGrow();
 		Uninit();
 		return;
 	}

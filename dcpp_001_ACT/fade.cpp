@@ -93,8 +93,6 @@ void CFade::Update(void)
 				//モード設定（次の画面に移行）
 				CManager::SetMode(m_modeNext);
 
-				//m_bExc = false;
-				
 				return;
 			}
 		}

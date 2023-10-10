@@ -121,13 +121,6 @@ CExplosion *CExplosion::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 size, co
 
 	if (pExplosion != nullptr)
 	{
-		if (pExplosion->GetID() >= MAX_OBJECT ||
-			pExplosion->GetID() < 0)
-		{
-			delete pExplosion;
-			return nullptr;
-		}
-
 		if (FAILED(pExplosion->Init(pos)))
 		{
 			pExplosion->Uninit();

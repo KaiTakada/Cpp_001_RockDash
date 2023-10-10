@@ -235,7 +235,7 @@ void CEnemy::Damage(int nDamege)
 
 		if (pScore == nullptr)
 		{
-			Uninit();
+			SetDeath(true);
 			return;
 		}
 
@@ -244,14 +244,14 @@ void CEnemy::Damage(int nDamege)
 			pScore->CntValue(100000);
 
 			CManager::SetResult(CManager::RT_WIN);
-			Uninit();
+			SetDeath(true);
 		}
 		else
 		{
 			pScore->CntValue(100);
 			
 			CExperience::Create(GetPos());
-			Uninit();
+			SetDeath(true);
 		}
 	}
 }
@@ -310,33 +310,28 @@ bool CEnemy::CollisionRect(void)
 
 	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
 	{
-		for (int nCntObj = 0; nCntObj < MAX_OBJECT; nCntObj++)
+		CObject *pObject = CObject::GetTop(nCntPrt);
+
+		while ((pObject != nullptr))
 		{
-			bCollision = false;
-
-			CObject *pObj;
-
-			//オブジェクトを取得
-			pObj = CObject::GetObject(nCntPrt, nCntObj);
-
-			if (pObj != nullptr)
-			{//NULLチェック
-				CObject::TYPE type = pObj->GetType();
+			if (pObject != nullptr)
+			{
+				CObject::TYPE type = pObject->GetType();	//今回のオブジェクトのタイプ
 
 				if (type == CObject::TYPE_PLAYER)
 				{//プレイヤ―だったら
-					Objpos = pObj->GetPos();
-					ObjposOld = pObj->GetPosOld();
-					Objsize = pObj->GetSize();
+					Objpos = pObject->GetPos();
+					ObjposOld = pObject->GetPosOld();
+					Objsize = pObject->GetSize();
 
 					if (ObjposOld.z + Objsize.z <= pos.z + sizeMin.z
 						&& Objpos.z + Objsize.z >= pos.z + sizeMin.z
 						&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
 						&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f
 						&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
-						&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
-						|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
-						&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+							&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
+							|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
+								&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
 					{//ブロック北
 						move.z = (pos.z + sizeMin.z) - (Objpos.z + Objsize.z) - 0.1f;
 						bCollision = true;
@@ -346,9 +341,9 @@ bool CEnemy::CollisionRect(void)
 						&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
 						&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f
 						&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
-						&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
-						|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
-						&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+							&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
+							|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
+								&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
 					{//ブロック南
 						move.z = (pos.z + sizeMax.z) - (Objpos.z - Objsize.z) + 0.1f;
 						bCollision = true;
@@ -359,9 +354,9 @@ bool CEnemy::CollisionRect(void)
 						&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
 						&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f
 						&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
-						&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
-						|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
-						&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+							&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
+							|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
+								&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
 					{//ブロック東
 						move.x = (pos.x + sizeMax.x) - (Objpos.x - Objsize.x) + 0.1f;
 						bCollision = true;
@@ -371,9 +366,9 @@ bool CEnemy::CollisionRect(void)
 						&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
 						&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f
 						&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
-						&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
-						|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
-						&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+							&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
+							|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
+								&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
 					{//ブロック西
 						move.x = (pos.x + sizeMin.x) - (Objpos.x + Objsize.x) - 0.1f;
 						bCollision = true;
@@ -386,11 +381,11 @@ bool CEnemy::CollisionRect(void)
 						&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
 						&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
 					{//ブロック上
-						D3DXVECTOR3 Objmove = pObj->GetMove();
-						pObj->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
+						D3DXVECTOR3 Objmove = pObject->GetMove();
+						pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
 
 						move.y = (pos.y + sizeMax.y) - (Objpos.y - Objsize.y) + 0.1f;
-						pObj->SetJump(false);
+						pObject->SetJump(false);
 
 						bCollision = true;
 					}
@@ -401,8 +396,8 @@ bool CEnemy::CollisionRect(void)
 						&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
 						&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
 					{//ブロック下
-						D3DXVECTOR3 Objmove = pObj->GetMove();
-						pObj->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
+						D3DXVECTOR3 Objmove = pObject->GetMove();
+						pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
 
 						move.y = (pos.y + sizeMin.y) - (Objpos.y + Objsize.y) - 0.1f;
 						bCollision = true;
@@ -410,10 +405,16 @@ bool CEnemy::CollisionRect(void)
 
 					if (bCollision)
 					{
-						pObj->SetPos(Objpos + move);
+						pObject->SetPos(Objpos + move);
 						return bCollision;
 					}
 				}
+
+				pObject = pObject->GetNext();
+			}
+			else
+			{// (pObject == NULL) == Endまで行ったってことでこの優先度は終了
+				break;
 			}
 		}
 	}
@@ -430,22 +431,19 @@ bool CEnemy::CollisionCircle(D3DXVECTOR3 pos)
 
 	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
 	{
-		for (int nCntObj = 0; nCntObj < MAX_OBJECT; nCntObj++)
+		CObject *pObject = CObject::GetTop(nCntPrt);
+
+		while ((pObject != nullptr))
 		{
-			CObject *pObj;
-
-			//オブジェクトを取得
-			pObj = CObject::GetObject(nCntPrt, nCntObj);
-
-			if (pObj != nullptr)
-			{//NULLチェック
-				CObject::TYPE type = pObj->GetType();
+			if (pObject != nullptr)
+			{
+				CObject::TYPE type = pObject->GetType();	//今回のオブジェクトのタイプ
 
 				if (type == CObject::TYPE_PLAYER)
 				{//敵だったら
 
-					D3DXVECTOR3 Objpos = pObj->GetPos();
-					D3DXVECTOR3 Objsize = pObj->GetMaxVtx();
+					D3DXVECTOR3 Objpos = pObject->GetPos();
+					D3DXVECTOR3 Objsize = pObject->GetMaxVtx();
 
 					float fSize0 = (size.x + size.z) * 0.5f;		//アイテムの半径xz
 					float fSize1 = (size.x + size.y) * 0.5f;		//アイテムの半径xy
@@ -480,6 +478,12 @@ bool CEnemy::CollisionCircle(D3DXVECTOR3 pos)
 						return TRUE;
 					}
 				}
+
+				pObject = pObject->GetNext();
+			}
+			else
+			{// (pObject == NULL) == Endまで行ったってことでこの優先度は終了
+				break;
 			}
 		}
 	}

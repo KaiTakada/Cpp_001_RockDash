@@ -157,38 +157,32 @@ bool CBlock::CollisionRect(void)
 
 	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
 	{
-		for (int nCntObj = 0; nCntObj < MAX_OBJECT; nCntObj++)
+		CObject *pObject = CObject::GetTop(nCntPrt);
+
+		while ((pObject != nullptr))
 		{
-			bLand = false;
-			Collision = false;
-
-			CObject *pObj;
-
-			//オブジェクトを取得
-			pObj = CObject::GetObject(nCntPrt, nCntObj);
-
-			if (pObj != nullptr)
-			{//NULLチェック
-				CObject::TYPE type = pObj->GetType();
+			if (pObject != nullptr)
+			{
+				CObject::TYPE type = pObject->GetType();	//今回のオブジェクトのタイプ
 
 				if (type == CObject::TYPE_PLAYER)
 				{//プレイヤ―だったら
-					Objpos = pObj->GetPos();
-					ObjposOld = pObj->GetPosOld();
-					//Objsize = pObj->GetSize();
+					Objpos = pObject->GetPos();
+					ObjposOld = pObject->GetPosOld();
+					//Objsize = pObject->GetSize();
 					Objsize = D3DXVECTOR3(100.0f, 100.0f, 100.0f);
-					Objmove = pObj->GetMove();
+					Objmove = pObject->GetMove();
 
-					if (pObj->GetJump() == false)
+					if (pObject->GetJump() == false)
 					{
 						if (ObjposOld.z + Objsize.z <= m_posOld.z - sizeMin.z
 							&& Objpos.z + Objsize.z >= pos.z - sizeMin.z
 							&& Objpos.x + Objsize.x - PLAYER_EXCESSX >= pos.x + sizeMin.x + 0.1f
 							&& Objpos.x - Objsize.x + PLAYER_EXCESSX <= pos.x - sizeMax.x - 0.1f)
 						{//ブロック上
-							//bLand = true;
+						 //bLand = true;
 							Objpos.z = pos.z - sizeMin.z - Objsize.z - 0.1f;		//ブロックの上に立たせる
-							pObj->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));			//移動量を0に
+							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));			//移動量を0に
 							Collision = true;
 						}
 						else if (ObjposOld.z - Objsize.z >= m_posOld.z + sizeMax.z
@@ -197,7 +191,7 @@ bool CBlock::CollisionRect(void)
 							&& Objpos.x - Objsize.x + PLAYER_EXCESSX <= pos.x + sizeMax.x - 0.1f)
 						{//ブロック下
 							Objpos.z = pos.z + sizeMax.z + Objsize.z;		//ブロックの下に立たせる
-							pObj->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));			//移動量を0に
+							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));			//移動量を0に
 							Collision = true;
 						}
 
@@ -207,7 +201,7 @@ bool CBlock::CollisionRect(void)
 							&& Objpos.z - Objsize.z < pos.z + sizeMax.z)
 						{//ブロック左
 							Objpos.x = pos.x - sizeMin.z - Objsize.x + PLAYER_EXCESSX;			//ブロックの左に立たせる
-							pObj->SetMove(D3DXVECTOR3(0.0f, Objmove.z, Objmove.z));			//移動量を0に
+							pObject->SetMove(D3DXVECTOR3(0.0f, Objmove.z, Objmove.z));			//移動量を0に
 							Collision = true;
 						}
 						else if (ObjposOld.x - Objsize.x + PLAYER_EXCESSX >= m_posOld.x + sizeMax.x - 0.1f
@@ -216,7 +210,7 @@ bool CBlock::CollisionRect(void)
 							&& Objpos.z - Objsize.z < pos.z + sizeMax.z)
 						{//ブロック右
 							Objpos.x = pos.x + sizeMax.x + Objsize.x - PLAYER_EXCESSX;		//ブロックの右に立たせる
-							pObj->SetMove(D3DXVECTOR3(0.0f, Objmove.z, Objmove.z));			//移動量を0に
+							pObject->SetMove(D3DXVECTOR3(0.0f, Objmove.z, Objmove.z));			//移動量を0に
 							Collision = true;
 						}
 					}
@@ -228,7 +222,7 @@ bool CBlock::CollisionRect(void)
 							&& Objpos.z - Objsize.z < pos.z + sizeMax.z)
 						{//ブロック左
 							Objpos.x = pos.x - sizeMin.z - Objsize.x + PLAYER_EXCESSX;			//ブロックの左に立たせる
-							pObj->SetMove(D3DXVECTOR3(0.0f, Objmove.z, Objmove.z));			//移動量を0に
+							pObject->SetMove(D3DXVECTOR3(0.0f, Objmove.z, Objmove.z));			//移動量を0に
 							Collision = true;
 						}
 						else if (ObjposOld.x - Objsize.x + PLAYER_EXCESSX >= m_posOld.x + sizeMax.x - 0.1f
@@ -237,7 +231,7 @@ bool CBlock::CollisionRect(void)
 							&& Objpos.z - Objsize.z < pos.z + sizeMax.z)
 						{//ブロック右
 							Objpos.x = pos.x + sizeMax.x + Objsize.x - PLAYER_EXCESSX;		//ブロックの右に立たせる
-							pObj->SetMove(D3DXVECTOR3(0.0f, Objmove.z, Objmove.z));			//移動量を0に
+							pObject->SetMove(D3DXVECTOR3(0.0f, Objmove.z, Objmove.z));			//移動量を0に
 							Collision = true;
 						}
 
@@ -246,9 +240,9 @@ bool CBlock::CollisionRect(void)
 							&& Objpos.x + Objsize.x - PLAYER_EXCESSX >= pos.x - sizeMin.x + 0.1f
 							&& Objpos.x - Objsize.x + PLAYER_EXCESSX <= pos.x + sizeMax.x - 0.1f)
 						{//ブロック上
-							//bLand = true;
+						 //bLand = true;
 							Objpos.z = pos.z - sizeMin.z - Objsize.z - 0.1f;		//ブロックの上に立たせる
-							pObj->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));			//移動量を0に
+							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));			//移動量を0に
 							Collision = true;
 						}
 						else if (ObjposOld.z - Objsize.z >= m_posOld.z + sizeMax.z
@@ -257,7 +251,7 @@ bool CBlock::CollisionRect(void)
 							&& Objpos.x - Objsize.x + PLAYER_EXCESSX <= pos.x + sizeMax.x - 0.1f)
 						{//ブロック下
 							Objpos.z = pos.z + sizeMax.z + Objsize.z;		//ブロックの下に立たせる
-							pObj->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));			//移動量を0に
+							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));			//移動量を0に
 							Collision = true;
 						}
 					}
@@ -265,13 +259,19 @@ bool CBlock::CollisionRect(void)
 
 				if (Collision)
 				{
-					pObj->SetPos(Objpos);
+					pObject->SetPos(Objpos);
 				}
 
 				if (bLand)
 				{
-					pObj->SetJump(!bLand);
+					pObject->SetJump(!bLand);
 				}
+
+				pObject = pObject->GetNext();
+			}
+			else
+			{// (pObject == NULL) == Endまで行ったってことでこの優先度は終了
+				break;
 			}
 		}
 	}

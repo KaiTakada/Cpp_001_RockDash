@@ -226,62 +226,59 @@ bool CBullet::CollisionCircle(D3DXVECTOR3 pos)
 
 	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
 	{
-		for (int nCntObj = 0; nCntObj < MAX_OBJECT; nCntObj++)
+		CObject *pObject = CObject::GetTop(nCntPrt);
+
+		while ((pObject != nullptr))
 		{
-			CObject *pObj;
-
-			//オブジェクトを取得
-			pObj = CObject::GetObject(nCntPrt, nCntObj);
-
-			if (pObj != nullptr)
-			{//NULLチェック
-				CObject::TYPE type = pObj->GetType();
+			if (pObject != nullptr)
+			{
+				CObject::TYPE type = pObject->GetType();	//今回のオブジェクトのタイプ
 
 				if (type == CObject::TYPE_ENEMY || type == CObject::TYPE_BOSS || type == CObject::TYPE_PLAYER)
 				{//敵だったら
-				
-					 D3DXVECTOR3 Objpos = pObj->GetPos();
 
-					 D3DXVECTOR3 Objsize;
-					 
-					 type == CObject::TYPE_PLAYER ?
-						 Objsize = pObj->GetSize() :
-						 Objsize = pObj->GetMaxVtx();
+					D3DXVECTOR3 Objpos = pObject->GetPos();
 
-					 //3軸使った球の判定から1軸の円の判定に
+					D3DXVECTOR3 Objsize;
+
+					type == CObject::TYPE_PLAYER ?
+						Objsize = pObject->GetSize() :
+						Objsize = pObject->GetMaxVtx();
+
+					//3軸使った球の判定から1軸の円の判定に
 					float fSize0 = (size.x + size.z) * 0.5f;		//アイテムの半径xz
-					//float fSize1 = (size.x + size.y) * 0.5f;		//アイテムの半径xy
-					//float fSize2 = (size.z + size.y) * 0.5f;		//アイテムの半径zy
+																	//float fSize1 = (size.x + size.y) * 0.5f;		//アイテムの半径xy
+																	//float fSize2 = (size.z + size.y) * 0.5f;		//アイテムの半径zy
 
 					float fObjsize0 = (Objsize.x + Objsize.z) * 0.5f;		//オブジェクトの半径xz
-					//float fObjsize1 = (Objsize.x + Objsize.y) * 0.5f;		//オブジェクトの半径xy
-					//float fObjsize2 = (Objsize.z + Objsize.y) * 0.5f;		//オブジェクトの半径zy
+																			//float fObjsize1 = (Objsize.x + Objsize.y) * 0.5f;		//オブジェクトの半径xy
+																			//float fObjsize2 = (Objsize.z + Objsize.y) * 0.5f;		//オブジェクトの半径zy
 
 					float fColl0 = fSize0 + fObjsize0;		//当たり判定範囲
-					//float fColl1 = fSize1 + fObjsize1;		//当たり判定範囲
-					//float fColl2 = fSize2 + fObjsize2;		//当たり判定範囲
+															//float fColl1 = fSize1 + fObjsize1;		//当たり判定範囲
+															//float fColl2 = fSize2 + fObjsize2;		//当たり判定範囲
 
 					float fLength0 = hypotf((pos.x - Objpos.x), (pos.z - Objpos.z));		//2点間の長さxz
-					//float fLength1 = hypotf((pos.x - Objpos.x), (pos.y - Objpos.y));		//2点間の長さxy
-					//float fLength2 = hypotf((pos.z - Objpos.z), (pos.y - Objpos.y));		//2点間の長さzy
+																							//float fLength1 = hypotf((pos.x - Objpos.x), (pos.y - Objpos.y));		//2点間の長さxy
+																							//float fLength2 = hypotf((pos.z - Objpos.z), (pos.y - Objpos.y));		//2点間の長さzy
 
-					//if (fLength0 <= fColl0 &&
-					//	fLength1 <= fColl1 &&
-					//	fLength2 <= fColl2)
+																							//if (fLength0 <= fColl0 &&
+																							//	fLength1 <= fColl1 &&
+																							//	fLength2 <= fColl2)
 
 					if (fLength0 <= fColl0 && pos.y <= 110.0f)
 					{
 						//ダイナミックキャスト
 						if (type == CObject::TYPE_PLAYER && m_side != SIDE_PLAYER)
 						{
-							CPlayer *pPlayer= dynamic_cast<CPlayer*>(pObj);
+							CPlayer *pPlayer = dynamic_cast<CPlayer*>(pObject);
 							pPlayer->Damage(float(m_nDamage));
 							pPlayer->CntExp(0.1f);
 							bCol = true;
 						}
 						else if (type != CObject::TYPE_PLAYER && m_side != SIDE_ENEMY)
 						{
-							CEnemy *pEnemy = dynamic_cast<CEnemy*>(pObj);
+							CEnemy *pEnemy = dynamic_cast<CEnemy*>(pObject);
 							pEnemy->Damage(m_nDamage);
 							bCol = true;
 						}
@@ -298,6 +295,12 @@ bool CBullet::CollisionCircle(D3DXVECTOR3 pos)
 						}
 					}
 				}
+
+				pObject = pObject->GetNext();
+			}
+			else
+			{// (pObject == NULL) == Endまで行ったってことでこの優先度は終了
+				break;
 			}
 		}
 	}
@@ -321,23 +324,18 @@ bool CBullet::CollisionRect(void)
 
 	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
 	{
-		for (int nCntObj = 0; nCntObj < MAX_OBJECT; nCntObj++)
+		CObject *pObject = CObject::GetTop(nCntPrt);
+
+		while ((pObject != nullptr))
 		{
-			bCollision = false;
-
-			CObject *pObj;
-
-			//オブジェクトを取得
-			pObj = CObject::GetObject(nCntPrt, nCntObj);
-
-			if (pObj != nullptr)
-			{//NULLチェック
-				CObject::TYPE type = pObj->GetType();
+			if (pObject != nullptr)
+			{
+				CObject::TYPE type = pObject->GetType();	//今回のオブジェクトのタイプ
 
 				if (type == CObject::TYPE_BLOCK)
 				{//プレイヤ―だったら
-					Objpos = pObj->GetPos();
-					Objsize = pObj->GetSize();
+					Objpos = pObject->GetPos();
+					Objsize = pObject->GetSize();
 
 					if (Objpos.y + Objsize.y <= posOld.y - size.y
 						&& Objpos.y + Objsize.y >= pos.y - size.y
@@ -380,6 +378,12 @@ bool CBullet::CollisionRect(void)
 						return bCollision;
 					}
 				}
+
+				pObject = pObject->GetNext();
+			}
+			else
+			{// (pObject == NULL) == Endまで行ったってことでこの優先度は終了
+				break;
 			}
 		}
 	}

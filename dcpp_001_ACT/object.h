@@ -100,29 +100,33 @@ public:
 	virtual D3DXVECTOR3 GetMinVtx(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }			//最小座標取得
 	virtual D3DXVECTOR3 GetMaxVtx(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }			//最大座標取得
 
-	static void Reset(void);		//タイプで破棄
 	static void ReleaseAll(void);		//全ての破棄
 	static void UpdateAll(void);		//全ての更新
 	static void DrawAll(void);			//全ての描画
 	static int GetNumAll(void) { return m_nNumAll; }		//総数取得
-	void SetPrity(int nPriority);		//描画順設定
-	int GetID(void) { return m_nID; }		//総数取得
 
 	void SetType(CObject::TYPE type) { m_type = type; }		//タイプ取得
 	CObject::TYPE GetType(void) { return m_type; }		//タイプ取得
 	void SetDeath(bool bDeath) { m_bDeath = bDeath; }		//死亡フラグ取得
 	bool GetDeath(void) { return m_bDeath; }				//死亡フラグ取得
 
-	static CObject *GetObject(const int nPriority, const int nIdx);		//指定オブジェクト取得
+	static CObject *GetTop(int nPrty) { return m_apTop[nPrty]; }		//オブジェクト
+	static CObject *GetEnd(int nPrty) { return m_apEnd[nPrty]; }		//優先順でのオブジェクト
+	void SetNext(CObject *pNext) { m_pNext = pNext; }		//前アドレス設定
+	CObject *GetNext(void) { return m_pNext; }				//前アドレス取得
+	void SetPrev(CObject *pPrev) { m_pPrev = pPrev; }		//後アドレス設定
+	CObject *GetPrev(void) { return m_pPrev; }				//後アドレス取得
 
 protected:
 	void Release(void);		//自身の破棄
 
 private:
-	static CObject *m_apObject[PRIORITY_MAX][MAX_OBJECT];		//オブジェクトインスタンス
 	static int m_nNumAll;		//オブジェクト総数
-	int m_nID;					//自分自身のID
-	CObject::TYPE m_type;					//タイプ
+	static CObject *m_apTop[PRIORITY_MAX];		//先頭オブジェクト
+	static CObject *m_apEnd[PRIORITY_MAX];		//最後尾オブジェクト
+	CObject *m_pNext;				//次オブジェクト
+	CObject *m_pPrev;				//前オブジェクト
+	CObject::TYPE m_type;		//タイプ
 	int m_nPriority;	//描画順
 	bool m_bDeath;		//死亡フラグ
 };

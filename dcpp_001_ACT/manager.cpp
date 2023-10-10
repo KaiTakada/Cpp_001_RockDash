@@ -47,7 +47,7 @@
 //=========================
 // マクロ定義
 //=========================
-#define DEBUG_SCENE CScene::MODE_TITLE//デバッグ時のスタートシーン
+#define DEBUG_SCENE CScene::MODE_GAME//デバッグ時のスタートシーン
 
 //=========================
 // 前方宣言
@@ -211,50 +211,6 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 	{
 		return -1;
 	}
-
-	////============ テクスチャ ============
-	////NULLチェック
-	//if (m_pTeture != nullptr)
-	//{
-	//	m_pTeture = nullptr;
-	//}
-
-	////生成
-	//if (m_pTeture == nullptr)
-	//{
-	//	m_pTeture = new CTexture;
-
-	//	if (FAILED(m_pTeture->Load()))
-	//	{//初期化処理が失敗した場合
-	//		return -1;
-	//	}
-	//}
-	//else
-	//{
-	//	return -1;
-	//}
-
-	////============ モデル ============
-	////NULLチェック
-	//if (m_pXModel != nullptr)
-	//{
-	//	m_pXModel = nullptr;
-	//}
-
-	////生成
-	//if (m_pXModel == nullptr)
-	//{
-	//	m_pXModel = new CXModel;
-
-	//	if (FAILED(m_pXModel->Load()))
-	//	{//初期化処理が失敗した場合
-	//		return -1;
-	//	}
-	//}
-	//else
-	//{
-	//	return -1;
-	//}
 
 	//============ デバッグ ============
 	//NULLチェック
@@ -434,20 +390,6 @@ HRESULT CManager::Init(HINSTANCE hInstance, HWND hWnd, BOOL bWindow)
 //============================
 void CManager::Uninit(void)
 {
-	////オブジェクト破棄
-	//if (m_pField != nullptr)
-	//{//地面破棄
-	//	m_pField->Uninit();
-	//	m_pField = nullptr;
-	//}
-
-	////オブジェクト破棄
-	//if (m_pPlayer != nullptr)
-	//{//プレイヤー破棄
-	//	m_pPlayer->Uninit();
-	//	m_pPlayer = nullptr;
-	//}
-
 	if (m_pScene != nullptr)
 	{//シーン破棄
 		m_pScene->Uninit();
@@ -655,8 +597,23 @@ void CScene::Update()
 	}
 
 	////無限フェード(メモリデバッグ用)
-	//int nMode = GetMode() + 1;
+	//int nMode = GetMode();
+	//nMode += 1;
+	//
+	//if (nMode < CScene::MODE_TITLE || nMode > CScene::MODE_RANKING)
+	//{
+	//	//デバッグ必要、ゴムが入ってる。
+	//	nMode = GetMode();
+	//}
+	//
 	//nMode %= CScene::MODE_MAX;
+
+	//if (nMode < CScene::MODE_TITLE || nMode > CScene::MODE_RANKING)
+	//{
+	//	nMode = CScene::MODE_TITLE;
+	//	//assert(false);
+	//}
+
 	//m_pFade->SetState(CScene::MODE(nMode));
 
 	if (pKeyboard->GetTrigger(DIK_ADD))
@@ -762,6 +719,12 @@ void CManager::SetMode(const CScene::MODE mode)
 	if (mode != CScene::MODE_RANKING)
 	{
 		m_result = RT_NONE;
+	}
+
+	if (mode < CScene::MODE_TITLE || mode > CScene::MODE_RANKING)
+	{
+		m_result = RT_NONE;
+		assert(true);
 	}
 
 	//新しいモードの生成

@@ -16,7 +16,8 @@
 //============================
 // 静的メンバ変数宣言
 //============================
-CObject *CObject::m_apObject[PRIORITY_MAX][MAX_OBJECT];		//オブジェクトインスタンス
+CObject *CObject::m_apTop[PRIORITY_MAX] = {};
+CObject *CObject::m_apEnd[PRIORITY_MAX] = {};
 int CObject::m_nNumAll;		//オブジェクト総数
 
 //============================
@@ -24,25 +25,25 @@ int CObject::m_nNumAll;		//オブジェクト総数
 //============================
 CObject::CObject(int nPriority)
 {
-	int nCntAll = 0;
-
-	for (nCntAll = 0; nCntAll < MAX_OBJECT; nCntAll++)
-	{
-		if (m_apObject[nPriority][nCntAll] == nullptr)
-		{
-			m_apObject[nPriority][nCntAll] = this;		//自身を代入
-			m_nID = nCntAll;				//自身のIDを保存
-			m_nPriority = nPriority;		//自身の描画優先度を保存
-			m_bDeath = false;				//死亡フラグを下げる
-			m_nNumAll++;					//総数をカウントアップ
-			break;
-		}
+	if (m_apTop[nPriority] == nullptr)
+	{//先頭がいないならthisを据える
+		m_apTop[nPriority] = this;
 	}
 
-	//if (nCntAll >= MAX_OBJECT)
-	//{
-	//	return nullptr;
-	//}
+	m_pNext = nullptr;
+
+	//現状の最後尾
+	m_pPrev = m_apEnd[nPriority];
+	m_nPriority = nPriority;
+	m_bDeath = false;
+
+	if (m_apEnd[nPriority] != nullptr)
+	{
+		m_apEnd[nPriority]->m_pNext = this;
+	}
+
+	m_apEnd[nPriority] = this;
+	m_nNumAll++;
 }
 //============================
 // デストラクタ
@@ -52,67 +53,103 @@ CObject::~CObject()
 
 }
 
+////============================
+//// オブジェクトの破棄
+////============================
+//void CObject::Release(void)
+//{
+//	int nPrity = m_nPriority;
+//	CObject *pNext = m_pNext;		//次の
+//	CObject *pPrev = m_pPrev;		//前の
+//
+//	if (m_apTop != nullptr)
+//	{
+//		if (m_apTop == this)
+//		{//先頭とthisが一緒であれば
+//			m_apTop = pNext;
+//		}
+//	}
+//
+//	if (m_apEnd != nullptr)
+//	{
+//		if (m_apEnd == this)
+//		{//最後尾とthisが一緒であれば
+//			m_apEnd = m_pPrev;
+//		}
+//	}
+//
+//	if (pPrev != nullptr)
+//	{
+//		if (pNext == nullptr)
+//		{
+//			pPrev->m_pNext = nullptr;
+//		}
+//		else
+//		{
+//			pPrev->m_pNext = pNext;
+//		}
+//	}
+//
+//	if (pNext != nullptr)
+//	{
+//		pNext->m_pPrev = m_pPrev;
+//	}
+//
+//	delete this;
+//	//this = nullptr;
+//
+//	//総数ダウン
+//	m_nNumAll--;
+//}
+
 //============================
 // オブジェクトの破棄
 //============================
 void CObject::Release(void)
 {
-	int nIdx = m_nID;
 	int nPrity = m_nPriority;
+	CObject *pNext = m_pNext;		//次の
+	CObject *pPrev = m_pPrev;		//前の
 
-	if (m_apObject[nPrity][nIdx] != nullptr)
+	if (m_apTop[nPrity] != nullptr)
 	{
-		//自身破棄
-		delete m_apObject[nPrity][nIdx];
-		m_apObject[nPrity][nIdx] = nullptr;
+		if (m_apTop[nPrity] == this)
+		{//先頭とthisが一緒であれば
 
-		//総数ダウン
-		m_nNumAll--;
-	}
-}
-
-//============================
-// タイプで破棄
-//============================
-void CObject::Reset(void)
-{
-	//全消去
-	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
-	{
-		for (int nCntType = 0; nCntType < MAX_OBJECT; nCntType++)
-		{
-			if (m_apObject[nCntPrt][nCntType] != nullptr)
-			{
-				switch (m_apObject[nCntPrt][nCntType]->m_type)
-				{
-				case TYPE_BLOCK:
-
-					m_apObject[nCntPrt][nCntType]->Uninit();
-
-					break;
-
-				case TYPE_ITEM:
-
-					m_apObject[nCntPrt][nCntType]->Uninit();
-
-					break;
-
-				case TYPE_ENEMY:
-
-					m_apObject[nCntPrt][nCntType]->Uninit();
-
-					break;
-
-				default:
-
-					break;
-				}
-
-			}
+			m_apTop[nPrity] = pNext;
 		}
 	}
 
-	//CManager::SetObjDflt();
+	if (m_apEnd[nPrity] != nullptr)
+	{
+		if (m_apEnd[nPrity] == this)
+		{//最後尾とthisが一緒であれば
+
+			m_apEnd[nPrity] = m_pPrev;
+		}
+	}
+
+	if (pPrev != nullptr)
+	{
+		if (pNext == nullptr)
+		{
+			pPrev->m_pNext = nullptr;
+		}
+		else
+		{//自身の後を先代に引き継がせる
+			pPrev->m_pNext = pNext;
+		}
+	}
+
+	if (pNext != nullptr)
+	{//自身の前を後続に引き継がせる
+		pNext->m_pPrev = m_pPrev;
+	}
+
+	delete this;
+
+	//総数ダウン
+	m_nNumAll--;
 }
 
 //============================
@@ -120,15 +157,39 @@ void CObject::Reset(void)
 //============================
 void CObject::ReleaseAll(void)
 {
-	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
+	CObject *pObject = m_apTop[0];
+
+	//全てに死亡フラグを立てていく
+	for (int nCnt = 0; nCnt < PRIORITY_MAX; nCnt++)
 	{
-		for (int nCntAll = 0; nCntAll < MAX_OBJECT; nCntAll++)
+		while (pObject != nullptr)
 		{
-			if (m_apObject[nCntPrt][nCntAll] != nullptr)
+			CObject *pObjectNext = pObject->m_pNext;
+
+			pObject->m_bDeath = true;
+
+			pObject = pObjectNext;
+		}
+
+		pObject = m_apTop[nCnt];
+	}
+
+	//死亡フラグONなら消す
+	for (int nCnt = 0; nCnt < PRIORITY_MAX; nCnt++)
+	{
+		while (pObject != nullptr)
+		{
+			CObject *pObjectNext = pObject->m_pNext;
+
+			if (pObject->m_bDeath == true)
 			{
-				m_apObject[nCntPrt][nCntAll]->Uninit();
+				pObject->Uninit();
+
+				pObject = pObjectNext;
 			}
 		}
+
+		pObject = m_apTop[nCnt];
 	}
 }
 
@@ -137,15 +198,50 @@ void CObject::ReleaseAll(void)
 //============================
 void CObject::UpdateAll(void)
 {
-	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
+	CObject *pObject = m_apTop[0];
+
+	for (int nCnt = 0; nCnt < PRIORITY_MAX; nCnt++)
 	{
-		for (int nCntAll = 0; nCntAll < MAX_OBJECT; nCntAll++)
+		while ((pObject != nullptr))
 		{
-			if (m_apObject[nCntPrt][nCntAll] != nullptr)
+			if (pObject != nullptr)
 			{
-				m_apObject[nCntPrt][nCntAll]->Update();
+				if (pObject->m_type == TYPE_FADE)
+				{
+					pObject->Update();
+				}
+
+				CObject *pObjectNext = pObject->m_pNext;
+
+				pObject->Update();
+
+				pObject = pObjectNext;
+			}
+			else
+			{// (pObject == NULL) == Endまで行ったってことでこの優先度は終了
+				break;
 			}
 		}
+
+		pObject = m_apTop[nCnt];
+	}
+
+	//死亡フラグに応じて消す
+	for (int nCnt = 0; nCnt < PRIORITY_MAX; nCnt++)
+	{
+		while (pObject != nullptr)
+		{
+			CObject *pObjectNext = pObject->m_pNext;
+
+			if (pObject->m_bDeath == true)
+			{
+				pObject->Uninit();
+			}
+
+			pObject = pObjectNext;
+		}
+
+		pObject = m_apTop[nCnt];
 	}
 }
 
@@ -154,49 +250,33 @@ void CObject::UpdateAll(void)
 //============================
 void CObject::DrawAll(void)
 {
-	int nCnt[PRIORITY_MAX] = {};
-	CDebugProc *pDebug = CManager::GetDebugProc();
-	pDebug->Print("FPS:%d\n", GetFPS());
-
 	CCamera *pCamera = CManager::GetCamera();
-	pCamera->SetCamera();
 
-	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
+	if (pCamera != nullptr)
 	{
-		for (int nCntAll = 0; nCntAll < MAX_OBJECT; nCntAll++)
+		pCamera->SetCamera();
+	}
+	CObject *pObject = m_apTop[0];
+
+	for (int nCnt = 0; nCnt < PRIORITY_MAX; nCnt++)
+	{
+		while ((pObject != nullptr))
 		{
-			if (m_apObject[nCntPrt][nCntAll] != nullptr)
+			if (pObject != nullptr)
 			{
-				m_apObject[nCntPrt][nCntAll]->Draw();
-			
-				nCnt[nCntPrt]++;
+				pObject->Draw();
+
+				pObject = pObject->m_pNext;
+			}
+			else
+			{// (pObject == NULL) == Endまで行ったってことでこの優先度は終了
+				break;
 			}
 		}
+		pObject = m_apTop[nCnt];
 	}
 
-	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
-	{
-		pDebug->Print("現在のオブジェクト数:%d\n", nCnt[nCntPrt]);
-	}
-
+	CDebugProc *pDebug = CManager::GetDebugProc();
+	pDebug->Print("FPS:%d", GetFPS());
 	pDebug->Draw();
-}
-
-//============================
-// 描画順再設定
-//============================
-void CObject::SetPrity(int nPriority)
-{
-	//this->GetType();
-
-
-	//m_nPriority = nPriority;
-}
-
-//============================
-// 指定オブジェクト取得
-//============================
-CObject *CObject::GetObject(const int nPriority, const int nIdx)
-{
-	return m_apObject[nPriority][nIdx];
 }
