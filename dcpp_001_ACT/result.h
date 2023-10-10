@@ -22,7 +22,7 @@
 //=========================
 // 画面(シーン)クラス
 //=========================
-class CResult : public CObject
+class CResult : public CScene
 {
 public:
 	CResult();

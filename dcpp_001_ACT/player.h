@@ -123,7 +123,6 @@ private:
 	CWeapon *m_pWeapon;		//武器情報
 	CGauge *m_pGaugeHP;		//HP情報
 	CGauge *m_pGaugeExp;	//exp情報
-	CCursor *m_pCursor;		//Aim用カーソル
 	float m_fExp;			//現在経験値
 	float m_fExpMax;		//経験値ゲージMax値
 	CState_Life *m_pStateLife;		//状態

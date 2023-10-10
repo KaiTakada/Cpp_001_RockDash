@@ -40,6 +40,7 @@
 #include "title.h"
 #include "tutorial.h"
 #include "game.h"
+#include "result.h"
 #include "ranking.h"
 
 //#include "renderer.h"
@@ -97,7 +98,7 @@ CObjectX *CScene::m_pObjectX = nullptr;					//モデル
 CEnemy *CScene::m_pEnemy = nullptr;						//敵
 CBlock *CScene::m_pBlock = nullptr;						//ブロック
 
-int CScene::m_nScore = 0;								//今回プレイ結果
+int CScene::m_nTime = 0;								//今回プレイ結果
 
 //============================
 // コンストラクタ
@@ -602,7 +603,7 @@ void CScene::Update()
 	//
 	//if (nMode < CScene::MODE_TITLE || nMode > CScene::MODE_RANKING)
 	//{
-	//	//デバッグ必要、ゴムが入ってる。
+	//	//デバッグ必要、ゴミが入ってる。
 	//	nMode = GetMode();
 	//}
 	//
@@ -656,6 +657,10 @@ CScene * CScene::Create(MODE mode)
 
 	case CScene::MODE_GAME:
 		pScene = new CGame;
+		break;
+
+	case CScene::MODE_RESULT:
+		pScene = new CResult;
 		break;
 
 	case CScene::MODE_RANKING:

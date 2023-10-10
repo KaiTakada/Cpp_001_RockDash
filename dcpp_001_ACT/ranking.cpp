@@ -62,7 +62,7 @@ HRESULT CRanking::Init()
 
 	CManager::RESULT_TYPE type = CManager::GetResult();
 
-	m_nScore = GetNowScore();
+	m_nScore = GetNowTime();
 
 	//îwåi
 	CObject2D *pPolygon = CObject2D::Create(D3DXVECTOR3(fWidth * 0.5f, fHeight * 0.5f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),

@@ -21,7 +21,6 @@
 #include "gauge.h"		//HPゲージ
 #include "Xmodel.h"		//モデル
 #include "growselecter.h"		//進化・成長シーン
-#include "cursor.h"		//Aimカーソル
 #include "debugproc.h"	//デバッグ
 #include "state_life.h"		//状態管理
 
@@ -78,7 +77,6 @@ CPlayer::CPlayer(int nPriority) : CObject(nPriority)
 	m_pWeapon = nullptr;
 	m_pGaugeHP = nullptr;
 	m_pGaugeExp = nullptr;
-	m_pCursor = nullptr;
 	ZeroMemory(&m_param, sizeof(m_param));
 	m_fExp = 0;
 	m_fExpMax = 0;
@@ -194,19 +192,7 @@ HRESULT CPlayer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, int nNumPart
 	m_pGaugeExp->SetRatio(0.0f);
 	m_pGaugeExp->SetCol(D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f));
 
-	//expゲージの生成
-	if (m_pCursor != nullptr)
-	{
-		m_pCursor->Uninit();
-		m_pCursor = nullptr;
-	}
-
 	CInputMouse *pInputMouse = CManager::GetInputMouse();
-
-	D3DXVECTOR3 posCsr = D3DXVECTOR3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f);
-	posCsr = pInputMouse->GetPos();
-
-	m_pCursor = CCursor::Create(posCsr);
 
 	//状態の生成
 	if (m_pStateLife != nullptr)
@@ -261,12 +247,6 @@ void CPlayer::Uninit(void)
 	{
 		m_pGaugeExp->Uninit();
 		m_pGaugeExp = nullptr;
-	}
-
-	if (m_pCursor != nullptr)
-	{
-		m_pCursor->Uninit();
-		m_pCursor = nullptr;
 	}
 
 	if (m_pStateLife != nullptr)
@@ -620,16 +600,6 @@ void CPlayer::RotOperate(float *pfRotDest)
 	CInputMouse *pInputMouse = CManager::GetInputMouse();
 	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
 	bool bInput = false;
-
-	if (m_pCursor == nullptr || pInputMouse == nullptr)
-	{
-		return;
-	}
-
-	D3DXVECTOR3 pos = m_pCursor->GetPos();
-	pos += pInputMouse->GetChangePos();
-	m_pCursor->SetPos(pos);
-	m_rot.y = m_pCursor->GetRot().y;
 }
 
 //============================

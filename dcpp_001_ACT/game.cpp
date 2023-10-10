@@ -20,7 +20,6 @@
 #include "timer.h"
 #include "growselecter.h"
 #include "enemy_boss.h"
-#include "result.h"
 
 //=========================
 // マクロ定義
@@ -48,9 +47,6 @@ CGame::CGame()
 	m_pField = nullptr;
 	m_pPause = nullptr;
 	m_pTimer = nullptr;
-	m_pResult = nullptr;
-
-	m_bResult = false;
 }
 
 //============================
@@ -66,8 +62,6 @@ CGame::~CGame()
 //============================
 HRESULT CGame::Init()
 {
-	m_bResult = false;
-
 	CScene::Init();
 
 	//オブジェクトの生成
@@ -134,12 +128,6 @@ void CGame::Uninit()
 		m_pTimer = nullptr;
 	}
 
-	if (m_pResult != nullptr)
-	{
-		m_pResult->Uninit();
-		m_pResult = nullptr;
-	}
-
 	CScene::Uninit();
 
 	CManager::GetSound()->Stop();
@@ -156,24 +144,6 @@ void CGame::Update()
 	bool bPause = CManager::GetPause();
 
 	CScene::Update();
-
-	if (m_bResult == true)
-	{//リザルト時はリザルトのみ更新
-		if (bPause == true)
-		{
-			//リザルト表示
-			if (m_pResult != nullptr)
-			{
-				m_pResult->Update();
-			}
-		}
-		else
-		{
-			CManager::InvPause();
-		}
-
-		return;
-	}
 
 	if (pInputKeyboard->GetTrigger(DIK_P) || pInputPad->GetPress(CInputGamepad::BUTTON_START, 0) == true)
 	{//[ P ]キーでポーズ
@@ -205,18 +175,17 @@ void CGame::Update()
 		}
 	}
 
-	if (CManager::GetResult() != CManager::RT_NONE && m_bResult == false)
+	if (pInputKeyboard->GetTrigger(DIK_F))
+	{
+		CManager::SetResult(CManager::RT_WIN);
+	}
+
+	CFade *pFade = CScene::GetFade();
+
+	if (CManager::GetResult() != CManager::RT_NONE)
 	{//結果が確定したら
-
-		//リザルト表示
-		if (m_pResult != nullptr)
-		{
-			m_pResult->Uninit();
-			m_pResult = nullptr;
-		}
-
-		m_pResult = CResult::Create();
-		m_bResult = true;
+		
+		pFade->SetState(CScene::MODE_RESULT);
 	}
 
 	int nNumCsr = 0;

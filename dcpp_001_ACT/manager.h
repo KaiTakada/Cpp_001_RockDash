@@ -62,6 +62,7 @@ public:
 		MODE_TITLE = 0,
 		MODE_TUTORIAL,
 		MODE_GAME,
+		MODE_RESULT,
 		MODE_RANKING,
 		MODE_MAX
 	};
@@ -96,8 +97,8 @@ public:
 	static CEnemy *GetEnemy(void) { return m_pEnemy; }									//敵の取得
 	static CBlock *GetBlock(void) { return m_pBlock; }									//ブロックの取得
 
-	static int GetNowScore(void) { return m_nScore; }									//今回プレイ結果の取得
-	static void SetNowScore(int nScore) { m_nScore = nScore; }							//今回プレイ結果の取得
+	static int GetNowTime(void) { return m_nTime; }									//今回プレイ結果の取得
+	static void SetNowTime(int nScore) { m_nTime = nScore; }							//今回プレイ結果の取得
 
 protected:
 
@@ -123,7 +124,7 @@ private:
 	static CObjectX *m_pObjectX;						//モデル
 	static CEnemy *m_pEnemy;							//敵
 	static CBlock *m_pBlock;							//ブロック
-	static int m_nScore;								//今回プレイ結果
+	static int m_nTime;								//今回プレイ結果
 };
 
 //=========================

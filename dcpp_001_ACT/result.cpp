@@ -51,6 +51,8 @@ HRESULT CResult::Init()
 
 	CTexture *pTexture = CManager::GetTexture();
 
+	CScene::Init();
+
 	//”wŒi----------------------------
 	CObject2D *pPolygon = CObject2D::Create(D3DXVECTOR3(fWidth * 0.5f, fHeight * 0.5f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),
 		D3DXVECTOR3(fWidth * 0.5f, fHeight * 0.5f, 0.0f), CObject2D::UPDATE_TYPE_NONE);
@@ -93,7 +95,7 @@ HRESULT CResult::Init()
 
 	if (pScene != nullptr)
 	{
-		m_pScore->SetValue(pScene->GetNowScore());
+		m_pScore->SetValue(pScene->GetNowTime());
 	}
 
 	return S_OK;
@@ -110,7 +112,7 @@ void CResult::Uninit()
 		m_pScore = nullptr;
 	}
 
-	Release();
+	CScene::Uninit();
 }
 
 //============================
@@ -131,6 +133,8 @@ void CResult::Update()
 			CManager::GetSound()->PlaySound(CSound::SOUND_LABEL_SE_BUTTON);
 		}
 	}
+
+	CScene::Update();
 }
 
 //============================
@@ -138,7 +142,7 @@ void CResult::Update()
 //============================
 void CResult::Draw()
 {
-
+	CScene::Draw();
 }
 
 //============================
