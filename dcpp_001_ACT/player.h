@@ -24,7 +24,7 @@
 //=========================
 class CParts;
 class CMotion;
-class CWeapon;
+class CBoost;
 class CGauge;
 class CCursor;
 class CState_Life;
@@ -110,12 +110,13 @@ private:
 	D3DXVECTOR3 m_posOld;		//前回位置
 	D3DXVECTOR3 m_pos;			//現在位置
 	D3DXVECTOR3 m_rot;			//向き
+	D3DXVECTOR3 m_rotDest;		//目標の向き
 	D3DXMATRIX m_mtxWorld;		//ワールドマトリックス
 	float m_fHeart;			//プレイヤーの中心y軸(心臓座標)
 	bool m_bJump;			//ジャンプ判定(falseはジャンプ可能状態)
 	CMotion *m_pMotion;		//モーション情報
 	Param m_param;			//パラメータ
-	CWeapon *m_pWeapon;		//武器情報
+	CBoost *m_pBoost;		//武器情報
 	CGauge *m_pGaugeBoost;		//ブ―ストゲージ
 	CState_Life *m_pStateLife;		//状態
 };

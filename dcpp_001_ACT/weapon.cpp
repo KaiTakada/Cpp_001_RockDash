@@ -24,6 +24,7 @@ const char *c_apFileWeapon[CWeapon::TYPE_MAX] =
 	"data\\MODEL\\WEAPON\\nife.x",			//ナイフ
 	"data\\MODEL\\WEAPON\\revolver.x",		//リボルバー
 	"data\\MODEL\\WEAPON\\ak.x",			//ライフル
+	"data\\MODEL\\WEAPON\\boost.x",			//ブースト
 };
 
 //=======================
@@ -73,6 +74,9 @@ HRESULT CWeapon::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const WPNTYP
 	m_type = type;
 
 	CParts::Init(pos, rot);
+
+	CXModel *pXmodel = CManager::GetXModel();
+	SetIdxModel(pXmodel->Regist(c_apFileWeapon[type]));		//モデルの割り当て
 
 	SetType(TYPE_WEAPON);
 

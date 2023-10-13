@@ -32,6 +32,7 @@ public:
 		WPNTYPE_NIFE = 0,		//ナイフ
 		WPNTYPE_REVOLVER,		//リボルバー
 		WPNTYPE_AK,				//ライフル
+		WPNTYPE_BOOST,			//ブースト
 		WPNTYPE_MAX,
 	}WPNTYPE;
 

@@ -17,7 +17,8 @@
 #include "parts.h"		//親子関係
 #include "motion.h"		//モーション
 #include "Field.h"		//地面との当たり判定
-#include "weapon.h"		//武器
+//#include "weapon.h"		//武器
+#include "wp_boost.h"		//ブースト
 #include "gauge.h"		//HPゲージ
 #include "Xmodel.h"		//モデル
 #include "growselecter.h"		//進化・成長シーン
@@ -47,11 +48,11 @@
 #define NUM_SPEED_STOP (0.0001f)	//移動量を0にする条件値
 #define NUM_HEART (50.0f)			//心臓位置
 #define NUM_JUMP (15.0f)			//ジャンプ力
-#define NUM_BOOST (5.0f)			//ブースト力
+#define NUM_BOOST (10.0f)			//ブースト力
 #define NUM_GRAV (0.5f)				//重力
 #define MOTION_FILE "data\\SET\\MOTION\\motion_player.txt"		//モーションファイルパス
 #define READ_PSIZE (256)			//読込ポインタサイズ
-#define ARMR_IDX (8)				//右手パーツ
+#define ARMR_IDX (17)				//右手パーツ
 #define HP_HEIGHT (170.0f)			//HPゲージの高さ
 #define EXP_MAX (5.0f)				//expゲージのMaxの初期値
 #define EXP_MAX_MGNFC (1.2f)		//expゲージのMaxに掛ける倍率
@@ -71,11 +72,12 @@ CPlayer::CPlayer(int nPriority) : CObject(nPriority)
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_posOld = m_pos;
 	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_rotDest = m_rot;
 	m_mtxWorld = {};
 	m_fHeart = 0.0f;
 	m_bJump = false;
 	m_pMotion = nullptr;
-	m_pWeapon = nullptr;
+	m_pBoost = nullptr;
 	m_pGaugeBoost = nullptr;
 	ZeroMemory(&m_param, sizeof(m_param));
 	m_pStateLife = nullptr;
@@ -101,6 +103,7 @@ HRESULT CPlayer::Init(void)
 {
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_rotDest = m_rot;
 	m_fHeart = NUM_HEART;
 	m_param.fLife = NUM_HP;
 	m_param.fLifeMax = NUM_HP;
@@ -124,6 +127,7 @@ HRESULT CPlayer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, int nNumPart
 	m_pos = pos;
 	m_posOld = pos;
 	m_rot = rot;
+	m_rotDest = rot;
 	m_nNumModel = nNumParts;
 	m_fHeart = NUM_HEART;
 	m_param.fLife = NUM_HP;
@@ -162,23 +166,21 @@ HRESULT CPlayer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, int nNumPart
 	m_pMotion->SetModel(m_apPart, m_nNumModel);
 
 	//武器を持たせる
-	if (m_pWeapon != nullptr)
+	if (m_pBoost != nullptr)
 	{
 		return E_FAIL;
 	}
 	
-	m_pWeapon = CWeapon::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+	m_pBoost = CBoost::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 
-	if (m_pWeapon != nullptr)
+	if (m_pBoost != nullptr)
 	{
 		if (m_apPart[ARMR_IDX] != nullptr)
 		{
 			float fposX = m_apPart[ARMR_IDX]->GetMaxVtx().x * 0.5f;
-			m_pWeapon->SetParent(m_apPart[ARMR_IDX]);
-			m_pWeapon->SetPos(D3DXVECTOR3(fposX, 0.0f, 0.0f));
+			m_pBoost->SetParent(m_apPart[ARMR_IDX]);
+			m_pBoost->SetPos(D3DXVECTOR3(fposX, 0.0f, 0.0f));
 		}
-	
-		m_pWeapon->SetWpnType(CWeapon::WPNTYPE_REVOLVER);
 	}
 
 	//HPゲージの生成
@@ -229,10 +231,10 @@ void CPlayer::Uninit(void)
 		m_pMotion = nullptr;
 	}
 
-	if (m_pWeapon != nullptr)
+	if (m_pBoost != nullptr)
 	{
-		m_pWeapon->Uninit();
-		m_pWeapon = nullptr;
+		m_pBoost->Uninit();
+		m_pBoost = nullptr;
 	}
 
 	if (m_pGaugeBoost != nullptr)
@@ -270,20 +272,13 @@ void CPlayer::Update(void)
 	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
 
 	//移動入力
+	fRotDest = m_rotDest.y;
+
 	MoveOperate2D(&fRotDest);
 	RotOperate(&fRotDest);
 
 	fRotDiff = fRotDest - fRotMove;
 	RotAdj(fRotDiff);
-
-	if (pInputKeyboard->GetPress(DIK_Q))
-	{//[ Q ]キーでジャンプ
-		m_rot.y += 0.01f;
-	}
-	if (pInputKeyboard->GetPress(DIK_E))
-	{//[ E ]キーでジャンプ
-		m_rot.y -= 0.01f;
-	}
 
 	if (pInputKeyboard->GetTrigger(DIK_SPACE) ||
 		pInputGamepad->GetPress(CInputGamepad::BUTTON_A,0))
@@ -293,22 +288,25 @@ void CPlayer::Update(void)
 			m_move.x += sinf(m_rot.y * D3DX_PI) * NUM_BOOST;		//x
 			m_pMotion->Set(MOTIONTYPE_SLIDING);
 		}
-		else if (m_bJump == false)
-		{//ジャンプ未使用
-			m_move.y += NUM_JUMP;
-			m_bJump = true;
-			m_pMotion->Set(MOTIONTYPE_JUMP);
-		}
-		else if (1)
-		{//ジャンプ使用済み かつブーストゲージが残っていれば
-
+		else if ((m_bJump == true) || m_pMotion->GetType() == MOTIONTYPE_SLIDING)
+		{//ジャンプ使用済み  orスライディング中なら
+			//かつブーストゲージが残っていれば
 			 //ブースト
+			m_bJump = true;
 			m_move.y = NUM_JUMP * 1.5f;
 			m_pMotion->Set(MOTIONTYPE_BOOST);
 		}
+		else if (m_bJump == false)
+		{//ジャンプ未使用
+			m_bJump = true;
+			m_move.y += NUM_JUMP;
+			m_pMotion->Set(MOTIONTYPE_JUMP);
+		}
 	}
 	
+#if _DEBUG
 	DebugKey(pInputKeyboard);
+#endif
 
 	//重力
 	m_move.y -= NUM_GRAV;
@@ -328,17 +326,17 @@ void CPlayer::Update(void)
 	}
 
 	//武器の座標更新
-	if (m_pWeapon != nullptr)
+	if (m_pBoost != nullptr)
 	{
 		if (m_apPart[ARMR_IDX] != nullptr)
 		{
 			//武器の持ち手を右手に納まる位置にする
 			CXModel *pXmodel = CManager::GetXModel();
 			D3DXVECTOR3 vtx = pXmodel->GetVtxMax(m_apPart[ARMR_IDX]->GetIdxModel());
-			m_pWeapon->SetPos(D3DXVECTOR3(vtx.x * 0.7f, 0.0f, 0.0f));
+			m_pBoost->SetPos(D3DXVECTOR3(vtx.x * 0.7f, 0.0f, 0.0f));
 		}
 		
-		m_pWeapon->Update();
+		m_pBoost->Update();
 	}
 
 	//HPゲージの座標更新
@@ -626,6 +624,7 @@ void CPlayer::MoveOperate2D(float *pRotDest)
 
 	if (bInput == true)
 	{
+		m_rotDest.y = *pRotDest;
 		if (m_pMotion->IsFinish() ||
 			m_pMotion->GetType() == MOTIONTYPE_NEUTRAL ||
 			m_pMotion->GetType() == MOTIONTYPE_GROUND)
@@ -1012,8 +1011,8 @@ void CPlayer::DebugKey(CInputKeyboard *pInputKeyboard)
 
 	if (pInputKeyboard->GetTrigger(DIK_K))
 	{//Kで武器チェン
-		int nType = (m_pWeapon->GetWpnType() + 1) % CWeapon::WPNTYPE_MAX;
-		m_pWeapon->SetWpnType(CWeapon::WPNTYPE(nType));
+		int nType = (m_pBoost->GetWpnType() + 1) % CBoost::WPNTYPE_MAX;
+		m_pBoost->SetWpnType(CWeapon::WPNTYPE(nType));
 	}
 
 	if (pInputKeyboard->GetTrigger(DIK_I))
