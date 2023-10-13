@@ -186,9 +186,6 @@ void CItem2D::PlayerAdd()
 	case CItem2D::TYPE_002_SPEED:
 		param.fSpeed *= 1.1f;
 		break;
-	case CItem2D::TYPE_003_COOLTIME:
-		param.fSpeedFire += 1.0f;
-		break;
 	default:
 		assert(false);
 		break;

@@ -609,6 +609,11 @@ void CScene::Update()
 	//
 	//nMode %= CScene::MODE_MAX;
 
+	//if (nMode < 0)
+	//{
+	//	nMode *= -1;
+	//}
+
 	//if (nMode < CScene::MODE_TITLE || nMode > CScene::MODE_RANKING)
 	//{
 	//	nMode = CScene::MODE_TITLE;
@@ -685,7 +690,7 @@ CScene * CScene::Create(MODE mode)
 			//============ フェード ============
 			if (m_pFade == nullptr)
 			{
-				m_pFade = CFade::Create(CScene::MODE_GAME);
+				m_pFade = CFade::Create(mode);
 			}
 		}
 	}

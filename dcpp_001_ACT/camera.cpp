@@ -16,7 +16,7 @@
 //============================
 #define CAMERA_SPEED (10.0f)				//移動スピード
 #define CAMERA_ROTSPEED (0.01f)				//回転スピード
-#define CAMERA_DISTANCE (700.0f)			//視点・注視点の距離
+#define CAMERA_DISTANCE (500.0f)			//視点・注視点の距離
 #define CAMERA_INIT_POS_Y (100.0f)			//視点・注視点のy初期値
 #define CAMERA_RADJT (400.0f)				//注視点のずらし値
 #define CAMERA_VISDISTANCE (40000.0f)		//可視距離の値
@@ -131,7 +131,7 @@ void CCamera::SetCamera()
 								10.0f,
 								CAMERA_VISDISTANCE);
 
-	////プロジェクションマトリックスの作成[平行投影]-2Dっぽい
+	////プロジェクションマトリックスの作成[平行投影]-2dっぽい
 	//D3DXMatrixOrthoLH(&m_mtxProjection,
 	//				(float)SCREEN_WIDTH,
 	//				(float)SCREEN_HEIGHT,

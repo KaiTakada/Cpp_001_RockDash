@@ -247,24 +247,24 @@ bool CBullet::CollisionCircle(D3DXVECTOR3 pos)
 
 					//3軸使った球の判定から1軸の円の判定に
 					float fSize0 = (size.x + size.z) * 0.5f;		//アイテムの半径xz
-																	//float fSize1 = (size.x + size.y) * 0.5f;		//アイテムの半径xy
-																	//float fSize2 = (size.z + size.y) * 0.5f;		//アイテムの半径zy
+					//float fSize1 = (size.x + size.y) * 0.5f;		//アイテムの半径xy
+					//float fSize2 = (size.z + size.y) * 0.5f;		//アイテムの半径zy
 
 					float fObjsize0 = (Objsize.x + Objsize.z) * 0.5f;		//オブジェクトの半径xz
-																			//float fObjsize1 = (Objsize.x + Objsize.y) * 0.5f;		//オブジェクトの半径xy
-																			//float fObjsize2 = (Objsize.z + Objsize.y) * 0.5f;		//オブジェクトの半径zy
+					//float fObjsize1 = (Objsize.x + Objsize.y) * 0.5f;		//オブジェクトの半径xy
+					//float fObjsize2 = (Objsize.z + Objsize.y) * 0.5f;		//オブジェクトの半径zy
 
 					float fColl0 = fSize0 + fObjsize0;		//当たり判定範囲
-															//float fColl1 = fSize1 + fObjsize1;		//当たり判定範囲
-															//float fColl2 = fSize2 + fObjsize2;		//当たり判定範囲
+					//float fColl1 = fSize1 + fObjsize1;		//当たり判定範囲
+					//float fColl2 = fSize2 + fObjsize2;		//当たり判定範囲
 
-					float fLength0 = hypotf((pos.x - Objpos.x), (pos.z - Objpos.z));		//2点間の長さxz
-																							//float fLength1 = hypotf((pos.x - Objpos.x), (pos.y - Objpos.y));		//2点間の長さxy
-																							//float fLength2 = hypotf((pos.z - Objpos.z), (pos.y - Objpos.y));		//2点間の長さzy
+					float fLength0 = hypotf((pos.x - Objpos.x), (pos.z - Objpos.z));					//2点間の長さxz
+					//float fLength1 = hypotf((pos.x - Objpos.x), (pos.y - Objpos.y));		//2点間の長さxy
+					//float fLength2 = hypotf((pos.z - Objpos.z), (pos.y - Objpos.y));		//2点間の長さzy
 
-																							//if (fLength0 <= fColl0 &&
-																							//	fLength1 <= fColl1 &&
-																							//	fLength2 <= fColl2)
+					//if (fLength0 <= fColl0 &&
+					//	fLength1 <= fColl1 &&
+					//	fLength2 <= fColl2)
 
 					if (fLength0 <= fColl0 && pos.y <= 110.0f)
 					{
@@ -273,7 +273,6 @@ bool CBullet::CollisionCircle(D3DXVECTOR3 pos)
 						{
 							CPlayer *pPlayer = dynamic_cast<CPlayer*>(pObject);
 							pPlayer->Damage(float(m_nDamage));
-							pPlayer->CntExp(0.1f);
 							bCol = true;
 						}
 						else if (type != CObject::TYPE_PLAYER && m_side != SIDE_ENEMY)

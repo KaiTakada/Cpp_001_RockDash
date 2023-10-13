@@ -193,8 +193,6 @@ bool CExperience::CollisionBall(void)
 						fLength1 <= fColl1 &&
 						fLength2 <= fColl2)
 					{
-						pPlayer->CntExp(m_fValue);
-
 						//íeèIóπ
 						Uninit();
 

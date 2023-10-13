@@ -262,6 +262,324 @@ void CMotion::SetModel(CParts ** ppParts, int nNumModel)
 }
 
 //============================
+// パーツファイル読込
+//============================
+char **CMotion::ReadParts(const char * pReadFile, int *pnNumFile)
+{
+	char *pComp = new char[128];				//ゴミ
+	char *pFilepass[MAX_PLAYER_PARTS] = {};		//ファイルパス
+	int nNumParts = 0;
+
+	FILE *pFile;
+
+	pFile = fopen(pReadFile, "r");
+
+	if (pFile != nullptr)
+	{
+		do
+		{
+			fscanf(pFile, "%s", pComp);
+
+			if (strncmp(pComp, "#", 1) == 0)
+			{// これのあとコメント
+				fgets(pComp, 128, pFile);
+				continue;
+			}
+
+			if (strcmp(pComp, "NUM_MODEL") == 0)
+			{//総数取得
+				fscanf(pFile, "%s %d", pComp, &nNumParts);
+				m_nNumModel = nNumParts;
+			}
+			else if (strcmp(pComp, "MODEL_FILENAME") == 0)
+			{//ファイル読込
+				for (int nCntCrt = 0; nCntCrt < nNumParts; nCntCrt++)
+				{
+					if (pFilepass[nCntCrt] == nullptr)
+					{
+						pFilepass[nCntCrt] = new char[128];
+						fscanf(pFile, "%s %s", pComp, pFilepass[nCntCrt]);
+						break;
+					}
+				}
+			}
+		} while (strcmp(pComp, "END_SCRIPT") != 0);
+	}
+
+	*pnNumFile = nNumParts;
+
+	return pFilepass;
+}
+
+//============================
+// セットアップ読込
+//============================
+void CMotion::ReadSetUp(const char * pReadFile, CParts **ppParts)
+{
+	char *pComp = new char[128];				//ゴミ
+	D3DXVECTOR3 pos[MAX_PLAYER_PARTS];			//プリセット位置
+	D3DXVECTOR3 rot[MAX_PLAYER_PARTS];			//プリセット向き
+	int aParent[MAX_PLAYER_PARTS];				//親モデルの有無
+	int nNumParts = 0;					//パーツ総数
+	D3DXVECTOR3 **ppPos = nullptr;		//位置
+	D3DXVECTOR3 **ppRot = nullptr;		//向き
+	int nNumKey = 0;					//キー数
+
+	for (int nCntNull = 0; nCntNull < MAX_PLAYER_PARTS; nCntNull++)
+	{
+		pos[nCntNull] = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+		rot[nCntNull] = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	}
+
+	FILE *pFile;
+
+	pFile = fopen(pReadFile, "r");
+
+	if (pFile != nullptr)
+	{
+		do
+		{
+			fscanf(pFile, "%s", pComp);
+
+			if (strncmp(pComp, "#", 1) == 0)
+			{// これのあとコメント
+				fgets(pComp, 128, pFile);
+				continue;
+			}
+
+			if (strcmp(pComp, "NUM_MODEL") == 0)
+			{//総数取得
+				fscanf(pFile, "%s %d", pComp, &nNumParts);
+				m_nNumModel = nNumParts;
+			}
+			else if (strcmp(pComp, "CHARACTERSET") == 0)
+			{//オフセット情報取得開始
+				int nCntSet = 0;
+
+				do
+				{
+					fscanf(pFile, "%s", pComp);
+
+					if (strcmp(pComp, "PARTSSET") == 0)
+					{//パーツ情報取得開始
+						while (TRUE)
+						{
+							fscanf(pFile, "%s", pComp);
+
+							if (strcmp(pComp, "END_PARTSSET") == 0)
+							{
+								break;
+							}
+							else if (strcmp(pComp, "PARENT") == 0)
+							{
+								fscanf(pFile, "%s %d", pComp, &aParent[nCntSet]);
+							}
+							else if (strcmp(pComp, "POS") == 0)
+							{
+								fscanf(pFile, "%s %f %f %f", pComp, &pos[nCntSet].x, &pos[nCntSet].y, &pos[nCntSet].z);
+							}
+							else if (strcmp(pComp, "ROT") == 0)
+							{
+								fscanf(pFile, "%s %f %f %f", pComp, &rot[nCntSet].x, &rot[nCntSet].y, &rot[nCntSet].z);
+							}
+						}
+
+						//取得終了で加算
+						nCntSet++;
+					}
+
+				} while (strcmp(pComp, "END_CHARACTERSET") != 0);
+			}
+
+		} while (strcmp(pComp, "END_SCRIPT") != 0);
+
+		fclose(pFile);
+	}
+	else
+	{//ファイル読込に失敗
+		return;
+	}
+
+	//親モデルの設定(全パーツ分)
+	for (int nCntPrt = 0; nCntPrt < nNumParts; nCntPrt++)
+	{
+		if (aParent[nCntPrt] <= -1)
+		{
+			ppParts[nCntPrt]->SetParent(nullptr);
+		}
+		else
+		{
+			ppParts[nCntPrt]->SetParent(ppParts[aParent[nCntPrt]]);
+		}
+	}
+
+	delete[] pComp;		//ゴミ
+}
+
+//============================
+// モーション内容読込
+//============================
+void CMotion::ReadMotions(const char * pReadFile, CMotion::INFO *pInfo)
+{
+	char *pComp = new char[128];				//ゴミ
+	char *pFilepass[MAX_PLAYER_PARTS] = {};		//ファイルパス
+	D3DXVECTOR3 pos[MAX_PLAYER_PARTS];			//プリセット位置
+	D3DXVECTOR3 rot[MAX_PLAYER_PARTS];			//プリセット向き
+	int aParent[MAX_PLAYER_PARTS];				//親モデルの有無
+	int nNumParts = 0;					//パーツ総数
+	int nNumKey = 0;					//キー数
+	int nFrame = 0;						//フレーム数
+	int nLoop = 0;						//ループ [ 0:しない / 1:する ]
+	int nKeyCtr = 0;			//モーション読込時のキーカウンター
+	int nKeySetCtr = 0;			//モーション読込時のキーセットカウンター
+	int nMotionCtr = 0;			//モーション数
+	CMotion::INFO *info = new CMotion::INFO[16];		//モーション情報
+
+	for (int nCntNull = 0; nCntNull < MAX_PLAYER_PARTS; nCntNull++)
+	{
+		aParent[nCntNull] = -1;
+	}
+
+	FILE *pFile;
+
+	pFile = fopen(pReadFile, "r");
+
+	if (pFile != nullptr)
+	{
+		do
+		{
+			fscanf(pFile, "%s", pComp);
+
+			if (strncmp(pComp, "#", 1) == 0)
+			{// これのあとコメント
+				fgets(pComp, 128, pFile);
+				continue;
+			}
+
+			if (strcmp(pComp, "NUM_MODEL") == 0)
+			{//総数取得
+				fscanf(pFile, "%s %d", pComp, &nNumParts);
+				m_nNumModel = nNumParts;
+			}
+			else if (strcmp(pComp, "MOTIONSET") == 0)
+			{
+				do
+				{//モーション情報を読む
+
+					fscanf(pFile, "%s", pComp);
+
+					if (strncmp(pComp, "#", 1) == 0)
+					{// これのあとコメント
+						fgets(pComp, 128, pFile);
+						continue;
+					}
+					else if (strcmp(pComp, "END_MOTIONSET") == 0)
+					{
+						nMotionCtr++;
+						nKeyCtr = 0;
+						nKeySetCtr = 0;
+						break;
+					}
+					else if (strcmp(pComp, "LOOP") == 0)
+					{//ループ設定取得
+						fscanf(pFile, "%s %d", pComp, &nLoop);
+
+						info[nMotionCtr].bLoop = (nLoop == 0 ? false : true);
+					}
+					else if (strcmp(pComp, "NUM_KEY") == 0)
+					{//キー数取得
+						fscanf(pFile, "%s %d", pComp, &nNumKey);
+
+						info[nMotionCtr].nNumKey = nNumKey;
+					}
+					else if (strcmp(pComp, "KEYSET") == 0)
+					{//キーセット情報取得開始
+						do
+						{
+							fscanf(pFile, "%s", pComp);
+
+							if (strncmp(pComp, "#", 1) == 0)
+							{// これのあとコメント
+								fgets(pComp, 128, pFile);
+								continue;
+							}
+							else if (strcmp(pComp, "END_KEYSET") == 0)
+							{
+								//取得終了で加算
+								nKeySetCtr++;
+								nKeyCtr = 0;
+
+								break;
+							}
+							else if (strcmp(pComp, "FRAME") == 0)
+							{//フレーム数取得
+								fscanf(pFile, "%s %d", pComp, &nFrame);
+
+								info[nMotionCtr].aKeyInfo[nKeySetCtr].nFrame = nFrame;
+							}
+							else if (strcmp(pComp, "KEY") == 0)
+							{//パーツ情報取得開始
+								while (TRUE)
+								{
+									fscanf(pFile, "%s", pComp);
+
+									if (strncmp(pComp, "#", 1) == 0)
+									{// これのあとコメント
+										fgets(pComp, 128, pFile);
+										continue;
+									}
+									else if (strcmp(pComp, "END_KEY") == 0)
+									{
+										//取得終了で加算
+										nKeyCtr++;
+										break;
+									}
+									else if (strcmp(pComp, "POS") == 0)
+									{
+										float fX, fY, fZ;
+
+										fscanf(pFile, "%s %f %f %f", pComp, &fX, &fY, &fZ);
+
+										info[nMotionCtr].aKeyInfo[nKeySetCtr].aKey[nKeyCtr].fPosX = fX;
+										info[nMotionCtr].aKeyInfo[nKeySetCtr].aKey[nKeyCtr].fPosY = fY;
+										info[nMotionCtr].aKeyInfo[nKeySetCtr].aKey[nKeyCtr].fPosZ = fZ;
+									}
+									else if (strcmp(pComp, "ROT") == 0)
+									{
+										float fX, fY, fZ;
+
+										fscanf(pFile, "%s %f %f %f", pComp, &fX, &fY, &fZ);
+
+										info[nMotionCtr].aKeyInfo[nKeySetCtr].aKey[nKeyCtr].fRotX = fX;
+										info[nMotionCtr].aKeyInfo[nKeySetCtr].aKey[nKeyCtr].fRotY = fY;
+										info[nMotionCtr].aKeyInfo[nKeySetCtr].aKey[nKeyCtr].fRotZ = fZ;
+									}
+								}
+
+							}
+
+						} while (strcmp(pComp, "END_KEYSET") != 0);
+					}
+				} while (strcmp(pComp, "END_MOTIONSET") != 0);
+			}
+
+		} while (strcmp(pComp, "END_SCRIPT") != 0);
+
+		fclose(pFile);
+	}
+	else
+	{//ファイル読込に失敗
+		return;
+	}
+
+	////モーション情報設定
+	//m_pMotion->SetInfo(info, nMotionCtr);
+
+	delete[] pComp;		//ゴミ
+	delete[] info;
+}
+
+//============================
 // ファイル読み込み
 //============================
 void CMotion::ReadFile(char *pFilePass)

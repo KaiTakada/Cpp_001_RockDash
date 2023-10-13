@@ -126,6 +126,8 @@ CBlock *CBlock::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, TYPE type)
 			CXModel *pXmodel = CManager::GetXModel();
 			pBlock->SetIdxModel(pXmodel->Regist(c_apFileBlock[type], &vtxMin, &vtxMax));		//モデル割り当て
 		
+			vtxMin = pXmodel->GetAddress(pBlock->GetIdxModel())->vtxMin;
+			vtxMax = pXmodel->GetAddress(pBlock->GetIdxModel())->vtxMax;
 			pBlock->SetVtx(vtxMin, vtxMax);
 		}
 	}
@@ -151,6 +153,7 @@ bool CBlock::CollisionRect(void)
 	D3DXVECTOR3 ObjposOld = D3DXVECTOR3(0.0f,0.0f,0.0f);
 	D3DXVECTOR3 Objsize = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 Objmove = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		//押し戻す分
 
 	bool bLand = false;			//着地したかどうか
 	bool Collision = false;			//当たり判定があったかどうか
@@ -169,102 +172,198 @@ bool CBlock::CollisionRect(void)
 				{//プレイヤ―だったら
 					Objpos = pObject->GetPos();
 					ObjposOld = pObject->GetPosOld();
-					//Objsize = pObject->GetSize();
-					Objsize = D3DXVECTOR3(100.0f, 100.0f, 100.0f);
+					Objsize = pObject->GetSize();
 					Objmove = pObject->GetMove();
+
+					//Objpos.y += 50.0f;
+					//ObjposOld.y += 50.0f;
 
 					if (pObject->GetJump() == false)
 					{
-						if (ObjposOld.z + Objsize.z <= m_posOld.z - sizeMin.z
-							&& Objpos.z + Objsize.z >= pos.z - sizeMin.z
-							&& Objpos.x + Objsize.x - PLAYER_EXCESSX >= pos.x + sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x + PLAYER_EXCESSX <= pos.x - sizeMax.x - 0.1f)
-						{//ブロック上
-						 //bLand = true;
-							Objpos.z = pos.z - sizeMin.z - Objsize.z - 0.1f;		//ブロックの上に立たせる
-							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));			//移動量を0に
+						if (ObjposOld.x + Objsize.x <= pos.x + sizeMin.x
+							&& Objpos.x + Objsize.x > pos.x + sizeMin.x
+							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
+							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
+						{//ブロック西
+							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
+								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
+									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+							{
+								move.x = move.x;
+							}
+							move.x = (pos.x + sizeMin.x) - (Objpos.x + Objsize.x) - 0.1f;
 							Collision = true;
 						}
-						else if (ObjposOld.z - Objsize.z >= m_posOld.z + sizeMax.z
-							&& Objpos.z - Objsize.z <= pos.z + sizeMax.z
-							&& Objpos.x + Objsize.x - PLAYER_EXCESSX >= pos.x - sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x + PLAYER_EXCESSX <= pos.x + sizeMax.x - 0.1f)
-						{//ブロック下
-							Objpos.z = pos.z + sizeMax.z + Objsize.z;		//ブロックの下に立たせる
-							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));			//移動量を0に
+						else if (ObjposOld.x - Objsize.x >= pos.x + sizeMax.x
+							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x
+							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
+							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
+						{//ブロック左
+							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
+								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
+									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+							{
+							}
+							move.x = (pos.x + sizeMax.x) - (Objpos.x - Objsize.x) + 0.1f;
 							Collision = true;
 						}
 
-						if (ObjposOld.x + Objsize.x - PLAYER_EXCESSX <= m_posOld.x - sizeMin.x + 0.1f
-							&& Objpos.x + Objsize.x - PLAYER_EXCESSX >= pos.x - sizeMin.x + 0.1f
-							&& Objpos.z + Objsize.z > pos.z - sizeMin.z
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z)
-						{//ブロック左
-							Objpos.x = pos.x - sizeMin.z - Objsize.x + PLAYER_EXCESSX;			//ブロックの左に立たせる
-							pObject->SetMove(D3DXVECTOR3(0.0f, Objmove.z, Objmove.z));			//移動量を0に
+						if (ObjposOld.z + Objsize.z <= pos.z + sizeMin.z
+							&& Objpos.z + Objsize.z >= pos.z + sizeMin.z
+							&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
+							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f)
+						{//ブロック北
+							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
+								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
+									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+							{
+							}
+							move.z = (pos.z + sizeMin.z) - (Objpos.z + Objsize.z) - 0.1f;
 							Collision = true;
 						}
-						else if (ObjposOld.x - Objsize.x + PLAYER_EXCESSX >= m_posOld.x + sizeMax.x - 0.1f
-							&& Objpos.x - Objsize.x + PLAYER_EXCESSX <= pos.x + sizeMax.x - 0.1f
-							&& Objpos.z + Objsize.z > pos.z - sizeMin.z
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z)
-						{//ブロック右
-							Objpos.x = pos.x + sizeMax.x + Objsize.x - PLAYER_EXCESSX;		//ブロックの右に立たせる
-							pObject->SetMove(D3DXVECTOR3(0.0f, Objmove.z, Objmove.z));			//移動量を0に
+						else if (ObjposOld.z - Objsize.z >= pos.z + sizeMax.z
+							&& Objpos.z - Objsize.z <= pos.z + sizeMax.z
+							&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
+							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f)
+						{//ブロック南
+							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
+								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
+									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+							{
+							}
+							move.z = (pos.z + sizeMax.z) - (Objpos.z - Objsize.z) + 0.1f;
+							Collision = true;
+						}
+
+						if (ObjposOld.y - Objsize.y >= pos.y + sizeMax.y
+							&& Objpos.y - Objsize.y <= pos.y + sizeMax.y
+							&& Objpos.x + Objsize.x > pos.x + sizeMin.x + 0.1f
+							&& Objpos.x - Objsize.x < pos.x + sizeMax.x + 0.1f
+							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
+							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
+						{//ブロック上
+							D3DXVECTOR3 Objmove = pObject->GetMove();
+							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
+
+							move.y = (pos.y + sizeMax.y) - (Objpos.y - Objsize.y) + 0.1f;
+							pObject->SetJump(false);
+							Collision = true;
+							bLand = true;
+						}
+						else if (ObjposOld.y + Objsize.y <= pos.y + sizeMin.y
+							&& Objpos.y + Objsize.y >= pos.y + sizeMin.y
+							&& Objpos.x + Objsize.x > pos.x + sizeMin.x + 0.1f
+							&& Objpos.x - Objsize.x < pos.x + sizeMax.x + 0.1f
+							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
+							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
+						{//ブロック下
+							D3DXVECTOR3 Objmove = pObject->GetMove();
+							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
+
+							move.y = (pos.y + sizeMin.y) - (Objpos.y + Objsize.y) - 0.1f;
 							Collision = true;
 						}
 					}
 					else
 					{
-						if (ObjposOld.x + Objsize.x - PLAYER_EXCESSX <= m_posOld.x - sizeMin.x + 0.1f
-							&& Objpos.x + Objsize.x - PLAYER_EXCESSX >= pos.x - sizeMin.x + 0.1f
-							&& Objpos.z + Objsize.z > pos.z - sizeMin.z
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z)
-						{//ブロック左
-							Objpos.x = pos.x - sizeMin.z - Objsize.x + PLAYER_EXCESSX;			//ブロックの左に立たせる
-							pObject->SetMove(D3DXVECTOR3(0.0f, Objmove.z, Objmove.z));			//移動量を0に
+						if (ObjposOld.x + Objsize.x <= pos.x + sizeMin.x
+						&& Objpos.x + Objsize.x > pos.x + sizeMin.x
+						&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
+						&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
+						{//ブロック西
+							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
+								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
+									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+							{
+							}
+							move.x = (pos.x + sizeMin.x) - (Objpos.x + Objsize.x) - 0.1f;
 							Collision = true;
 						}
-						else if (ObjposOld.x - Objsize.x + PLAYER_EXCESSX >= m_posOld.x + sizeMax.x - 0.1f
-							&& Objpos.x - Objsize.x + PLAYER_EXCESSX <= pos.x + sizeMax.x - 0.1f
-							&& Objpos.z + Objsize.z > pos.z - sizeMin.z
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z)
-						{//ブロック右
-							Objpos.x = pos.x + sizeMax.x + Objsize.x - PLAYER_EXCESSX;		//ブロックの右に立たせる
-							pObject->SetMove(D3DXVECTOR3(0.0f, Objmove.z, Objmove.z));			//移動量を0に
+						else if (ObjposOld.x - Objsize.x >= pos.x + sizeMax.x
+							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x
+							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
+							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
+						{//ブロック左
+							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
+								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
+									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+							{
+							}
+							move.x = (pos.x + sizeMax.x) - (Objpos.x - Objsize.x) + 0.1f;
 							Collision = true;
 						}
 
-						if (ObjposOld.z + Objsize.z <= m_posOld.z - sizeMin.z
-							&& Objpos.z + Objsize.z >= pos.z - sizeMin.z
-							&& Objpos.x + Objsize.x - PLAYER_EXCESSX >= pos.x - sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x + PLAYER_EXCESSX <= pos.x + sizeMax.x - 0.1f)
-						{//ブロック上
-						 //bLand = true;
-							Objpos.z = pos.z - sizeMin.z - Objsize.z - 0.1f;		//ブロックの上に立たせる
-							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));			//移動量を0に
+						if (ObjposOld.z + Objsize.z <= pos.z + sizeMin.z
+							&& Objpos.z + Objsize.z >= pos.z + sizeMin.z
+							&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
+							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f)
+						{//ブロック北
+							if(((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
+								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
+									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+							{
+							}
+							move.z = (pos.z + sizeMin.z) - (Objpos.z + Objsize.z) - 0.1f;
 							Collision = true;
 						}
-						else if (ObjposOld.z - Objsize.z >= m_posOld.z + sizeMax.z
+						else if (ObjposOld.z - Objsize.z >= pos.z + sizeMax.z
 							&& Objpos.z - Objsize.z <= pos.z + sizeMax.z
-							&& Objpos.x + Objsize.x - PLAYER_EXCESSX >= pos.x - sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x + PLAYER_EXCESSX <= pos.x + sizeMax.x - 0.1f)
-						{//ブロック下
-							Objpos.z = pos.z + sizeMax.z + Objsize.z;		//ブロックの下に立たせる
-							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));			//移動量を0に
+							&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
+							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f)
+						{//ブロック南
+							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
+								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
+									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+							{
+							}
+							move.z = (pos.z + sizeMax.z) - (Objpos.z - Objsize.z) + 0.1f;
 							Collision = true;
 						}
+
+						if (ObjposOld.y - Objsize.y >= pos.y + sizeMax.y
+							&& Objpos.y - Objsize.y <= pos.y + sizeMax.y
+							&& Objpos.x + Objsize.x > pos.x + sizeMin.x + 0.1f
+							&& Objpos.x - Objsize.x < pos.x + sizeMax.x + 0.1f
+							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
+							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
+						{//ブロック上
+							D3DXVECTOR3 Objmove = pObject->GetMove();
+							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
+
+							//move.y = (pos.y + sizeMax.y) - (Objpos.y - Objsize.y) + 0.1f;
+							pObject->SetJump(false);
+							Collision = true;
+							bLand = true;
+						}
+						else if (ObjposOld.y + Objsize.y <= pos.y + sizeMin.y
+							&& Objpos.y + Objsize.y >= pos.y + sizeMin.y
+							&& Objpos.x + Objsize.x > pos.x + sizeMin.x + 0.1f
+							&& Objpos.x - Objsize.x < pos.x + sizeMax.x + 0.1f
+							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
+							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
+						{//ブロック下
+							D3DXVECTOR3 Objmove = pObject->GetMove();
+							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
+
+							//move.y = (pos.y + sizeMin.y) - (Objpos.y + Objsize.y) - 0.1f;
+							Collision = true;
+						}
+
 					}
 				}
 
 				if (Collision)
 				{
-					pObject->SetPos(Objpos);
-				}
-
-				if (bLand)
-				{
-					pObject->SetJump(!bLand);
+					pObject->SetPos(Objpos + move);
+					break;
 				}
 
 				pObject = pObject->GetNext();

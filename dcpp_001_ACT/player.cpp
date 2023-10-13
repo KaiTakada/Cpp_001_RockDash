@@ -41,12 +41,13 @@
 #define NUM_HYGETAREA (100.0f)		//取得加速領域の半径
 #define NUM_GETAREA_SPEED (8.0f)	//取得領域の引き寄せ速度
 #define NUM_COLL (30.0f)			//当たり判定半径
-#define NUM_HP (100.0f)				//HP量
+#define NUM_HP (1.0f)				//HP量
 #define NUM_ATTACK (1.0f)			//攻撃力
 #define NUM_SPEED (0.5f)			//移動量
 #define NUM_SPEED_STOP (0.0001f)	//移動量を0にする条件値
 #define NUM_HEART (50.0f)			//心臓位置
 #define NUM_JUMP (15.0f)			//ジャンプ力
+#define NUM_BOOST (5.0f)			//ブースト力
 #define NUM_GRAV (0.5f)				//重力
 #define MOTION_FILE "data\\SET\\MOTION\\motion_player.txt"		//モーションファイルパス
 #define READ_PSIZE (256)			//読込ポインタサイズ
@@ -75,11 +76,8 @@ CPlayer::CPlayer(int nPriority) : CObject(nPriority)
 	m_bJump = false;
 	m_pMotion = nullptr;
 	m_pWeapon = nullptr;
-	m_pGaugeHP = nullptr;
-	m_pGaugeExp = nullptr;
+	m_pGaugeBoost = nullptr;
 	ZeroMemory(&m_param, sizeof(m_param));
-	m_fExp = 0;
-	m_fExpMax = 0;
 	m_pStateLife = nullptr;
 
 	for (int nCntPart = 0; nCntPart < MAX_PLAYER_PARTS; nCntPart++)
@@ -107,9 +105,7 @@ HRESULT CPlayer::Init(void)
 	m_param.fLife = NUM_HP;
 	m_param.fLifeMax = NUM_HP;
 	m_param.fSpeed = NUM_SPEED;
-	m_param.fGetArea = NUM_GETAREA;
 	m_param.fColl = NUM_COLL;
-	m_fExpMax = EXP_MAX;
 
 	//ファイル読込＆パーツ生成・初期化
 	ReadFile();
@@ -134,9 +130,7 @@ HRESULT CPlayer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, int nNumPart
 	m_param.fLifeMax = NUM_HP;
 	m_param.fAttack = NUM_ATTACK;
 	m_param.fSpeed = NUM_SPEED;
-	m_param.fGetArea = NUM_GETAREA;
 	m_param.fColl = NUM_COLL;
-	m_fExpMax = EXP_MAX;
 
 	//モーションの生成、初期化
 	if (m_pMotion != nullptr)
@@ -149,6 +143,21 @@ HRESULT CPlayer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, int nNumPart
 
 	//ファイル読込＆パーツ生成・初期化
 	ReadFile();
+
+	//int nNumParts = 0;
+	//CMotion::INFO *pInfo;
+
+	////パーツモデルファイル読込
+	//char **ppParts = m_pMotion->ReadParts(MOTION_FILE, &nNumParts);
+
+	////モデルの生成(全パーツ分)
+	//for (int nCntCrt = 0; nCntCrt < nNumParts; nCntCrt++)
+	//{
+	//	m_apPart[nCntCrt] = CParts::Create(ppParts[nCntCrt]);
+	//}
+
+	//m_pMotion->ReadSetUp(MOTION_FILE, m_apPart);
+	//m_pMotion->ReadMotions(MOTION_FILE, pInfo);
 
 	m_pMotion->SetModel(m_apPart, m_nNumModel);
 
@@ -173,25 +182,14 @@ HRESULT CPlayer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, int nNumPart
 	}
 
 	//HPゲージの生成
-	if (m_pGaugeHP != nullptr)
+	if (m_pGaugeBoost != nullptr)
 	{
-		m_pGaugeHP->Uninit();
-		m_pGaugeHP = nullptr;
+		m_pGaugeBoost->Uninit();
+		m_pGaugeBoost = nullptr;
 	}
 
-	m_pGaugeHP = CGauge::Create(D3DXVECTOR3(m_pos.x, m_pos.y + HP_HEIGHT, m_pos.z), m_apPart[0]->GetRot(), D3DXVECTOR3(60.0f, 10.0f, 0.0f));
+	m_pGaugeBoost = CGauge::Create(D3DXVECTOR3(m_pos.x, m_pos.y + HP_HEIGHT, m_pos.z), m_apPart[0]->GetRot(), D3DXVECTOR3(60.0f, 10.0f, 0.0f));
 	
-	//expゲージの生成
-	if (m_pGaugeExp != nullptr)
-	{
-		m_pGaugeExp->Uninit();
-		m_pGaugeExp = nullptr;
-	}
-
-	m_pGaugeExp = CGauge::Create(D3DXVECTOR3(m_pos.x, m_pos.y + HP_HEIGHT - 15.0f, m_pos.z), m_apPart[0]->GetRot(), D3DXVECTOR3(60.0f, 5.0f, 0.0f));
-	m_pGaugeExp->SetRatio(0.0f);
-	m_pGaugeExp->SetCol(D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f));
-
 	CInputMouse *pInputMouse = CManager::GetInputMouse();
 
 	//状態の生成
@@ -237,18 +235,12 @@ void CPlayer::Uninit(void)
 		m_pWeapon = nullptr;
 	}
 
-	if (m_pGaugeHP != nullptr)
+	if (m_pGaugeBoost != nullptr)
 	{
-		m_pGaugeHP->Uninit();
-		m_pGaugeHP = nullptr;
+		m_pGaugeBoost->Uninit();
+		m_pGaugeBoost = nullptr;
 	}
 	
-	if (m_pGaugeExp != nullptr)
-	{
-		m_pGaugeExp->Uninit();
-		m_pGaugeExp = nullptr;
-	}
-
 	if (m_pStateLife != nullptr)
 	{
 		m_pStateLife->Uninit();
@@ -278,7 +270,7 @@ void CPlayer::Update(void)
 	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
 
 	//移動入力
-	MoveOperate(&fRotDest);
+	MoveOperate2D(&fRotDest);
 	RotOperate(&fRotDest);
 
 	fRotDiff = fRotDest - fRotMove;
@@ -293,30 +285,26 @@ void CPlayer::Update(void)
 		m_rot.y -= 0.01f;
 	}
 
-	if ((pInputKeyboard->GetTrigger(DIK_SPACE) ||
+	if (pInputKeyboard->GetTrigger(DIK_SPACE) ||
 		pInputGamepad->GetPress(CInputGamepad::BUTTON_A,0))
-		&& m_bJump == false)
 	{//[ - ]キーでジャンプ
-		m_move.y += NUM_JUMP;
-		m_bJump = true;
-		m_pMotion->Set(MOTIONTYPE_JUMP);
-	}
-
-	if (pInputKeyboard->GetPress(DIK_RETURN) ||
-		pInputMouse->GetPress(CInputMouse::BUTTON_LEFT) ||
-		pInputGamepad->GetGameStickRXPress(0) != 0 ||
-		pInputGamepad->GetGameStickRYPress(0) != 0)
-	{//ENTERキーで弾発射
-
-		m_pWeapon->Attack(m_rot,int(m_param.fAttack));
-		
-		if (m_pWeapon->GetWpnType() == CWeapon::WPNTYPE_REVOLVER)
+		if (pInputKeyboard->GetPress(DIK_S))
 		{
-			m_pMotion->Set(MOTIONTYPE_FIRE_REV);
+			m_move.x += sinf(m_rot.y * D3DX_PI) * NUM_BOOST;		//x
+			m_pMotion->Set(MOTIONTYPE_SLIDING);
 		}
-		else if (m_pWeapon->GetWpnType() == CWeapon::WPNTYPE_AK)
-		{
-			m_pMotion->Set(MOTIONTYPE_FIRE_AK);
+		else if (m_bJump == false)
+		{//ジャンプ未使用
+			m_move.y += NUM_JUMP;
+			m_bJump = true;
+			m_pMotion->Set(MOTIONTYPE_JUMP);
+		}
+		else if (1)
+		{//ジャンプ使用済み かつブーストゲージが残っていれば
+
+			 //ブースト
+			m_move.y = NUM_JUMP * 1.5f;
+			m_pMotion->Set(MOTIONTYPE_BOOST);
 		}
 	}
 	
@@ -351,34 +339,16 @@ void CPlayer::Update(void)
 		}
 		
 		m_pWeapon->Update();
-
-		if (m_param.fSpeedFire != 0.0f)
-		{//クールダウンLv.で武器進化
-			if (m_param.fSpeedFire >= 5.0f && m_pWeapon->GetWpnType() == CWeapon::WPNTYPE_REVOLVER)
-			{
-				m_pWeapon->SetWpnType(CWeapon::WPNTYPE_AK);
-				m_param.fSpeedFire = 0.0f;
-			}
-			m_pWeapon->SetCooltimeMin(int(m_param.fSpeedFire));
-		}
 	}
 
 	//HPゲージの座標更新
-	if (m_pGaugeHP != nullptr)
+	if (m_pGaugeBoost != nullptr)
 	{
-		m_pGaugeHP->SetPos(D3DXVECTOR3(pos.x, pos.y + HP_HEIGHT, pos.z));
+		m_pGaugeBoost->SetPos(D3DXVECTOR3(pos.x, pos.y + HP_HEIGHT, pos.z));
 	
-		m_pGaugeHP->Update();
+		m_pGaugeBoost->Update();
 	}
 	
-	//expゲージの座標更新
-	if (m_pGaugeExp != nullptr)
-	{
-		m_pGaugeExp->SetPos(D3DXVECTOR3(pos.x, pos.y + HP_HEIGHT - 15.0f, pos.z));
-
-		m_pGaugeExp->Update();
-	}
-
 	if (m_pStateLife != nullptr)
 	{
 		CState_Life::STATE state = m_pStateLife->Get();
@@ -416,9 +386,6 @@ void CPlayer::Update(void)
 		m_move.z = 0.0f;
 	}
 
-	//引き寄せ
-	PullItem();
-
 	if (!m_pMotion->IsFinish())
 	{
 		m_pMotion->Update();
@@ -454,8 +421,8 @@ void CPlayer::Draw(void)
 
 	//デバッグ
 	CDebugProc *pDebug = CManager::GetDebugProc();
-	pDebug->Print("プレイヤー情報\n");
-	pDebug->Print("現在の方向:%f,%f,%f\n", m_rot.x, m_rot.y, m_rot.z);
+	pDebug->Print("--- プレイヤー情報 ---\n");
+	pDebug->Print("現在の方向:%f\n", m_rot.y);
 }
 
 //============================
@@ -592,6 +559,99 @@ void CPlayer::MoveOperate(float *pRotDest)
 }
 
 //============================
+// 2D移動操作
+//============================
+void CPlayer::MoveOperate2D(float *pRotDest)
+{
+	//キーボード取得
+	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CCamera *pCamera = CManager::GetCamera();
+	bool bInput = false;
+
+	D3DXVECTOR3 cameraRot = pCamera->GetRot();
+
+	if (pInputKeyboard->GetPress(DIK_S) == true ||
+		pInputGamepad->GetPress(CInputGamepad::BUTTON_DOWN, 0) || pInputGamepad->GetGameStickLYPress(0) < 0)
+	{
+		if (pInputKeyboard->GetPress(DIK_A) == true ||
+			pInputGamepad->GetPress(CInputGamepad::BUTTON_LEFT, 0) || pInputGamepad->GetGameStickLXPress(0) < 0)
+		{//下かつ左キーを押したとき
+
+		}
+		else if (pInputKeyboard->GetPress(DIK_D) == true ||
+			pInputGamepad->GetPress(CInputGamepad::BUTTON_RIGHT, 0) || pInputGamepad->GetGameStickLXPress(0) > 0)
+		{//下かつ右キーを押したとき
+
+		}
+		else
+		{//下キーのみを押したとき
+			//しゃがみたい(願望)
+		}
+	}
+	else if (pInputKeyboard->GetPress(DIK_W) == true ||
+		pInputGamepad->GetPress(CInputGamepad::BUTTON_UP, 0) || pInputGamepad->GetGameStickLYPress(0) > 0)
+	{
+		if (pInputKeyboard->GetPress(DIK_A) == true ||
+			pInputGamepad->GetPress(CInputGamepad::BUTTON_LEFT, 0) || pInputGamepad->GetGameStickLXPress(0) < 0)
+		{//上かつ左キーを押したとき
+
+		}
+		else if (pInputKeyboard->GetPress(DIK_D) == true ||
+			pInputGamepad->GetPress(CInputGamepad::BUTTON_RIGHT, 0) || pInputGamepad->GetGameStickLXPress(0) > 0)
+		{//上かつ右キーを押したとき
+
+		}
+		else
+		{//上キーのみを押したとき
+
+		}
+	}
+	else if (pInputKeyboard->GetPress(DIK_A) == true ||
+		pInputGamepad->GetPress(CInputGamepad::BUTTON_LEFT, 0) || pInputGamepad->GetGameStickLXPress(0) < 0)
+	{//左キーのみを押したとき
+		m_move.x += sinf(cameraRot.y + -0.5f * D3DX_PI) * m_param.fSpeed;
+		m_move.z += cosf(cameraRot.y + -0.5f * D3DX_PI) * m_param.fSpeed;
+		*pRotDest = cameraRot.y + 0.5f * D3DX_PI;
+		bInput = true;
+	}
+	else if (pInputKeyboard->GetPress(DIK_D) == true ||
+		pInputGamepad->GetPress(CInputGamepad::BUTTON_RIGHT, 0) || pInputGamepad->GetGameStickLXPress(0) > 0)
+	{//右キーのみを押したとき
+		m_move.x += sinf(cameraRot.y + 0.5f * D3DX_PI) * m_param.fSpeed;
+		m_move.z += cosf(cameraRot.y + 0.5f * D3DX_PI) * m_param.fSpeed;
+		*pRotDest = cameraRot.y + -0.5f * D3DX_PI;
+		bInput = true;
+	}
+
+	if (bInput == true)
+	{
+		if (m_pMotion->IsFinish() ||
+			m_pMotion->GetType() == MOTIONTYPE_NEUTRAL ||
+			m_pMotion->GetType() == MOTIONTYPE_GROUND)
+		{
+			if (NUM_SPEED > m_param.fSpeed)
+			{
+				m_pMotion->Set(MOTIONTYPE_DASH);
+			}
+			else
+			{
+				m_pMotion->Set(MOTIONTYPE_WALK);
+			}
+		}
+	}
+	else
+	{
+		if (m_pMotion->IsFinish() ||
+			m_pMotion->GetType() == MOTIONTYPE_DASH ||
+			m_pMotion->GetType() == MOTIONTYPE_WALK)
+		{
+			m_pMotion->Set(MOTIONTYPE_NEUTRAL);
+		}
+	}
+}
+
+//============================
 // 移動操作
 //============================
 void CPlayer::RotOperate(float *pfRotDest)
@@ -614,105 +674,6 @@ void CPlayer::RotAdj(float fRotDiff)
 
 	//角度の値を修正する
 	RotLimit(&m_rot.y);
-}
-
-//============================
-// アイテム引き寄せ
-//============================
-void CPlayer::PullItem(void)
-{
-	D3DXVECTOR3 Objpos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	D3DXVECTOR3 Objsize = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-
-	float fSize = m_param.fGetArea;		//プレイヤーの半径
-
-	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
-	{
-		CObject *pObject = CObject::GetTop(nCntPrt);
-
-		while ((pObject != nullptr))
-		{
-			if (pObject != nullptr)
-			{
-				CObject::TYPE type = pObject->GetType();	//今回のオブジェクトのタイプ
-
-				if (type == CObject::TYPE_ITEM ||
-					type == CObject::TYPE_EXP)
-				{//アイテムだったら
-					Objpos = pObject->GetPos();
-					Objsize = pObject->GetSize();
-
-					float fObjsize = (Objsize.x + Objsize.z) * 0.5f;		//オブジェクトの半径
-
-					float fLength = fSize + fObjsize;		//2点間の長さ
-					float fColl = 0.0f;						//当たり判定範囲
-
-															//判定
-					fColl = hypotf((m_pos.x - Objpos.x), (m_pos.z - Objpos.z));
-
-					if (fColl <= fLength)
-					{
-						D3DXVECTOR3 ObjMove = pObject->GetMove();
-
-						float fRotMove = atan2f(ObjMove.x, ObjMove.y);							//現在の移動方向(角度)
-						float fRotDest = atan2f(Objpos.x - m_pos.x, Objpos.z - m_pos.z);		//目標の移動方向(角度)
-						float fRotDiff = fRotDest - fRotMove;									//目標の移動方向までの差分
-
-						RotLimit(&fRotDiff);
-
-						fRotMove += fRotDiff * 1.0f;
-
-						RotLimit(&fRotMove);
-
-						float fSpeed = NUM_GETAREA_SPEED;
-
-						if ((fLength - fColl) <= NUM_HYGETAREA)
-						{//近かったら速く
-							fSpeed *= 2;
-						}
-
-						if ((fLength - fColl) <= NUM_COLL && type == CObject::TYPE_EXP)
-						{//触れていたら取得
-						 //CExperience *pExp = pObj;
-						}
-
-						ObjMove.x = sinf(fRotMove + 1.0f * D3DX_PI) * fSpeed;		//x
-						ObjMove.z = cosf(fRotMove + 1.0f * D3DX_PI) * fSpeed;		//y
-						(Objpos.y > 50.0f) ? ObjMove.y = -fSpeed : ObjMove.y = fSpeed;	//y
-						pObject->SetMove(ObjMove);
-					}
-				}
-				pObject = pObject->GetNext();
-			}
-			else
-			{// (pObject == NULL) == Endまで行ったってことでこの優先度は終了
-				break;
-			}
-		}
-	}
-}
-
-//============================
-// 経験値ゲージ設定
-//============================
-void CPlayer::SetExp(const float fExp)
-{
-	m_fExp = fExp;
-
-	CntExp(0);
-}
-
-//============================
-// 経験値加算
-//============================
-void CPlayer::CntExp(const float fExp)
-{
-	m_fExp += fExp;
-
-	float fRatio = m_fExp / m_fExpMax;
-
-	//加算結果の割合で設定
-	m_pGaugeExp->SetRatio(fRatio);
 }
 
 //============================
@@ -1028,7 +989,7 @@ void CPlayer::Damage(float fDamege)
 
 	float fRatio = m_param.fLife / m_param.fLifeMax;
 
-	m_pGaugeHP->SetRatio(fRatio);
+	m_pGaugeBoost->SetRatio(fRatio);
 
 	if (m_param.fLife <= 0.0f)
 	{
@@ -1064,16 +1025,11 @@ void CPlayer::DebugKey(CInputKeyboard *pInputKeyboard)
 	if (pInputKeyboard->GetTrigger(DIK_E))
 	{//左ShiftでHP減少
 
-		float fRatio = m_pGaugeHP->GetRatio();
+		float fRatio = m_pGaugeBoost->GetRatio();
 
 		fRatio -= 0.01f;
 
-		m_pGaugeHP->SetRatio(fRatio);
-	}
-
-	if (pInputKeyboard->GetPress(DIK_I))
-	{
-		CntExp(1.0f);
+		m_pGaugeBoost->SetRatio(fRatio);
 	}
 }
 

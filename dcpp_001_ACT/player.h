@@ -46,8 +46,8 @@ public:
 		MOTIONTYPE_DASH,	//拍手
 		MOTIONTYPE_JUMP,	//ジャンプ
 		MOTIONTYPE_GROUND,	//着地
-		MOTIONTYPE_FIRE_REV,	//発射(REVOLVER)
-		MOTIONTYPE_FIRE_AK,	//発射(AK)
+		MOTIONTYPE_BOOST,	//ブースト
+		MOTIONTYPE_SLIDING,	//スライディング
 		MOTIONTYPE_MAX,
 	}MOTIONTYPE;
 
@@ -59,9 +59,7 @@ public:
 		float fLife;		//体力
 		float fLifeMax;		//最大体力
 		float fSpeed;		//移動速度
-		float fSpeedFire;	//連射速度
 		float fAttack;		//攻撃力
-		float fGetArea;		//引き寄せ判定の半径
 		float fColl;		//当たり判定の半径
 	}Param;
 
@@ -84,15 +82,12 @@ public:
 	D3DXVECTOR3 GetMove(void) { return m_move; }				//移動量取得
 	D3DXVECTOR3 GetSize(void) { return MAX_PLAYER_SIZE; }				//サイズ取得
 	float GetHeartPos(void) { return m_fHeart; }				//心臓位置取得
-	float GetExp(void) { return m_fExp; }						//現在経験値取得
 	Param GetParam(void) { return m_param; }					//現在パラメータ取得
 	void SetJump(const bool bJump) { m_bJump = bJump; }				//ジャンプ判定設定
 	void SetMove(const D3DXVECTOR3 move) { m_move = move; }			//移動量設定
 	void SetPos(const D3DXVECTOR3 pos) { m_pos = pos; }				//現在位置設定
 	void SetRot(const D3DXVECTOR3 rot) { m_rot = rot; }				//向き設定
 	void SetHeartPos(const float fHeart) { m_fHeart = fHeart; }		//心臓位置設定
-	void SetExp(const float fExp);				//現在経験値設定
-	void CntExp(const float fExp);				//現在経験値加算
 	void SetParam(const Param param) { m_param = param; }			//現在パラメータ設定
 	void ReadFile(void);	//ファイル読込
 	void Damage(float fDamege = 1.0f);
@@ -101,9 +96,9 @@ protected:
 
 private:
 	void MoveOperate(float *pfRotDest);		//移動操作
+	void MoveOperate2D(float *pfRotDest);	//移動操作
 	void RotOperate(float *pfRotDest);		//向き操作
 	void RotAdj(float fRotDiff);			//向き修正
-	void PullItem(void);					//アイテム引き寄せ
 	void RotLimit(float *pRot);				//向き修正
 
 	void DebugKey(CInputKeyboard *pInputKeyboard);		//デバッグキー
@@ -121,10 +116,7 @@ private:
 	CMotion *m_pMotion;		//モーション情報
 	Param m_param;			//パラメータ
 	CWeapon *m_pWeapon;		//武器情報
-	CGauge *m_pGaugeHP;		//HP情報
-	CGauge *m_pGaugeExp;	//exp情報
-	float m_fExp;			//現在経験値
-	float m_fExpMax;		//経験値ゲージMax値
+	CGauge *m_pGaugeBoost;		//ブ―ストゲージ
 	CState_Life *m_pStateLife;		//状態
 };
 

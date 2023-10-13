@@ -77,7 +77,12 @@ public:
 	void SetModel(CParts **ppParts, int nNumModel);		//モデル情報設定
 	//void SetOrg(CParts **ppParts, int nNumModel);		//オフセット情報設定
 
+	char **ReadParts(const char *pReadFile, int *pnNumFile);
+	void ReadSetUp(const char *pReadFile, CParts **ppParts);
+	void ReadMotions(const char *pReadFile, CMotion::INFO *pInfo);
+
 	int GetKey(void) { return m_nKey; }		//現在のキー取得
+	INFO *GetInfo(void) { return m_aInfo; }		//現在のキー取得
 
 protected:
 

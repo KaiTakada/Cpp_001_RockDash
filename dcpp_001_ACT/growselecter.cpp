@@ -184,7 +184,7 @@ void CGrowSelecter::Update(void)
 		
 		if (pPlayer != nullptr)
 		{
-			pPlayer->SetExp(0);
+		
 		}
 		else
 		{

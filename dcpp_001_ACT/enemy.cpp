@@ -151,6 +151,7 @@ void CEnemy::Update(void)
 	}
 
 	CollisionCircle(pos);
+	//CollisionRect();
 
 	CObjectX::Update();
 }

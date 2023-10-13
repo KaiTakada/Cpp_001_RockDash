@@ -169,7 +169,7 @@
       <Filter>ソース ファイル\single</Filter>
     </ClCompile>
     <ClCompile Include="motion.cpp">
-      <Filter>ソース ファイル</Filter>
+      <Filter>ソース ファイル\single</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
