@@ -49,7 +49,7 @@ HRESULT CResult::Init()
 	float fWidth = SCREEN_WIDTH;
 	float fHeight = SCREEN_HEIGHT;
 
-	CTexture *pTexture = CManager::GetTexture();
+	CTexture *pTexture = CManager::GetInstance()->GetTexture();
 
 	CScene::Init();
 
@@ -62,7 +62,7 @@ HRESULT CResult::Init()
 	//--------------------------------
 
 	//勝敗どちらか--------------------
-	CManager::RESULT_TYPE type = CManager::GetResult();
+	CManager::RESULT_TYPE type = CManager::GetInstance()->GetResult();
 
 	pPolygon = CObject2D::Create(D3DXVECTOR3(fWidth * 0.8f, fHeight * 0.6f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, -0.3f),
 		D3DXVECTOR3(200.0f, 40.0f, 0.0f), CObject2D::UPDATE_TYPE_NONE);
@@ -91,7 +91,7 @@ HRESULT CResult::Init()
 
 	m_pScore = CScore::Create(D3DXVECTOR3(fWidth * 0.5f, fHeight * 0.7f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(40.0f, 60.0f, 0.0f));
 
-	CScene *pScene = CManager::GetScene();
+	CScene *pScene = CManager::GetInstance()->GetScene();
 
 	if (pScene != nullptr)
 	{
@@ -121,8 +121,8 @@ void CResult::Uninit()
 void CResult::Update()
 {
 	//キーボード取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
-	CInputGamepad *pInputPad = CManager::GetInputGamepad();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
+	CInputGamepad *pInputPad = CManager::GetInstance()->GetInputGamepad();
 	CFade *pFade = CScene::GetFade();
 
 	if (pInputKeyboard->GetTrigger(DIK_RETURN) || pInputKeyboard->GetTrigger(DIK_SPACE) ||
@@ -130,7 +130,7 @@ void CResult::Update()
 	{//[ Enter ]キーでポーズ
 		if (pFade->SetState(CScene::MODE_RANKING))
 		{
-			CManager::GetSound()->PlaySound(CSound::SOUND_LABEL_SE_BUTTON);
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_SE_BUTTON);
 		}
 	}
 

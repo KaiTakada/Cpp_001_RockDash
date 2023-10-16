@@ -110,7 +110,7 @@ void CTexture::Unload(void)
 int CTexture::Regist(const char *pFilename)
 {
 	//デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	for (int nCntReg = 0; nCntReg < MAX_TEXTURE; nCntReg++)
 	{

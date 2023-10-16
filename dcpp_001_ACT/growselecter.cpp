@@ -135,9 +135,9 @@ void CGrowSelecter::Uninit(void)
 void CGrowSelecter::Update(void)
 {
 	//キーボード取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
-	CInputGamepad *pInputPad = CManager::GetInputGamepad();
-	CInputMouse *pInputMouse = CManager::GetInputMouse();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
+	CInputGamepad *pInputPad = CManager::GetInstance()->GetInputGamepad();
+	CInputMouse *pInputMouse = CManager::GetInstance()->GetInputMouse();
 	CFade *pFade = CScene::GetFade();
 	int nNum[2] = {};
 
@@ -191,7 +191,7 @@ void CGrowSelecter::Update(void)
 			pPlayer = nullptr;
 		}
 
-		CManager::SetGrow(false);
+		CManager::GetInstance()->SetGrow(false);
 		Uninit();
 		return;
 	}
@@ -223,7 +223,7 @@ CGrowSelecter * CGrowSelecter::Create()
 		}
 		else
 		{
-			CTexture *pTexture = CManager::GetTexture();
+			CTexture *pTexture = CManager::GetInstance()->GetTexture();
 
 			for (int nCntItem = 0; nCntItem < MAX_ITEM; nCntItem++)
 			{

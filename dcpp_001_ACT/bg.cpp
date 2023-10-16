@@ -170,7 +170,7 @@ CBg * CBg::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3DXVECTOR
 
 			pBg->m_texMove = move;
 
-			CTexture *pTexture = CManager::GetTexture();
+			CTexture *pTexture = CManager::GetInstance()->GetTexture();
 			pBg->SetIdxTexture(pTexture->Regist(c_apTexpass[TexType]));
 		}
 		else

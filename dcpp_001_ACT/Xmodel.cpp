@@ -122,7 +122,7 @@ void CXModel::Unload(void)
 int CXModel::Regist(const char *pFilename, D3DXVECTOR3 *vtxMin, D3DXVECTOR3 *vtxMax)
 {
 	//デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 	int nNumVtx = 0;		//頂点数
 	DWORD dwSizeFVF;	//頂点フォーマットのサイズ
 	BYTE *pVtxBuff;		//頂点バッファへのポインタ

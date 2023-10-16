@@ -141,7 +141,7 @@ void CPause::Uninit(void)
 void CPause::Update(void)
 {
 	//キーボード取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 	CFade *pFade = CScene::GetFade();
 	int nNum[2] = {};
 
@@ -182,7 +182,7 @@ void CPause::Update(void)
 		switch (m_nPauseSelect)
 		{
 			case PAUSE_MENU_CONTINUE:
-				CManager::SetPause(false);
+				CManager::GetInstance()->SetPause(false);
 				CGame::NullPause();
 				Uninit();
 				break;
@@ -228,7 +228,7 @@ CPause * CPause::Create(D3DXVECTOR3 pos)
 		}
 		else
 		{
-			CTexture *pTexture = CManager::GetTexture();
+			CTexture *pTexture = CManager::GetInstance()->GetTexture();
 
 			for (int nCntItem = 0; nCntItem < PAUSE_MENU_MAX; nCntItem++)
 			{

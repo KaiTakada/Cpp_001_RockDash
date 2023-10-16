@@ -54,13 +54,13 @@ CRanking::~CRanking()
 //============================
 HRESULT CRanking::Init()
 {
-	CTexture *pTexture = CManager::GetTexture();
+	CTexture *pTexture = CManager::GetInstance()->GetTexture();
 	float fWidth = SCREEN_WIDTH;
 	float fHeight = SCREEN_HEIGHT;
 
 	CScene::Init();
 
-	CManager::RESULT_TYPE type = CManager::GetResult();
+	CManager::RESULT_TYPE type = CManager::GetInstance()->GetResult();
 
 	m_nScore = GetNowTime();
 
@@ -142,7 +142,7 @@ HRESULT CRanking::Init()
 		Write();
 	}
 
-	CManager::GetSound()->PlaySound(CSound::SOUND_LABEL_BGM_RANKING);
+	CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_BGM_RANKING);
 
 	return S_OK;
 }
@@ -163,7 +163,7 @@ void CRanking::Uninit()
 
 	CScene::Uninit();
 
-	CManager::GetSound()->Stop();
+	CManager::GetInstance()->GetSound()->Stop();
 }
 
 //============================
@@ -172,8 +172,8 @@ void CRanking::Uninit()
 void CRanking::Update()
 {
 	//キーボード取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
-	CInputGamepad *pInputPad = CManager::GetInputGamepad();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
+	CInputGamepad *pInputPad = CManager::GetInstance()->GetInputGamepad();
 	CFade *pFade = CScene::GetFade();
 
 	if (pInputKeyboard->GetTrigger(DIK_RETURN) || pInputKeyboard->GetTrigger(DIK_SPACE) ||
@@ -181,7 +181,7 @@ void CRanking::Update()
 	{//[ Enter ]キーでポーズ	
 		if (pFade->SetState(CScene::MODE_TITLE))
 		{
-			CManager::GetSound()->PlaySound(CSound::SOUND_LABEL_SE_BUTTON);
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_SE_BUTTON);
 		}
 	}
 	else if (m_nCntTitle >= 1200)

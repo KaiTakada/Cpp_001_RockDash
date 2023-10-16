@@ -198,7 +198,7 @@ CBullet * CBullet::Create( D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const SIDE si
 
 			pBullet->SetSize(size);		//ƒTƒCƒYÝ’è
 
-			CTexture *pTexture = CManager::GetTexture();
+			CTexture *pTexture = CManager::GetInstance()->GetTexture();
 			pBullet->SetIdxTexture(pTexture->Regist(FILE_PASS));
 
 			D3DXVECTOR3 move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);

@@ -75,7 +75,7 @@ HRESULT CWeapon::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const WPNTYP
 
 	CParts::Init(pos, rot);
 
-	CXModel *pXmodel = CManager::GetXModel();
+	CXModel *pXmodel = CManager::GetInstance()->GetXModel();
 	SetIdxModel(pXmodel->Regist(c_apFileWeapon[type]));		//ƒ‚ƒfƒ‹‚ÌŠ„‚è“–‚Ä
 
 	SetType(TYPE_WEAPON);
@@ -147,19 +147,19 @@ void CWeapon::Attack(const D3DXVECTOR3 rot, const int nDamage)
 	case WPNTYPE_REVOLVER:
 		m_nCooltime = 30 - m_nCooltimeMin;
 		CBullet::Create(pos + muzzlePos, rot + GetRot(), CBullet::SIDE_PLAYER, nDamage);
-		CManager::GetSound()->PlaySound(CSound::SOUND_LABEL_SE_ONFIRE);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_SE_ONFIRE);
 		break;
 
 	case WPNTYPE_AK:
 		m_nCooltime = 15 - m_nCooltimeMin;
 		CBullet::Create(pos + muzzlePos, rot + GetRot(), CBullet::SIDE_PLAYER, nDamage);
-		CManager::GetSound()->PlaySound(CSound::SOUND_LABEL_SE_ONFIRE);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_SE_ONFIRE);
 		break;
 
 	default:
 		m_nCooltime = 5 - m_nCooltimeMin;
 		CBullet::Create(muzzlePos, rot, CBullet::SIDE_PLAYER, nDamage);
-		CManager::GetSound()->PlaySound(CSound::SOUND_LABEL_SE_ONFIRE);
+		CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_SE_ONFIRE);
 		break;
 	}
 
@@ -191,7 +191,7 @@ CWeapon *CWeapon::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, WPNTYPE type)
 		{
 			pWeapon->ReadMuzzleFile(type);
 
-			CXModel *pXmodel = CManager::GetXModel();
+			CXModel *pXmodel = CManager::GetInstance()->GetXModel();
 			pWeapon->SetIdxModel(pXmodel->Regist(c_apFileWeapon[type], &vtxMin, &vtxMax));		//ƒ‚ƒfƒ‹‚ÌŠ„‚è“–‚Ä
 		}
 	}
@@ -208,7 +208,7 @@ CWeapon *CWeapon::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, WPNTYPE type)
 //=======================
 void CWeapon::SetWpnType(CWeapon::WPNTYPE type)
 {
-	CXModel *pXmodel = CManager::GetXModel();
+	CXModel *pXmodel = CManager::GetInstance()->GetXModel();
 	SetIdxModel(pXmodel->Regist(c_apFileWeapon[type]));		//ƒ‚ƒfƒ‹‚ÌŠ„‚è“–‚Ä
 	m_type = type;
 

@@ -17,6 +17,7 @@
 // マクロ定義
 //=========================
 #define MAX_PLAYER_PARTS (32)		//最大パーツ数
+#define MAX_PLAYER_WEAPON (2)		//武器数
 #define MAX_PLAYER_SIZE D3DXVECTOR3(30.0f,50.0f,30.0f)		//サイズ
 
 //=========================
@@ -116,7 +117,7 @@ private:
 	bool m_bJump;			//ジャンプ判定(falseはジャンプ可能状態)
 	CMotion *m_pMotion;		//モーション情報
 	Param m_param;			//パラメータ
-	CBoost *m_pBoost;		//武器情報
+	CBoost *m_pBoost[MAX_PLAYER_WEAPON];		//武器情報[両足分]
 	CGauge *m_pGaugeBoost;		//ブ―ストゲージ
 	CState_Life *m_pStateLife;		//状態
 };

@@ -198,7 +198,7 @@ CEnemy * CEnemy::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, TYPE type)
 		pEnemy->InitialState(type);
 		pEnemy->InitialMove();
 
-		CXModel *pXmodel = CManager::GetXModel();
+		CXModel *pXmodel = CManager::GetInstance()->GetXModel();
 		pEnemy->SetIdxModel(pXmodel->Regist(c_apFilenameEnemy[type], &vtxMin, &vtxMax));		//ƒ‚ƒfƒ‹‚ÌŠ„‚è“–‚Ä
 
 		vtxMin = pXmodel->GetAddress(pEnemy->GetIdxModel())->vtxMin;
@@ -244,7 +244,7 @@ void CEnemy::Damage(int nDamege)
 		{
 			pScore->CntValue(100000);
 
-			CManager::SetResult(CManager::RT_WIN);
+			CManager::GetInstance()->SetResult(CManager::RT_WIN);
 			SetDeath(true);
 		}
 		else

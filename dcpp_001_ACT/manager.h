@@ -152,75 +152,79 @@ public:
 	void Uninit(void);												//終了
 	void Update(void);												//更新
 	void Draw(void);												//描画
-	static void SetMode(CScene::MODE mode);							//シーン設定
+	void SetMode(CScene::MODE mode);							//シーン設定
 
-	static CRenderer *GetRenderer(void) { return m_pRenderer; }							//レンダラーの取得
-	static CTexture *GetTexture(void) { return m_pTeture; }								//テクスチャの取得
-	static CXModel *GetXModel(void) { return m_pXModel; }								//Xファイルモデルの取得
-	static CCamera *GetCamera(void) { return m_pCamera; }								//カメラの取得
-	static CLight *GetLight(void) { return m_pLight; }									//ライトの取得
-	static CSound *GetSound(void) { return m_pSound; }									//サウンドの取得
-	static CSpawn *GetSpawn(void) { return m_pSpawn; }									//敵スポーンの取得
+	CRenderer *GetRenderer(void) { return m_pRenderer; }							//レンダラーの取得
+	CTexture *GetTexture(void) { return m_pTeture; }								//テクスチャの取得
+	CXModel *GetXModel(void) { return m_pXModel; }								//Xファイルモデルの取得
+	CCamera *GetCamera(void) { return m_pCamera; }								//カメラの取得
+	CLight *GetLight(void) { return m_pLight; }									//ライトの取得
+	CSound *GetSound(void) { return m_pSound; }									//サウンドの取得
+	CSpawn *GetSpawn(void) { return m_pSpawn; }									//敵スポーンの取得
 
-	static CInputKeyboard *GetInputKeyboard(void) { return m_pCInputKeyboard; }			//入力情報の取得(キーボード)
-	static CInputGamepad *GetInputGamepad(void) { return m_pCInputGamepad; }			//入力情報の取得(Pad [X])
-	static CInputMouse *GetInputMouse(void) { return m_pCInputMouse; }					//入力情報の取得(マウス)
+	CInputKeyboard *GetInputKeyboard(void) { return m_pCInputKeyboard; }			//入力情報の取得(キーボード)
+	CInputGamepad *GetInputGamepad(void) { return m_pCInputGamepad; }			//入力情報の取得(Pad [X])
+	CInputMouse *GetInputMouse(void) { return m_pCInputMouse; }					//入力情報の取得(マウス)
 
-	//static CBg *GetBg(void) { return m_pBg; }											//背景の取得
-	//static CMultiBg *GetMultiBg(void) { return m_pMultiBg; }							//多重背景の取得
-	//static CEffect *GetEffect(void) { return m_pEffect; }								//エフェクトの取得
-	//static CParticle *GetParticle(void) { return m_pParticle; }							//パーティクルの取得
-	//static CNumber *GetNumber(void) { return m_pNumber; }								//数字の取得
-	//static CScore *GetScore(void) { return m_pScore; }									//スコアの取得
+	//CBg *GetBg(void) { return m_pBg; }											//背景の取得
+	//CMultiBg *GetMultiBg(void) { return m_pMultiBg; }							//多重背景の取得
+	//CEffect *GetEffect(void) { return m_pEffect; }								//エフェクトの取得
+	//CParticle *GetParticle(void) { return m_pParticle; }							//パーティクルの取得
+	//CNumber *GetNumber(void) { return m_pNumber; }								//数字の取得
+	//CScore *GetScore(void) { return m_pScore; }									//スコアの取得
 
-	//static CObject3D *GetObject3D(void) { return m_pObject3D; }							//3Dポリゴンの取得
-	//static CField *GetField(void) { return m_pField; }									//地面の取得
+	//CObject3D *GetObject3D(void) { return m_pObject3D; }							//3Dポリゴンの取得
+	//CField *GetField(void) { return m_pField; }									//地面の取得
 
-	//static CObjectBillboard *GetBillBoard(void) { return m_pBillBoard; }				//ビルボードの取得
-	//static CItem *GetItem(void) { return m_pItem; }										//アイテムの取得
-	//static CBullet *GetBullet(void) { return m_pBullet; }								//弾の取得
-	//static CExplosion *GetExplosion(void) { return m_pExplosion; }						//爆発の取得
+	//CObjectBillboard *GetBillBoard(void) { return m_pBillBoard; }				//ビルボードの取得
+	//CItem *GetItem(void) { return m_pItem; }										//アイテムの取得
+	//CBullet *GetBullet(void) { return m_pBullet; }								//弾の取得
+	//CExplosion *GetExplosion(void) { return m_pExplosion; }						//爆発の取得
 
-	//static CObjectX *GetObjectX(void) { return m_pObjectX; }								//モデルの取得
-	//static CPlayer *GetPlayer(void) { return m_pPlayer; }								//プレイヤーの取得
-	//static CEnemy *GetEnemy(void) { return m_pEnemy; }									//敵の取得
-	//static CBlock *GetBlock(void) { return m_pBlock; }									//ブロックの取得
+	//CObjectX *GetObjectX(void) { return m_pObjectX; }								//モデルの取得
+	//CPlayer *GetPlayer(void) { return m_pPlayer; }								//プレイヤーの取得
+	//CEnemy *GetEnemy(void) { return m_pEnemy; }									//敵の取得
+	//CBlock *GetBlock(void) { return m_pBlock; }									//ブロックの取得
 
-	static CDebugProc *GetDebugProc(void) { return m_pDebugProc; }				//デバッグの取得
-	static CScene *GetScene(void) { return m_pScene; }							//シーンの取得
+	CDebugProc *GetDebugProc(void) { return m_pDebugProc; }				//デバッグの取得
+	CScene *GetScene(void) { return m_pScene; }							//シーンの取得
 
-	static void SetPause(bool bPause) { m_bPause = bPause; }					//ポーズ状態設定
-	static bool GetPause(void) { return m_bPause; }								//ポーズ状態取得
-	static void InvPause(void) { m_bPause = m_bPause ? false : true; }			//ポーズ切り替え
+	void SetPause(bool bPause) { m_bPause = bPause; }					//ポーズ状態設定
+	bool GetPause(void) { return m_bPause; }								//ポーズ状態取得
+	void InvPause(void) { m_bPause = m_bPause ? false : true; }			//ポーズ切り替え
 
-	static void SetGrow(bool bGrow) { m_bGrow = bGrow; }						//進化シーン状態設定
-	static bool GetGrow(void) { return m_bGrow; }								//進化シーン状態取得
-	static void InvGrow(void) { m_bGrow = m_bGrow ? false : true; }				//進化シーン切り替え
+	void SetGrow(bool bGrow) { m_bGrow = bGrow; }						//進化シーン状態設定
+	bool GetGrow(void) { return m_bGrow; }								//進化シーン状態取得
+	void InvGrow(void) { m_bGrow = m_bGrow ? false : true; }				//進化シーン切り替え
 
-	static void SetResult(RESULT_TYPE result) { m_result = result; }			//勝敗状態設定
-	static RESULT_TYPE GetResult(void) { return m_result; }						//勝敗状態取得
+	void SetResult(RESULT_TYPE result) { m_result = result; }			//勝敗状態設定
+	RESULT_TYPE GetResult(void) { return m_result; }						//勝敗状態取得
+	
+	static CManager *GetInstance();						//インスタンス取得
 
 protected:
 
 private:
-	static CRenderer *m_pRenderer;						//レンダラー
-	static CTexture *m_pTeture;							//テクスチャ
-	static CXModel *m_pXModel;							//Xファイルモデル
-	static CCamera *m_pCamera;							//カメラ
-	static CLight *m_pLight;							//ライト
-	static CSound *m_pSound;							//サウンド
-	static CSpawn *m_pSpawn;							//敵スポーン
+	CRenderer *m_pRenderer;						//レンダラー
+	CTexture *m_pTeture;							//テクスチャ
+	CXModel *m_pXModel;							//Xファイルモデル
+	CCamera *m_pCamera;							//カメラ
+	CLight *m_pLight;							//ライト
+	CSound *m_pSound;							//サウンド
+	CSpawn *m_pSpawn;							//敵スポーン
 
-	static CInputKeyboard *m_pCInputKeyboard;			//入力(キーボード)
-	static CInputGamepad *m_pCInputGamepad;				//入力(Pad[X])
-	static CInputMouse *m_pCInputMouse;					//入力(マウス)
+	CInputKeyboard *m_pCInputKeyboard;			//入力(キーボード)
+	CInputGamepad *m_pCInputGamepad;				//入力(Pad[X])
+	CInputMouse *m_pCInputMouse;					//入力(マウス)
 
-	static CDebugProc *m_pDebugProc;					//デバッグ
-	static CScene *m_pScene;							//シーン
+	CDebugProc *m_pDebugProc;					//デバッグ
+	CScene *m_pScene;							//シーン
 
-	static bool m_bPause;				//ポーズフラグ(※ゲームシーンで使用※Renderer干渉)
-	static bool m_bGrow;				//進化シーンフラグ(※ゲームシーンで使用※Renderer干渉)
-	static RESULT_TYPE m_result;		//勝敗フラグ(※ゲーム→リザルトシーンで使用)
+	bool m_bPause;				//ポーズフラグ(※ゲームシーンで使用※Renderer干渉)
+	bool m_bGrow;				//進化シーンフラグ(※ゲームシーンで使用※Renderer干渉)
+	RESULT_TYPE m_result;		//勝敗フラグ(※ゲーム→リザルトシーンで使用)
+	
+	static CManager *m_pManager;		//インスタンス保持
 };
 
 #endif

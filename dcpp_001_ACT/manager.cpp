@@ -58,24 +58,7 @@
 // 静的メンバ変数
 //=========================
 //Manager
-CRenderer *CManager::m_pRenderer = nullptr;					//レンダラー
-CTexture *CManager::m_pTeture = nullptr;					//テクスチャ
-CXModel *CManager::m_pXModel = nullptr;						//Xファイルモデル
-CCamera *CManager::m_pCamera = nullptr;						//カメラ
-CLight *CManager::m_pLight = nullptr;						//ライト
-CSound *CManager::m_pSound = nullptr;						//サウンド
-CSpawn *CManager::m_pSpawn = nullptr;						//敵スポーン
-
-CInputKeyboard *CManager::m_pCInputKeyboard = nullptr;		//キーボード入力
-CInputGamepad *CManager::m_pCInputGamepad = nullptr;		//入力(Pad[X])
-CInputMouse *CManager::m_pCInputMouse = nullptr;			//入力(マウス)
-
-CDebugProc *CManager::m_pDebugProc = nullptr;				//デバッグ
-CScene *CManager::m_pScene = nullptr;						//シーン
-
-bool CManager::m_bPause = false;		//ポーズフラグ
-bool CManager::m_bGrow = false;			//進化シーンフラグ
-CManager::RESULT_TYPE CManager::m_result = RT_NONE;			//勝敗内容
+CManager *CManager::m_pManager = nullptr;								//背景
 
 //Scene
 CBg *CScene::m_pBg = nullptr;								//背景
@@ -105,7 +88,26 @@ int CScene::m_nTime = 0;								//今回プレイ結果
 //============================
 CManager::CManager()
 {
+	m_pRenderer = nullptr;					//レンダラー
+	m_pTeture = nullptr;					//テクスチャ
+	m_pXModel = nullptr;						//Xファイルモデル
+	m_pCamera = nullptr;						//カメラ
+	m_pLight = nullptr;						//ライト
+	m_pSound = nullptr;						//サウンド
+	m_pSpawn = nullptr;						//敵スポーン
 
+	m_pCInputKeyboard = nullptr;		//キーボード入力
+	m_pCInputGamepad = nullptr;		//入力(Pad[X])
+	m_pCInputMouse = nullptr;			//入力(マウス)
+
+	m_pDebugProc = nullptr;				//デバッグ
+	m_pScene = nullptr;						//シーン
+
+	m_bPause = false;		//ポーズフラグ
+	m_bGrow = false;			//進化シーンフラグ
+	m_result = RT_NONE;			//勝敗内容
+
+	m_pManager = this;
 }
 
 //============================
@@ -113,7 +115,7 @@ CManager::CManager()
 //============================
 CManager::~CManager()
 {
-
+	m_pManager = nullptr;
 }
 
 //============================
@@ -590,7 +592,7 @@ void CScene::Uninit()
 //============================
 void CScene::Update()
 {
-	CInputKeyboard *pKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	if (m_pFade != nullptr)
 	{//フェード
@@ -739,4 +741,17 @@ void CManager::SetMode(const CScene::MODE mode)
 
 	//新しいモードの生成
 	m_pScene = CScene::Create(mode);
+}
+
+//======================================
+// インスタンス取得
+//======================================
+CManager * CManager::GetInstance()
+{
+	if (m_pManager == nullptr)
+	{
+		m_pManager = new CManager;
+	}
+
+	return m_pManager;
 }

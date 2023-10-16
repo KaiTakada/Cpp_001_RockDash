@@ -85,8 +85,8 @@ void CCamera::Uninit()
 //============================
 void CCamera::Update()
 {
-	CDebugProc *pDebug = CManager::GetDebugProc();
-	CInputMouse *pMouse = CManager::GetInputMouse();
+	CDebugProc *pDebug = CManager::GetInstance()->GetDebugProc();
+	CInputMouse *pMouse = CManager::GetInstance()->GetInputMouse();
 
 	if (pMouse != nullptr)
 	{//カメラがあれば
@@ -106,7 +106,7 @@ void CCamera::Update()
 
 		pDebug->Print("マウスの位置 = X:%f \n", mousepos.x);
 		pDebug->Print("マウスの位置 = Y:%f \n", mousepos.y);
-		pDebug->Print("マウスの位置 = Z:%f \n", mousepos.z);	
+		pDebug->Print("マウスの位置 = Z:%f \n", mousepos.z);
 	}
 
 	//プレイヤーに追従する
@@ -119,7 +119,7 @@ void CCamera::Update()
 void CCamera::SetCamera()
 {
 	//デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	//プロジェクションマトリックスの初期化
 	D3DXMatrixIdentity(&m_mtxProjection);
@@ -212,7 +212,7 @@ void CCamera::PlayerStalk(void)
 	m_posV.y = m_fDis;
 	m_posV.z = pos.z + (cosf(m_fAngle) * m_fDis);
 
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 
 	//押した時だけ押した側を移す
 	//離した瞬間戻る

@@ -154,7 +154,7 @@ void CRenderer::Draw(void)
 		//各種オブジェクトの描画処理
 		CObject::DrawAll();
 
-		CDebugProc *pDebug = CManager::GetDebugProc();
+		CDebugProc *pDebug = CManager::GetInstance()->GetDebugProc();
 		pDebug->Draw();
 
 		//描画終了

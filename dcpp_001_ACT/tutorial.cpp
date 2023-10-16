@@ -49,14 +49,14 @@ HRESULT CTutorial::Init()
 	float fWidth = SCREEN_WIDTH;
 	float fHeight = SCREEN_HEIGHT;
 
-	CTexture *pTexture = CManager::GetTexture();
+	CTexture *pTexture = CManager::GetInstance()->GetTexture();
 
 	CObject2D *pPolygon = CObject2D::Create(D3DXVECTOR3(fWidth * 0.5f, fHeight * 0.5f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),
 		D3DXVECTOR3(fWidth * 0.5f, fHeight * 0.5f, 0.0f), CObject2D::UPDATE_TYPE_NONE);
 
 	pPolygon->SetIdxTexture(pTexture->Regist("data\\TEXTURE\\SCENE\\tutorial.jpg"));
 
-	CManager::GetSound()->PlaySound(CSound::SOUND_LABEL_BGM_TUTORIAL);
+	CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_BGM_TUTORIAL);
 
 	return S_OK;
 }
@@ -68,7 +68,7 @@ void CTutorial::Uninit()
 {
 	CScene::Uninit();
 
-	CManager::GetSound()->Stop();
+	CManager::GetInstance()->GetSound()->Stop();
 }
 
 //============================
@@ -77,8 +77,8 @@ void CTutorial::Uninit()
 void CTutorial::Update()
 {
 	//キーボード取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
-	CInputGamepad *pInputPad = CManager::GetInputGamepad();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
+	CInputGamepad *pInputPad = CManager::GetInstance()->GetInputGamepad();
 	CFade *pFade = CScene::GetFade();
 
 	if (pInputKeyboard->GetTrigger(DIK_RETURN) || pInputKeyboard->GetTrigger(DIK_SPACE) || 
@@ -86,7 +86,7 @@ void CTutorial::Update()
 	{//[ Enter ]キーでポーズ
 		if (pFade->SetState(CScene::MODE_GAME))
 		{
-			CManager::GetSound()->PlaySound(CSound::SOUND_LABEL_SE_BUTTON);
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_SE_BUTTON);
 		}
 	}
 

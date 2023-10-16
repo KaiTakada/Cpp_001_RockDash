@@ -250,7 +250,7 @@ void CObject::UpdateAll(void)
 //============================
 void CObject::DrawAll(void)
 {
-	CCamera *pCamera = CManager::GetCamera();
+	CCamera *pCamera = CManager::GetInstance()->GetCamera();
 
 	if (pCamera != nullptr)
 	{
@@ -276,7 +276,7 @@ void CObject::DrawAll(void)
 		pObject = m_apTop[nCnt];
 	}
 
-	CDebugProc *pDebug = CManager::GetDebugProc();
+	CDebugProc *pDebug = CManager::GetInstance()->GetDebugProc();
 	pDebug->Print("FPS:%d", GetFPS());
 	pDebug->Draw();
 }

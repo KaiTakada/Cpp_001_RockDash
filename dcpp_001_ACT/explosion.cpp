@@ -142,7 +142,7 @@ CExplosion *CExplosion::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 size, co
 
 			pExplosion->SetSize(size);		//ƒTƒCƒYÝ’è
 
-			CTexture *pTexture = CManager::GetTexture();
+			CTexture *pTexture = CManager::GetInstance()->GetTexture();
 			pExplosion->SetIdxTexture(pTexture->Regist("data\\TEXTURE\\explosion000.png"));
 		}
 	}

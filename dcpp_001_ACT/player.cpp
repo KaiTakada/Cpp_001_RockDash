@@ -44,11 +44,11 @@
 #define NUM_COLL (30.0f)			//当たり判定半径
 #define NUM_HP (1.0f)				//HP量
 #define NUM_ATTACK (1.0f)			//攻撃力
-#define NUM_SPEED (0.5f)			//移動量
+#define NUM_SPEED (1.5f)			//移動量
 #define NUM_SPEED_STOP (0.0001f)	//移動量を0にする条件値
 #define NUM_HEART (50.0f)			//心臓位置
 #define NUM_JUMP (15.0f)			//ジャンプ力
-#define NUM_BOOST (10.0f)			//ブースト力
+#define NUM_BOOST (20.0f)			//ブースト力
 #define NUM_GRAV (0.5f)				//重力
 #define MOTION_FILE "data\\SET\\MOTION\\motion_player.txt"		//モーションファイルパス
 #define READ_PSIZE (256)			//読込ポインタサイズ
@@ -57,6 +57,11 @@
 #define EXP_MAX (5.0f)				//expゲージのMaxの初期値
 #define EXP_MAX_MGNFC (1.2f)		//expゲージのMaxに掛ける倍率
 #define DAMAGE_CT (1)				//ダメージ無敵時間
+
+//============================
+// 定数定義
+//============================
+int g_anParts[MAX_PLAYER_WEAPON] = { 14,17 };
 
 //============================
 // 静的メンバ変数宣言
@@ -77,10 +82,14 @@ CPlayer::CPlayer(int nPriority) : CObject(nPriority)
 	m_fHeart = 0.0f;
 	m_bJump = false;
 	m_pMotion = nullptr;
-	m_pBoost = nullptr;
 	m_pGaugeBoost = nullptr;
 	ZeroMemory(&m_param, sizeof(m_param));
 	m_pStateLife = nullptr;
+	
+	for (int nCntBst = 0; nCntBst < sizeof(m_pBoost) / sizeof(m_pBoost[0]); nCntBst++)
+	{
+		m_pBoost[nCntBst] = nullptr;
+	}
 
 	for (int nCntPart = 0; nCntPart < MAX_PLAYER_PARTS; nCntPart++)
 	{
@@ -165,21 +174,25 @@ HRESULT CPlayer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, int nNumPart
 
 	m_pMotion->SetModel(m_apPart, m_nNumModel);
 
-	//武器を持たせる
-	if (m_pBoost != nullptr)
+	//武器を持たせる	
+	for (int nCntBst = 0; nCntBst < sizeof(m_pBoost) / sizeof(m_pBoost[0]); nCntBst++)
 	{
-		return E_FAIL;
-	}
-	
-	m_pBoost = CBoost::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-
-	if (m_pBoost != nullptr)
-	{
-		if (m_apPart[ARMR_IDX] != nullptr)
+		if (m_pBoost[nCntBst] != nullptr)
 		{
-			float fposX = m_apPart[ARMR_IDX]->GetMaxVtx().x * 0.5f;
-			m_pBoost->SetParent(m_apPart[ARMR_IDX]);
-			m_pBoost->SetPos(D3DXVECTOR3(fposX, 0.0f, 0.0f));
+			m_pBoost[nCntBst] = nullptr;
+		}
+
+		m_pBoost[nCntBst] = CBoost::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+
+		if (m_pBoost[nCntBst] != nullptr)
+		{
+			if (m_apPart[g_anParts[nCntBst]] != nullptr)
+			{//定義位置のパーツが存在することを確認
+
+				float fposX = m_apPart[g_anParts[nCntBst]]->GetMaxVtx().x * 0.5f;
+				m_pBoost[nCntBst]->SetParent(m_apPart[g_anParts[nCntBst]]);
+				m_pBoost[nCntBst]->SetPos(D3DXVECTOR3(fposX, 0.0f, 0.0f));
+			}
 		}
 	}
 
@@ -192,7 +205,7 @@ HRESULT CPlayer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, int nNumPart
 
 	m_pGaugeBoost = CGauge::Create(D3DXVECTOR3(m_pos.x, m_pos.y + HP_HEIGHT, m_pos.z), m_apPart[0]->GetRot(), D3DXVECTOR3(60.0f, 10.0f, 0.0f));
 	
-	CInputMouse *pInputMouse = CManager::GetInputMouse();
+	CInputMouse *pInputMouse = CManager::GetInstance()->GetInputMouse();
 
 	//状態の生成
 	if (m_pStateLife != nullptr)
@@ -231,10 +244,13 @@ void CPlayer::Uninit(void)
 		m_pMotion = nullptr;
 	}
 
-	if (m_pBoost != nullptr)
+	for (int nCntBst = 0; nCntBst < sizeof(m_pBoost) / sizeof(m_pBoost[0]); nCntBst++)
 	{
-		m_pBoost->Uninit();
-		m_pBoost = nullptr;
+		if (m_pBoost[nCntBst] != nullptr)
+		{
+			m_pBoost[nCntBst]->Uninit();
+			m_pBoost[nCntBst] = nullptr;
+		}
 	}
 
 	if (m_pGaugeBoost != nullptr)
@@ -267,9 +283,9 @@ void CPlayer::Update(void)
 	m_posOld = pos;
 
 	//キーボード取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
-	CInputMouse *pInputMouse = CManager::GetInputMouse();
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
+	CInputMouse *pInputMouse = CManager::GetInstance()->GetInputMouse();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 
 	//移動入力
 	fRotDest = m_rotDest.y;
@@ -323,20 +339,16 @@ void CPlayer::Update(void)
 		pos.y = -50.0f;
 		m_move.y = 0.0f;
 		m_bJump = false;
+		//static_assert(true, "沼");
 	}
 
-	//武器の座標更新
-	if (m_pBoost != nullptr)
+	//武器の更新
+	for (int nCntBst = 0; nCntBst < sizeof(m_pBoost) / sizeof(m_pBoost[0]); nCntBst++)
 	{
-		if (m_apPart[ARMR_IDX] != nullptr)
+		if (m_pBoost[nCntBst] != nullptr)
 		{
-			//武器の持ち手を右手に納まる位置にする
-			CXModel *pXmodel = CManager::GetXModel();
-			D3DXVECTOR3 vtx = pXmodel->GetVtxMax(m_apPart[ARMR_IDX]->GetIdxModel());
-			m_pBoost->SetPos(D3DXVECTOR3(vtx.x * 0.7f, 0.0f, 0.0f));
+			m_pBoost[nCntBst]->Update();
 		}
-		
-		m_pBoost->Update();
 	}
 
 	//HPゲージの座標更新
@@ -396,7 +408,7 @@ void CPlayer::Update(void)
 void CPlayer::Draw(void)
 {
 	//描画
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();		//デバイスの取得
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();		//デバイスの取得
 	D3DXMATRIX mtxRot, mtxTrans;		//計算用マトリックス
 
 	//ワールドマトリックスの初期化
@@ -418,7 +430,7 @@ void CPlayer::Draw(void)
 	pDevice->SetTransform(D3DTS_WORLD, &m_mtxWorld);
 
 	//デバッグ
-	CDebugProc *pDebug = CManager::GetDebugProc();
+	CDebugProc *pDebug = CManager::GetInstance()->GetDebugProc();
 	pDebug->Print("--- プレイヤー情報 ---\n");
 	pDebug->Print("現在の方向:%f\n", m_rot.y);
 }
@@ -451,9 +463,9 @@ CPlayer * CPlayer::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot)
 void CPlayer::MoveOperate(float *pRotDest)
 {
 	//キーボード取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
-	CCamera *pCamera= CManager::GetCamera();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
+	CCamera *pCamera= CManager::GetInstance()->GetCamera();
 	bool bInput = false;
 
 	D3DXVECTOR3 cameraRot = pCamera->GetRot();
@@ -562,50 +574,51 @@ void CPlayer::MoveOperate(float *pRotDest)
 void CPlayer::MoveOperate2D(float *pRotDest)
 {
 	//キーボード取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
-	CCamera *pCamera = CManager::GetCamera();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
+	CCamera *pCamera = CManager::GetInstance()->GetCamera();
 	bool bInput = false;
 
 	D3DXVECTOR3 cameraRot = pCamera->GetRot();
 
-	if (pInputKeyboard->GetPress(DIK_S) == true ||
-		pInputGamepad->GetPress(CInputGamepad::BUTTON_DOWN, 0) || pInputGamepad->GetGameStickLYPress(0) < 0)
-	{
-		if (pInputKeyboard->GetPress(DIK_A) == true ||
-			pInputGamepad->GetPress(CInputGamepad::BUTTON_LEFT, 0) || pInputGamepad->GetGameStickLXPress(0) < 0)
-		{//下かつ左キーを押したとき
+	//if (pInputKeyboard->GetPress(DIK_S) == true ||
+	//	pInputGamepad->GetPress(CInputGamepad::BUTTON_DOWN, 0) || pInputGamepad->GetGameStickLYPress(0) < 0)
+	//{
+	//	if (pInputKeyboard->GetPress(DIK_A) == true ||
+	//		pInputGamepad->GetPress(CInputGamepad::BUTTON_LEFT, 0) || pInputGamepad->GetGameStickLXPress(0) < 0)
+	//	{//下かつ左キーを押したとき
 
-		}
-		else if (pInputKeyboard->GetPress(DIK_D) == true ||
-			pInputGamepad->GetPress(CInputGamepad::BUTTON_RIGHT, 0) || pInputGamepad->GetGameStickLXPress(0) > 0)
-		{//下かつ右キーを押したとき
+	//	}
+	//	else if (pInputKeyboard->GetPress(DIK_D) == true ||
+	//		pInputGamepad->GetPress(CInputGamepad::BUTTON_RIGHT, 0) || pInputGamepad->GetGameStickLXPress(0) > 0)
+	//	{//下かつ右キーを押したとき
 
-		}
-		else
-		{//下キーのみを押したとき
-			//しゃがみたい(願望)
-		}
-	}
-	else if (pInputKeyboard->GetPress(DIK_W) == true ||
-		pInputGamepad->GetPress(CInputGamepad::BUTTON_UP, 0) || pInputGamepad->GetGameStickLYPress(0) > 0)
-	{
-		if (pInputKeyboard->GetPress(DIK_A) == true ||
-			pInputGamepad->GetPress(CInputGamepad::BUTTON_LEFT, 0) || pInputGamepad->GetGameStickLXPress(0) < 0)
-		{//上かつ左キーを押したとき
+	//	}
+	//	else
+	//	{//下キーのみを押したとき
+	//		//しゃがみたい(願望)
+	//	}
+	//}
+	//else if (pInputKeyboard->GetPress(DIK_W) == true ||
+	//	pInputGamepad->GetPress(CInputGamepad::BUTTON_UP, 0) || pInputGamepad->GetGameStickLYPress(0) > 0)
+	//{
+	//	if (pInputKeyboard->GetPress(DIK_A) == true ||
+	//		pInputGamepad->GetPress(CInputGamepad::BUTTON_LEFT, 0) || pInputGamepad->GetGameStickLXPress(0) < 0)
+	//	{//上かつ左キーを押したとき
 
-		}
-		else if (pInputKeyboard->GetPress(DIK_D) == true ||
-			pInputGamepad->GetPress(CInputGamepad::BUTTON_RIGHT, 0) || pInputGamepad->GetGameStickLXPress(0) > 0)
-		{//上かつ右キーを押したとき
+	//	}
+	//	else if (pInputKeyboard->GetPress(DIK_D) == true ||
+	//		pInputGamepad->GetPress(CInputGamepad::BUTTON_RIGHT, 0) || pInputGamepad->GetGameStickLXPress(0) > 0)
+	//	{//上かつ右キーを押したとき
 
-		}
-		else
-		{//上キーのみを押したとき
+	//	}
+	//	else
+	//	{//上キーのみを押したとき
 
-		}
-	}
-	else if (pInputKeyboard->GetPress(DIK_A) == true ||
+	//	}
+	//}
+	//else if (pInputKeyboard->GetPress(DIK_A) == true ||
+	if (pInputKeyboard->GetPress(DIK_A) == true ||
 		pInputGamepad->GetPress(CInputGamepad::BUTTON_LEFT, 0) || pInputGamepad->GetGameStickLXPress(0) < 0)
 	{//左キーのみを押したとき
 		m_move.x += sinf(cameraRot.y + -0.5f * D3DX_PI) * m_param.fSpeed;
@@ -656,8 +669,8 @@ void CPlayer::MoveOperate2D(float *pRotDest)
 void CPlayer::RotOperate(float *pfRotDest)
 {
 	//キーボード取得
-	CInputMouse *pInputMouse = CManager::GetInputMouse();
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
+	CInputMouse *pInputMouse = CManager::GetInstance()->GetInputMouse();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
 	bool bInput = false;
 }
 
@@ -993,7 +1006,7 @@ void CPlayer::Damage(float fDamege)
 	if (m_param.fLife <= 0.0f)
 	{
 		//死んだらどうしようか
-		CManager::SetResult(CManager::RT_LOSE);
+		CManager::GetInstance()->SetResult(CManager::RT_LOSE);
 	}
 
 	m_pStateLife->Set(CState_Life::STATE_DAMAGE, DAMAGE_CT);
@@ -1011,8 +1024,8 @@ void CPlayer::DebugKey(CInputKeyboard *pInputKeyboard)
 
 	if (pInputKeyboard->GetTrigger(DIK_K))
 	{//Kで武器チェン
-		int nType = (m_pBoost->GetWpnType() + 1) % CBoost::WPNTYPE_MAX;
-		m_pBoost->SetWpnType(CWeapon::WPNTYPE(nType));
+		int nType = (m_pBoost[0]->GetWpnType() + 1) % CBoost::WPNTYPE_MAX;
+		m_pBoost[0]->SetWpnType(CWeapon::WPNTYPE(nType));
 	}
 
 	if (pInputKeyboard->GetTrigger(DIK_I))

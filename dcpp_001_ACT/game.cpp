@@ -99,7 +99,7 @@ HRESULT CGame::Init()
 	CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.5f, 50.0f, 0.0f));
 	CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.4f, 0.0f, 0.0f));
 
-	CManager::GetSound()->PlaySound(CSound::SOUND_LABEL_BGM_GAME);
+	CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_BGM_GAME);
 
 	return S_OK;
 }
@@ -135,7 +135,7 @@ void CGame::Uninit()
 
 	CScene::Uninit();
 
-	CManager::GetSound()->Stop();
+	CManager::GetInstance()->GetSound()->Stop();
 }
 
 //============================
@@ -144,9 +144,9 @@ void CGame::Uninit()
 void CGame::Update()
 {
 	//キーボード取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
-	CInputGamepad *pInputPad = CManager::GetInputGamepad();
-	bool bPause = CManager::GetPause();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
+	CInputGamepad *pInputPad = CManager::GetInstance()->GetInputGamepad();
+	bool bPause = CManager::GetInstance()->GetPause();
 
 	CScene::Update();
 
@@ -163,7 +163,7 @@ void CGame::Update()
 			m_pPause = nullptr;
 		}
 
-		CManager::InvPause();
+		CManager::GetInstance()->InvPause();
 	}
 
 	if (m_pPause != nullptr && bPause == true)
@@ -182,12 +182,12 @@ void CGame::Update()
 
 	if (pInputKeyboard->GetTrigger(DIK_F))
 	{
-		CManager::SetResult(CManager::RT_WIN);
+		CManager::GetInstance()->SetResult(CManager::RT_WIN);
 	}
 
 	CFade *pFade = CScene::GetFade();
 
-	if (CManager::GetResult() != CManager::RT_NONE)
+	if (CManager::GetInstance()->GetResult() != CManager::RT_NONE)
 	{//結果が確定したら
 		
 		pFade->SetState(CScene::MODE_RESULT);

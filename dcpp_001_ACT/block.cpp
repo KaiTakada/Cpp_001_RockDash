@@ -17,7 +17,8 @@
 //=======================
 const char *c_apFileBlock[CBlock::TYPE_MAX] =
 {
-	"data\\MODEL\\BLOCK\\brick.x",		//通常ブロック
+	//"data\\MODEL\\BLOCK\\brick.x",		//通常ブロック
+	"data\\MODEL\\BLOCK\\BIGbrick.x",		//通常ブロック
 };
 
 //=======================
@@ -123,7 +124,7 @@ CBlock *CBlock::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, TYPE type)
 		{
 			pBlock->m_posOld = pos;
 
-			CXModel *pXmodel = CManager::GetXModel();
+			CXModel *pXmodel = CManager::GetInstance()->GetXModel();
 			pBlock->SetIdxModel(pXmodel->Regist(c_apFileBlock[type], &vtxMin, &vtxMax));		//モデル割り当て
 		
 			vtxMin = pXmodel->GetAddress(pBlock->GetIdxModel())->vtxMin;
@@ -183,29 +184,24 @@ bool CBlock::CollisionRect(void)
 						if (ObjposOld.x + Objsize.x <= pos.x + sizeMin.x
 							&& Objpos.x + Objsize.x > pos.x + sizeMin.x
 							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
-						{//ブロック西
-							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f
+							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
 								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
 								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
 									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
-							{
-								move.x = move.x;
-							}
+						{//ブロック西
 							move.x = (pos.x + sizeMin.x) - (Objpos.x + Objsize.x) - 0.1f;
 							Collision = true;
 						}
 						else if (ObjposOld.x - Objsize.x >= pos.x + sizeMax.x
 							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x
 							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
-						{//ブロック左
-							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f
+							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
 								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
 								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
 									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
-							{
-							}
+						{//ブロック左
 							move.x = (pos.x + sizeMax.x) - (Objpos.x - Objsize.x) + 0.1f;
 							Collision = true;
 						}
@@ -213,28 +209,24 @@ bool CBlock::CollisionRect(void)
 						if (ObjposOld.z + Objsize.z <= pos.z + sizeMin.z
 							&& Objpos.z + Objsize.z >= pos.z + sizeMin.z
 							&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f)
-						{//ブロック北
-							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f
+							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
 								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
 								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
 									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
-							{
-							}
+						{//ブロック北
 							move.z = (pos.z + sizeMin.z) - (Objpos.z + Objsize.z) - 0.1f;
 							Collision = true;
 						}
 						else if (ObjposOld.z - Objsize.z >= pos.z + sizeMax.z
 							&& Objpos.z - Objsize.z <= pos.z + sizeMax.z
 							&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f)
-						{//ブロック南
-							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f
+							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
 								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
 								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
 									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
-							{
-							}
+						{//ブロック南
 							move.z = (pos.z + sizeMax.z) - (Objpos.z - Objsize.z) + 0.1f;
 							Collision = true;
 						}
@@ -273,28 +265,24 @@ bool CBlock::CollisionRect(void)
 						if (ObjposOld.x + Objsize.x <= pos.x + sizeMin.x
 						&& Objpos.x + Objsize.x > pos.x + sizeMin.x
 						&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
-						&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
-						{//ブロック西
-							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+						&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f
+							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
 								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
 								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
 									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
-							{
-							}
+						{//ブロック西
 							move.x = (pos.x + sizeMin.x) - (Objpos.x + Objsize.x) - 0.1f;
 							Collision = true;
 						}
 						else if (ObjposOld.x - Objsize.x >= pos.x + sizeMax.x
 							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x
 							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
-						{//ブロック左
-							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f
+							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
 								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
 								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
 									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
-							{
-							}
+						{//ブロック左
 							move.x = (pos.x + sizeMax.x) - (Objpos.x - Objsize.x) + 0.1f;
 							Collision = true;
 						}
@@ -302,28 +290,24 @@ bool CBlock::CollisionRect(void)
 						if (ObjposOld.z + Objsize.z <= pos.z + sizeMin.z
 							&& Objpos.z + Objsize.z >= pos.z + sizeMin.z
 							&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f)
-						{//ブロック北
-							if(((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f
+							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
 								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
 								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
 									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
-							{
-							}
+						{//ブロック北
 							move.z = (pos.z + sizeMin.z) - (Objpos.z + Objsize.z) - 0.1f;
 							Collision = true;
 						}
 						else if (ObjposOld.z - Objsize.z >= pos.z + sizeMax.z
 							&& Objpos.z - Objsize.z <= pos.z + sizeMax.z
 							&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f)
-						{//ブロック南
-							if (((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
+							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f
+							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
 								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
 								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
 									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
-							{
-							}
+						{
 							move.z = (pos.z + sizeMax.z) - (Objpos.z - Objsize.z) + 0.1f;
 							Collision = true;
 						}

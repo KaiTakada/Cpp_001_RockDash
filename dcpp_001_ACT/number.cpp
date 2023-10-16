@@ -122,7 +122,7 @@ CNumber *CNumber::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3D
 		{
 			pNumber->SetSize(size);		//サイズ設定
 
-			CTexture *pTexture = CManager::GetTexture();
+			CTexture *pTexture = CManager::GetInstance()->GetTexture();
 			pNumber->SetIdxTexture(pTexture->Regist("data\\TEXTURE\\number000.png"));
 
 			pNumber->SetNumber(nValue);		//数値割り当て

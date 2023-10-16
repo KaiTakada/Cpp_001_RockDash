@@ -137,7 +137,7 @@ CItem2D *CItem2D::Create(const D3DXVECTOR3 pos, const TYPE type, const D3DXVECTO
 
 			pNumber->m_type = type;
 
-			CTexture *pTexture = CManager::GetTexture();
+			CTexture *pTexture = CManager::GetInstance()->GetTexture();
 			pNumber->SetIdxTexture(pTexture->Regist(c_apTexpassItem2D[type]));
 		}
 	}
@@ -156,7 +156,7 @@ void CItem2D::SetType(TYPE type)
 {
 	m_type = type;
 
-	CTexture *pTexture = CManager::GetTexture();
+	CTexture *pTexture = CManager::GetInstance()->GetTexture();
 	CObject2D::SetIdxTexture(pTexture->Regist(c_apTexpassItem2D[type]));
 }
 

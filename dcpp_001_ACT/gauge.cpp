@@ -159,7 +159,7 @@ CGauge * CGauge::Create( D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3DXVECTO
 			pGauge->m_pFrameBB->SetSize(size);		//ƒTƒCƒYÝ’è
 			pGauge->SetSizeMax(pGauge->m_pFrameBB->GetSize());
 
-			CTexture *pTexture = CManager::GetTexture();
+			CTexture *pTexture = CManager::GetInstance()->GetTexture();
 			pGauge->m_pBarBB->SetIdxTexture(pTexture->Regist(FILE_PASS_BAR));
 			pGauge->m_pFrameBB->SetIdxTexture(pTexture->Regist(FILE_PASS_FRAME));
 		

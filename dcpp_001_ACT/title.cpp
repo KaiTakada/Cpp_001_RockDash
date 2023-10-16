@@ -62,7 +62,7 @@ HRESULT CTitle::Init()
 	float fWidth = SCREEN_WIDTH;
 	float fHeight = SCREEN_HEIGHT;
 
-	CTexture *pTexture = CManager::GetTexture();
+	CTexture *pTexture = CManager::GetInstance()->GetTexture();
 
 	CObject2D *pPolygon = CObject2D::Create(D3DXVECTOR3(fWidth * 0.5f, fHeight * 0.5f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),
 		D3DXVECTOR3(fWidth * 0.5f, fHeight * 0.5f, 0.0f), CObject2D::UPDATE_TYPE_NONE);
@@ -74,7 +74,7 @@ HRESULT CTitle::Init()
 
 	m_pEnter->SetIdxTexture(pTexture->Regist("data\\TEXTURE\\PressEnter00.png"));
 
-	CManager::GetSound()->PlaySound(CSound::SOUND_LABEL_BGM_TITLE);
+	CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_BGM_TITLE);
 
 	return S_OK;
 }
@@ -98,7 +98,7 @@ void CTitle::Uninit()
 
 	CScene::Uninit();
 
-	CManager::GetSound()->Stop();
+	CManager::GetInstance()->GetSound()->Stop();
 }
 
 //============================
@@ -109,8 +109,8 @@ void CTitle::Update()
 	//m_pField->Update();
 
 	//キーボード取得
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
-	CInputGamepad *pInputPad = CManager::GetInputGamepad();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
+	CInputGamepad *pInputPad = CManager::GetInstance()->GetInputGamepad();
 	CFade *pFade = CScene::GetFade();
 
 	if (pInputKeyboard->GetTrigger(DIK_RETURN) || pInputKeyboard->GetTrigger(DIK_SPACE) || 
@@ -118,7 +118,7 @@ void CTitle::Update()
 	{//[ Enter ]キーでポーズ
 		if (pFade->SetState(CScene::MODE_TUTORIAL))
 		{
-			CManager::GetSound()->PlaySound(CSound::SOUND_LABEL_SE_BUTTON);
+			CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_SE_BUTTON);
 		}
 		m_nTimeInterval = 4;							//点滅間隔を小さくする
 	}

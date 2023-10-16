@@ -130,7 +130,7 @@ CItem *CItem::Create(D3DXVECTOR3 pos, D3DXVECTOR3 size, TYPE type)
 		{
 			pItem->SetSize(size);		//ƒTƒCƒYÝ’è
 
-			CTexture *pTexture = CManager::GetTexture();
+			CTexture *pTexture = CManager::GetInstance()->GetTexture();
 			pItem->SetIdxTexture(pTexture->Regist(c_apFileItem[type]));
 		}
 	}

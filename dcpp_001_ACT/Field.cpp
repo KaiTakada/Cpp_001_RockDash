@@ -127,7 +127,7 @@ CField * CField::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3DX
 
 		pField->SetDivTex(DEF_NUM_DIF, DEF_NUM_DIF);
 
-		CTexture *pTexture = CManager::GetTexture();
+		CTexture *pTexture = CManager::GetInstance()->GetTexture();
 		pField->SetIdxTexture(pTexture->Regist(TEX_FIELD));
 	}
 	else

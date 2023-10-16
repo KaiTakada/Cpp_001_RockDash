@@ -81,13 +81,13 @@ void CParts::Update(void)
 //=================================
 void CParts::Draw(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();		//デバイスの取得
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();		//デバイスの取得
 	D3DXMATRIX mtxRot, mtxTrans;		//計算用マトリックス
 	D3DMATERIAL9 matDef;				//現在のマテリアル保存用
 	D3DXMATERIAL *pMat;					//マテリアルデータへのポインタ
 	D3DXMATRIX mtxParent;						//親のマトリックス
 
-	CXModel *pXModel = CManager::GetXModel();
+	CXModel *pXModel = CManager::GetInstance()->GetXModel();
 	CXModel::Model *pModel = pXModel->GetAddress(m_nIdxModel);
 
 	//ワールドマトリックスの初期化
@@ -169,7 +169,7 @@ CParts * CParts::Create(const char *pFilename, const D3DXVECTOR3 pos, const D3DX
 			return nullptr;
 		}
 
-		CXModel *pXmodel = CManager::GetXModel();
+		CXModel *pXmodel = CManager::GetInstance()->GetXModel();
 		pParts->SetIdxModel(pXmodel->Regist(pFilename));		//テクスチャの割り当て
 
 	}
@@ -186,7 +186,7 @@ CParts * CParts::Create(const char *pFilename, const D3DXVECTOR3 pos, const D3DX
 //=================================
 D3DXMATRIX CParts::GetMtxWorld(void)
 {
-	CXModel *pXModel = CManager::GetXModel();
+	CXModel *pXModel = CManager::GetInstance()->GetXModel();
 	CXModel::Model *pModel = pXModel->GetAddress(m_nIdxModel);
 
 	return pModel->mtxWorld;

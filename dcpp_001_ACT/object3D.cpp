@@ -44,7 +44,7 @@ CObject3D::~CObject3D()
 HRESULT CObject3D::Init(void)
 {
 	//デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	m_pos = DEF_VERTEX3D;	//初期化する
 	m_rot = DEF_VERTEX3D;	//初期化する
@@ -112,7 +112,7 @@ HRESULT CObject3D::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot)
 	m_size = D3DXVECTOR3(DEF_SIZE.x, 0.0f, DEF_SIZE.z);
 
 	//デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	//頂点バッファの生成
 	if(FAILED(pDevice->CreateVertexBuffer(sizeof(VERTEX_3D) * 4,
@@ -195,10 +195,10 @@ void CObject3D::Update(void)
 void CObject3D::Draw(void)
 {
 	//テクスチャ取得
-	CTexture *pTexture = CManager::GetTexture();
+	CTexture *pTexture = CManager::GetInstance()->GetTexture();
 
 	//デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 	D3DXMATRIX mtxRot, mtxTrans;						//計算用マトリックス
 
 	//ワールドマトリックスの初期化

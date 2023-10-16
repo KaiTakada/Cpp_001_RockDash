@@ -53,7 +53,7 @@ CObjectBillboard::~CObjectBillboard()
 HRESULT CObjectBillboard::Init(void)
 {
 	//デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);			//位置
 	m_size = D3DXVECTOR3(BILLBOARD_SIZE, BILLBOARD_SIZE, BILLBOARD_SIZE);			//大きさ
@@ -116,7 +116,7 @@ HRESULT CObjectBillboard::Init(void)
 HRESULT CObjectBillboard::Init(const D3DXVECTOR3 pos)
 {
 	//デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();
 
 	m_pos = pos;			//位置
 	m_size = D3DXVECTOR3(BILLBOARD_SIZE, BILLBOARD_SIZE, BILLBOARD_SIZE);			//大きさ
@@ -210,10 +210,10 @@ void CObjectBillboard::Update(void)
 void CObjectBillboard::Draw(void)
 {
 	//テクスチャ取得
-	CTexture *pTexture = CManager::GetTexture();
+	CTexture *pTexture = CManager::GetInstance()->GetTexture();
 
 	//デバイスの取得
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetInstance()->GetRenderer()->GetDevice();
 	D3DXMATRIX mtxRot, mtxTrans;						//計算用マトリックス
 	D3DXMATRIX mtxView;									//ビューマトリックス取得用
 

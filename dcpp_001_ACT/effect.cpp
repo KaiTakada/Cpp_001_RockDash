@@ -186,7 +186,7 @@ CEffect * CEffect::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3
 			pEffect->m_nLife = nLife;
 			pEffect->m_nLifeMax = nLife;
 
-			CTexture *pTexture = CManager::GetTexture();
+			CTexture *pTexture = CManager::GetInstance()->GetTexture();
 			pEffect->SetIdxTexture(pTexture->Regist(c_apTexpass[TexType]));
 		}
 		else

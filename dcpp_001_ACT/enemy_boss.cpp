@@ -176,7 +176,7 @@ CEnemy_Boss * CEnemy_Boss::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot)
 		pEnemy->InitialState(ET_BOSS);
 		pEnemy->InitialMove();
 		
-		CXModel *pXmodel = CManager::GetXModel();
+		CXModel *pXmodel = CManager::GetInstance()->GetXModel();
 		pEnemy->SetIdxModel(pXmodel->Regist(BOSS_FILE, &vtxMin, &vtxMax));		//ƒ‚ƒfƒ‹‚ÌŠ„‚è“–‚Ä
 
 		vtxMin = pXmodel->GetAddress(pEnemy->GetIdxModel())->vtxMin;

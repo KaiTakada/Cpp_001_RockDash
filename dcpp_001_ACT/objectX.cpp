@@ -81,12 +81,12 @@ void CObjectX::Update(void)
 //=================================
 void CObjectX::Draw(void)
 {
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();		//デバイスの取得
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();		//デバイスの取得
 	D3DXMATRIX mtxRot, mtxTrans;		//計算用マトリックス
 	D3DMATERIAL9 matDef;				//現在のマテリアル保存用
 	D3DXMATERIAL *pMat;					//マテリアルデータへのポインタ
 
-	CXModel *pXModel = CManager::GetXModel();
+	CXModel *pXModel = CManager::GetInstance()->GetXModel();
 	CXModel::Model *pModel = pXModel->GetAddress(m_nIdxModel);
 
 	//ワールドマトリックスの初期化
@@ -134,12 +134,12 @@ void CObjectX::Draw(void)
 //=================================
 void CObjectX::Draw(const D3DMATERIAL9 mat)
 {
-	LPDIRECT3DDEVICE9 pDevice = CManager::GetRenderer()->GetDevice();		//デバイスの取得
+	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();		//デバイスの取得
 	D3DXMATRIX mtxRot, mtxTrans;		//計算用マトリックス
 	D3DMATERIAL9 matDef;				//現在のマテリアル保存用
 	D3DXMATERIAL *pMat;					//マテリアルデータへのポインタ
 
-	CXModel *pXModel = CManager::GetXModel();
+	CXModel *pXModel = CManager::GetInstance()->GetXModel();
 	CXModel::Model *pModel = pXModel->GetAddress(m_nIdxModel);
 
 	//ワールドマトリックスの初期化

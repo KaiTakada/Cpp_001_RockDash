@@ -132,7 +132,7 @@ CExperience * CExperience::Create( D3DXVECTOR3 pos, const D3DXVECTOR3 size, cons
 			pExp->SetSize(size);
 			pExp->SetLight(true);
 
-			CTexture *pTexture = CManager::GetTexture();
+			CTexture *pTexture = CManager::GetInstance()->GetTexture();
 			pExp->SetIdxTexture(pTexture->Regist(c_pTexExp));
 		}
 	}

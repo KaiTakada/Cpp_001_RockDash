@@ -133,7 +133,7 @@ void CSpawn::Uninit(void)
 //============================
 void CSpawn::Update(void)
 {
-	CInputKeyboard *pInputKey = CManager::GetInputKeyboard();
+	CInputKeyboard *pInputKey = CManager::GetInstance()->GetInputKeyboard();
 
 	if (pInputKey->GetTrigger(DIK_O))
 	{

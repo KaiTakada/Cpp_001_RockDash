@@ -97,9 +97,9 @@ void CCursor::Update(void)
 
 	D3DXVECTOR3 move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
-	CInputGamepad *pInputGamepad = CManager::GetInputGamepad();
-	CInputKeyboard *pInputKeyboard = CManager::GetInputKeyboard();
-	CInputMouse *pInputMouse = CManager::GetInputMouse();
+	CInputGamepad *pInputGamepad = CManager::GetInstance()->GetInputGamepad();
+	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
+	CInputMouse *pInputMouse = CManager::GetInstance()->GetInputMouse();
 
 	if (m_bMouse)
 	{//ƒ}ƒEƒX‘€ì
@@ -217,7 +217,7 @@ CCursor * CCursor::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 size, const T
 			pCursor->m_Defpos = D3DXVECTOR3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f);
 			pCursor->SetSize(size);
 
-			CTexture *pTexture = CManager::GetTexture();
+			CTexture *pTexture = CManager::GetInstance()->GetTexture();
 			pCursor->SetIdxTexture(pTexture->Regist(c_apTexpass[TexType]));
 		}
 		else
