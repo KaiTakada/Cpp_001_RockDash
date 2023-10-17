@@ -16,13 +16,13 @@
 //============================
 #define CAMERA_SPEED (10.0f)				//移動スピード
 #define CAMERA_ROTSPEED (0.01f)				//回転スピード
-#define CAMERA_DISTANCE (500.0f)			//視点・注視点の距離
+#define CAMERA_DISTANCE (1000.0f)			//視点・注視点の距離
 #define CAMERA_INIT_POS_Y (100.0f)			//視点・注視点のy初期値
 #define CAMERA_RADJT (400.0f)				//注視点のずらし値
 #define CAMERA_VISDISTANCE (40000.0f)		//可視距離の値
 #define CAMERA_LIMIT_Z (D3DX_PI * 0.48f)	//z軸回転の限界値
 #define CAMERA_VR_ROT (1.0f)	//視点と注視点の角度
-#define CAMERA_Y_STALK (00.0f)	//プレイヤ―のy値に合わせて上を向くスタート値
+#define CAMERA_Y_STALK (300.0f)	//プレイヤ―のy値に合わせて上を向くスタート値
 
 //============================
 // コンストラクタ
@@ -91,16 +91,14 @@ void CCamera::Update()
 	if (pMouse != nullptr)
 	{//カメラがあれば
 
-		//if (pMouse->GetPress(CInputMouse::BUTTON_LEFT))
-		//{//マウス左ボタン
-		//	m_posV.x += 10.0f;
-		//	m_posR.x += 10.0f;
-		//}
-		//if (pMouse->GetPress(CInputMouse::BUTTON_RIGHT))
-		//{//マウス右ボタン
-		//	m_posV.x -= 10.0f;
-		//	m_posR.x -= 10.0f;
-		//}
+		if (pMouse->GetChangePos().z >= 10.0f)
+		{//マウス左ボタン
+			m_fAngle += 0.1f;
+		}
+		else if (pMouse->GetChangePos().z <= -10.0f)
+		{//マウス左ボタン
+			m_fAngle -= 0.1f;
+		}
 
 		D3DXVECTOR3 mousepos = pMouse->GetPos();
 
@@ -190,7 +188,7 @@ void CCamera::CameraStalk()
 // カメラの設定処理
 //============================
 void CCamera::PlayerStalk(void)
-{	
+{
 	CPlayer *pPlayer = CGame::GetPlayer();
 
 	if (pPlayer == nullptr)
@@ -203,35 +201,8 @@ void CCamera::PlayerStalk(void)
 	m_posR.z = pos.z;
 	m_posR.y = pos.y;
 
-	//if (pos.y >= CAMERA_Y_STALK)
-	//{
-	//	m_posR.y = pos.y - (CAMERA_Y_STALK / pos.y) * CAMERA_Y_STALK;
-	//}
-
 	m_posV.x = pos.x;
-	m_posV.y = m_fDis;
+	//m_posV.y = pos.y + CAMERA_Y_STALK;
+	m_posV.y = pos.y + (sinf(m_fAngle) * m_fDis);
 	m_posV.z = pos.z + (cosf(m_fAngle) * m_fDis);
-
-	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
-
-	//押した時だけ押した側を移す
-	//離した瞬間戻る
-	if (pInputKeyboard->GetPress(DIK_RIGHT))
-	{
-		//m_rot.y += 0.01f;
-		//m_posV.x = m_posR.x + sinf(m_rot.y) * -m_fDis;	//(x)
-		//m_posV.z = m_posR.z + cosf(m_rot.y) * -m_fDis;
-	}
-	else if (pInputKeyboard->GetPress(DIK_LEFT))
-	{
-		//m_rot.y -= 0.01f;
-		//m_posV.x = m_posR.x + sinf(m_rot.y) * -m_fDis;	//(x)
-		//m_posV.z = m_posR.z + cosf(m_rot.y) * -m_fDis;
-	}
-	else
-	{
-		m_rot.y = 0.0f;
-		m_posV.x = pos.x;
-		m_posV.z = pos.z + (cosf(m_fAngle) * m_fDis);
-	}
 }

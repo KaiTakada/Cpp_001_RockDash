@@ -62,9 +62,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 
 	RECT rect = { 0,0,SCREEN_WIDTH,SCREEN_HEIGHT };
 	
-	//マネージャ
-	CManager *pManager = nullptr;
-
 	//ウィンドウクラスの登録
 	RegisterClassEx(&wcex);
 
@@ -93,18 +90,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 	dwFrameCount = 0;
 	dwFPSLastTime = timeGetTime();
 
-	//マネージャの生成
-	if (pManager != nullptr)
-	{
-		pManager->Uninit();
-		delete pManager;
-		pManager = nullptr;
-	}
-
-	pManager = new CManager;
-
 	//マネージャの初期化
-	if (FAILED(pManager->Init(hInstance, hWnd, TRUE)))
+	if (FAILED(CManager::GetInstance()->Init(hInstance, hWnd, TRUE)))
 	{
 		return E_FAIL;
 	}
@@ -148,10 +135,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 
 				//DirectXの処理
 				//マネージャの更新
-				pManager->Update();
+				CManager::GetInstance()->Update();
 
 				//マネージャの描画
-				pManager->Draw();
+				CManager::GetInstance()->Draw();
 
 				dwFrameCount++;
 			}
@@ -159,13 +146,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 		}
 	}
 
-	//マネージャの破棄
-	if (pManager != nullptr)
-	{
-		pManager->Uninit();
-		delete pManager;
-		pManager = nullptr;
-	}
+	CManager::Release();
 
 	//分解能を戻す
 	timeEndPeriod(1);

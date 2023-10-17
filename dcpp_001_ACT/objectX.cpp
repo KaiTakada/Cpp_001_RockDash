@@ -104,6 +104,9 @@ void CObjectX::Draw(void)
 
 	D3DXMatrixMultiply(&pModel->mtxWorld, &pModel->mtxWorld, &mtxTrans);
 
+	//D3DXMatrixOrthoLH(&mtxTrans,
+	//	m_pos.x, m_pos.y, m_pos.z);
+
 	//ワールドマトリックスの設定
 	pDevice->SetTransform(D3DTS_WORLD, &pModel->mtxWorld);
 

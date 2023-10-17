@@ -163,7 +163,6 @@ void CRenderer::Draw(void)
 
 	//バックバッファとフロントバッファの入れ替え
 	m_pD3DDevice->Present(NULL, NULL, NULL,NULL);
-
 }
 
 //============================

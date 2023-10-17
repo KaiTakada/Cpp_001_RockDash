@@ -18,7 +18,7 @@
 //=========================
 #define MAX_PLAYER_PARTS (32)		//最大パーツ数
 #define MAX_PLAYER_WEAPON (2)		//武器数
-#define MAX_PLAYER_SIZE D3DXVECTOR3(30.0f,50.0f,30.0f)		//サイズ
+#define MAX_PLAYER_SIZE D3DXVECTOR3(30.0f,60.0f,30.0f)		//サイズ
 
 //=========================
 // 前方宣言

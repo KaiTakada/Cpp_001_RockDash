@@ -75,7 +75,7 @@ CParticle *CScene::m_pParticle = nullptr;					//パーティクル
 CBullet *CScene::m_pBullet = nullptr;						//弾
 CExplosion *CScene::m_pExplosion = nullptr;				//爆発
 CField *CScene::m_pField = nullptr;						//地面
-CItem *CScene::m_pItem = nullptr;							//アイテム
+CItem *CScene::m_pItem = nullptr;						//アイテム
 
 CObjectX *CScene::m_pObjectX = nullptr;					//モデル
 CEnemy *CScene::m_pEnemy = nullptr;						//敵
@@ -90,20 +90,20 @@ CManager::CManager()
 {
 	m_pRenderer = nullptr;					//レンダラー
 	m_pTeture = nullptr;					//テクスチャ
-	m_pXModel = nullptr;						//Xファイルモデル
-	m_pCamera = nullptr;						//カメラ
+	m_pXModel = nullptr;					//Xファイルモデル
+	m_pCamera = nullptr;					//カメラ
 	m_pLight = nullptr;						//ライト
 	m_pSound = nullptr;						//サウンド
 	m_pSpawn = nullptr;						//敵スポーン
 
-	m_pCInputKeyboard = nullptr;		//キーボード入力
-	m_pCInputGamepad = nullptr;		//入力(Pad[X])
+	m_pCInputKeyboard = nullptr;		//入力(キーボード)
+	m_pCInputGamepad = nullptr;			//入力(Pad[X])
 	m_pCInputMouse = nullptr;			//入力(マウス)
 
 	m_pDebugProc = nullptr;				//デバッグ
-	m_pScene = nullptr;						//シーン
+	m_pScene = nullptr;					//シーン
 
-	m_bPause = false;		//ポーズフラグ
+	m_bPause = false;			//ポーズフラグ
 	m_bGrow = false;			//進化シーンフラグ
 	m_result = RT_NONE;			//勝敗内容
 
@@ -754,4 +754,17 @@ CManager * CManager::GetInstance()
 	}
 
 	return m_pManager;
+}
+
+//======================================
+// リリース
+//======================================
+void CManager::Release()
+{
+	if (m_pManager != nullptr)
+	{
+		m_pManager->Uninit();
+		delete m_pManager;
+		m_pManager = nullptr;
+	}
 }

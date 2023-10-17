@@ -153,6 +153,9 @@ public:
 	void Update(void);												//更新
 	void Draw(void);												//描画
 	void SetMode(CScene::MODE mode);							//シーン設定
+	
+	static CManager *GetInstance();						//インスタンス取得
+	static void Release();						//リリース
 
 	CRenderer *GetRenderer(void) { return m_pRenderer; }							//レンダラーの取得
 	CTexture *GetTexture(void) { return m_pTeture; }								//テクスチャの取得
@@ -199,14 +202,12 @@ public:
 
 	void SetResult(RESULT_TYPE result) { m_result = result; }			//勝敗状態設定
 	RESULT_TYPE GetResult(void) { return m_result; }						//勝敗状態取得
-	
-	static CManager *GetInstance();						//インスタンス取得
 
 protected:
 
 private:
 	CRenderer *m_pRenderer;						//レンダラー
-	CTexture *m_pTeture;							//テクスチャ
+	CTexture *m_pTeture;						//テクスチャ
 	CXModel *m_pXModel;							//Xファイルモデル
 	CCamera *m_pCamera;							//カメラ
 	CLight *m_pLight;							//ライト

@@ -95,9 +95,13 @@ HRESULT CGame::Init()
 	m_pTimer = CTimer::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.45f, SCREEN_HEIGHT * 0.1f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(30.0f, 50.0f, 0.0f));
 	m_pTimer->SetValue(START_TIME);
 
-	CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.6f, 200.0f, 0.0f));
-	CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.5f, 50.0f, 0.0f));
-	CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.4f, 0.0f, 0.0f));
+	//CBlock *pBlock;
+
+	CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.3f, 250.0f, 0.0f));
+	CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.5f, 10.0f, 0.0f));
+	CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.1f, 80.0f, 0.0f));
+	CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.7f, 200.0f, 0.0f));
+	CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.7f, 80.0f, 0.0f));
 
 	CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_BGM_GAME);
 

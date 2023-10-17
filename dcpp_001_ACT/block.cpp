@@ -146,14 +146,13 @@ CBlock *CBlock::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, TYPE type)
 bool CBlock::CollisionRect(void)
 {
 	D3DXVECTOR3 pos = GetPos();
-	D3DXVECTOR3 sizeMin, sizeMax;
-	sizeMin = GetMinVtx();
-	sizeMax = GetMaxVtx();
+	D3DXVECTOR3 sizeMin = GetMinVtx();		//最小値
+	D3DXVECTOR3 sizeMax = GetMaxVtx();		//最大値
 
-	D3DXVECTOR3 Objpos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	D3DXVECTOR3 ObjposOld = D3DXVECTOR3(0.0f,0.0f,0.0f);
-	D3DXVECTOR3 Objsize = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	D3DXVECTOR3 Objmove = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 posC = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 posOldC = D3DXVECTOR3(0.0f,0.0f,0.0f);
+	D3DXVECTOR3 sizeC = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	D3DXVECTOR3 moveC = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		//押し戻す分
 
 	bool bLand = false;			//着地したかどうか
@@ -171,182 +170,184 @@ bool CBlock::CollisionRect(void)
 
 				if (type == CObject::TYPE_PLAYER)
 				{//プレイヤ―だったら
-					Objpos = pObject->GetPos();
-					ObjposOld = pObject->GetPosOld();
-					Objsize = pObject->GetSize();
-					Objmove = pObject->GetMove();
+					posC = pObject->GetPos();
+					posOldC = pObject->GetPosOld();
+					sizeC = pObject->GetSize();
+					moveC = pObject->GetMove();
 
-					//Objpos.y += 50.0f;
-					//ObjposOld.y += 50.0f;
+					D3DXVECTOR3 sizeOldMinC = D3DXVECTOR3(posOldC.x - sizeC.x, posOldC.y, posOldC.z - sizeC.z);		//キャラ最小値
+					D3DXVECTOR3 sizeOldMaxC = D3DXVECTOR3(posOldC.x + sizeC.x, posOldC.y + (sizeC.y * 2), posOldC.z + sizeC.z);		//キャラ最大値
+
+					D3DXVECTOR3 sizeMinC = D3DXVECTOR3(posC.x - sizeC.x, posC.y, posC.z - sizeC.z);		//キャラ最小値
+					D3DXVECTOR3 sizeMaxC = D3DXVECTOR3(posC.x + sizeC.x, posC.y + (sizeC.y * 2), posC.z + sizeC.z);		//キャラ最大値
 
 					if (pObject->GetJump() == false)
 					{
-						if (ObjposOld.x + Objsize.x <= pos.x + sizeMin.x
-							&& Objpos.x + Objsize.x > pos.x + sizeMin.x
-							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f
-							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
-								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
-								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
-									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+						if (sizeOldMaxC.x <= pos.x + sizeMin.x
+							&& sizeMaxC.x > pos.x + sizeMin.x
+							&& sizeMaxC.z > pos.z + sizeMin.z + 0.1f
+							&& sizeMinC.z < pos.z + sizeMax.z + 0.1f
+							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
+								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
+								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
+									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
 						{//ブロック西
-							move.x = (pos.x + sizeMin.x) - (Objpos.x + Objsize.x) - 0.1f;
+							move.x = (pos.x + sizeMin.x) - (sizeMaxC.x) - 0.1f;
 							Collision = true;
 						}
-						else if (ObjposOld.x - Objsize.x >= pos.x + sizeMax.x
-							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x
-							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f
-							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
-								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
-								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
-									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+						else if (sizeOldMinC.x >= pos.x + sizeMax.x
+							&& sizeMinC.x <= pos.x + sizeMax.x
+							&& sizeMaxC.z > pos.z + sizeMin.z + 0.1f
+							&& sizeMinC.z < pos.z + sizeMax.z + 0.1f
+							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
+								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
+								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
+									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
 						{//ブロック左
-							move.x = (pos.x + sizeMax.x) - (Objpos.x - Objsize.x) + 0.1f;
+							move.x = (pos.x + sizeMax.x) - (sizeMinC.x) + 0.1f;
 							Collision = true;
 						}
 
-						if (ObjposOld.z + Objsize.z <= pos.z + sizeMin.z
-							&& Objpos.z + Objsize.z >= pos.z + sizeMin.z
-							&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f
-							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
-								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
-								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
-									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+						if (sizeOldMaxC.z <= pos.z + sizeMin.z
+							&& sizeMaxC.z > pos.z + sizeMin.z
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
+								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
+								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
+									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
 						{//ブロック北
-							move.z = (pos.z + sizeMin.z) - (Objpos.z + Objsize.z) - 0.1f;
+							move.z = (pos.z + sizeMin.z) - (sizeMaxC.z) - 0.1f;
 							Collision = true;
 						}
-						else if (ObjposOld.z - Objsize.z >= pos.z + sizeMax.z
-							&& Objpos.z - Objsize.z <= pos.z + sizeMax.z
-							&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f
-							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
-								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
-								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
-									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+						else if (sizeOldMinC.z >= pos.z + sizeMax.z
+							&& sizeMinC.z <= pos.z + sizeMax.z
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
+								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
+								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
+									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
 						{//ブロック南
-							move.z = (pos.z + sizeMax.z) - (Objpos.z - Objsize.z) + 0.1f;
+							move.z = (pos.z + sizeMax.z) - (sizeMinC.z) + 0.1f;
 							Collision = true;
 						}
 
-						if (ObjposOld.y - Objsize.y >= pos.y + sizeMax.y
-							&& Objpos.y - Objsize.y <= pos.y + sizeMax.y
-							&& Objpos.x + Objsize.x > pos.x + sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x < pos.x + sizeMax.x + 0.1f
-							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
+						if (sizeOldMinC.y >= pos.y + sizeMax.y
+							&& sizeMinC.y <= pos.y + sizeMax.y
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& sizeMaxC.z > pos.z + sizeMin.z + 0.1f
+							&& sizeMinC.z < pos.z + sizeMax.z + 0.1f)
 						{//ブロック上
 							D3DXVECTOR3 Objmove = pObject->GetMove();
 							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
 
-							move.y = (pos.y + sizeMax.y) - (Objpos.y - Objsize.y) + 0.1f;
+							move.y = (pos.y + sizeMax.y) - (sizeMinC.y) + 0.1f;
 							pObject->SetJump(false);
 							Collision = true;
 							bLand = true;
 						}
-						else if (ObjposOld.y + Objsize.y <= pos.y + sizeMin.y
-							&& Objpos.y + Objsize.y >= pos.y + sizeMin.y
-							&& Objpos.x + Objsize.x > pos.x + sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x < pos.x + sizeMax.x + 0.1f
-							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
+						else if (sizeOldMaxC.y <= pos.y + sizeMin.y
+							&& sizeMaxC.y >= pos.y + sizeMin.y
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& sizeMaxC.z > pos.z + sizeMin.z + 0.1f
+							&& sizeMinC.z < pos.z + sizeMax.z + 0.1f)
 						{//ブロック下
 							D3DXVECTOR3 Objmove = pObject->GetMove();
 							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
 
-							move.y = (pos.y + sizeMin.y) - (Objpos.y + Objsize.y) - 0.1f;
+							move.y = (pos.y + sizeMin.y) - (sizeMaxC.y) - 0.1f;
 							Collision = true;
 						}
 					}
 					else
 					{
-						if (ObjposOld.x + Objsize.x <= pos.x + sizeMin.x
-						&& Objpos.x + Objsize.x > pos.x + sizeMin.x
-						&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
-						&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f
-							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
-								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
-								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
-									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+						if (sizeOldMaxC.x <= pos.x + sizeMin.x
+							&& sizeMaxC.x > pos.x + sizeMin.x
+							&& sizeMaxC.z > pos.z + sizeMin.z + 0.1f
+							&& sizeMinC.z < pos.z + sizeMax.z + 0.1f
+							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
+								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
+								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
+									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
 						{//ブロック西
-							move.x = (pos.x + sizeMin.x) - (Objpos.x + Objsize.x) - 0.1f;
+							move.x = (pos.x + sizeMin.x) - (sizeMaxC.x) - 0.1f;
 							Collision = true;
 						}
-						else if (ObjposOld.x - Objsize.x >= pos.x + sizeMax.x
-							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x
-							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f
-							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
-								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
-								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
-									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+						else if (sizeOldMinC.x >= pos.x + sizeMax.x
+							&& sizeMinC.x <= pos.x + sizeMax.x
+							&& sizeMaxC.z > pos.z + sizeMin.z + 0.1f
+							&& sizeMinC.z < pos.z + sizeMax.z + 0.1f
+							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
+								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
+								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
+									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
 						{//ブロック左
-							move.x = (pos.x + sizeMax.x) - (Objpos.x - Objsize.x) + 0.1f;
+							move.x = (pos.x + sizeMax.x) - (sizeMinC.x) + 0.1f;
 							Collision = true;
 						}
 
-						if (ObjposOld.z + Objsize.z <= pos.z + sizeMin.z
-							&& Objpos.z + Objsize.z >= pos.z + sizeMin.z
-							&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f
-							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
-								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
-								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
-									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
+						if (sizeOldMaxC.z <= pos.z + sizeMin.z
+							&& sizeMaxC.z > pos.z + sizeMin.z
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
+								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
+								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
+									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
 						{//ブロック北
-							move.z = (pos.z + sizeMin.z) - (Objpos.z + Objsize.z) - 0.1f;
+							move.z = (pos.z + sizeMin.z) - (sizeMaxC.z) - 0.1f;
 							Collision = true;
 						}
-						else if (ObjposOld.z - Objsize.z >= pos.z + sizeMax.z
-							&& Objpos.z - Objsize.z <= pos.z + sizeMax.z
-							&& Objpos.x + Objsize.x >= pos.x + sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x <= pos.x + sizeMax.x - 0.1f
-							&& ((Objpos.y + Objsize.y >= pos.y + sizeMin.y + 0.1f
-								&& Objpos.y + Objsize.y <= pos.y + sizeMax.y - 0.1f)
-								|| (Objpos.y - Objsize.y >= pos.y + sizeMin.y + 0.1f
-									&& Objpos.y - Objsize.y <= pos.y + sizeMax.y - 0.1f)))
-						{
-							move.z = (pos.z + sizeMax.z) - (Objpos.z - Objsize.z) + 0.1f;
+						else if (sizeOldMinC.z >= pos.z + sizeMax.z
+							&& sizeMinC.z <= pos.z + sizeMax.z
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
+								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
+								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
+									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
+						{//ブロック南
+							move.z = (pos.z + sizeMax.z) - (sizeMinC.z) + 0.1f;
 							Collision = true;
 						}
 
-						if (ObjposOld.y - Objsize.y >= pos.y + sizeMax.y
-							&& Objpos.y - Objsize.y <= pos.y + sizeMax.y
-							&& Objpos.x + Objsize.x > pos.x + sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x < pos.x + sizeMax.x + 0.1f
-							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
+						if (sizeOldMinC.y >= pos.y + sizeMax.y
+							&& sizeMinC.y <= pos.y + sizeMax.y
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& sizeMaxC.z > pos.z + sizeMin.z + 0.1f
+							&& sizeMinC.z < pos.z + sizeMax.z + 0.1f)
 						{//ブロック上
 							D3DXVECTOR3 Objmove = pObject->GetMove();
 							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
 
-							//move.y = (pos.y + sizeMax.y) - (Objpos.y - Objsize.y) + 0.1f;
+							move.y = (pos.y + sizeMax.y) - (sizeMinC.y) + 0.1f;
 							pObject->SetJump(false);
 							Collision = true;
 							bLand = true;
 						}
-						else if (ObjposOld.y + Objsize.y <= pos.y + sizeMin.y
-							&& Objpos.y + Objsize.y >= pos.y + sizeMin.y
-							&& Objpos.x + Objsize.x > pos.x + sizeMin.x + 0.1f
-							&& Objpos.x - Objsize.x < pos.x + sizeMax.x + 0.1f
-							&& Objpos.z + Objsize.z > pos.z + sizeMin.z + 0.1f
-							&& Objpos.z - Objsize.z < pos.z + sizeMax.z + 0.1f)
+						else if (sizeOldMaxC.y <= pos.y + sizeMin.y
+							&& sizeMaxC.y >= pos.y + sizeMin.y
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& sizeMaxC.z > pos.z + sizeMin.z + 0.1f
+							&& sizeMinC.z < pos.z + sizeMax.z + 0.1f)
 						{//ブロック下
 							D3DXVECTOR3 Objmove = pObject->GetMove();
 							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
 
-							//move.y = (pos.y + sizeMin.y) - (Objpos.y + Objsize.y) - 0.1f;
+							move.y = (pos.y + sizeMin.y) - (sizeMaxC.y) - 0.1f;
 							Collision = true;
 						}
-
 					}
 				}
 
 				if (Collision)
 				{
-					pObject->SetPos(Objpos + move);
+					pObject->SetPos(posC + move);
 					break;
 				}
 
