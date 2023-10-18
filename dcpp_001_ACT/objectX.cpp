@@ -6,6 +6,7 @@
 //============================
 #include "manager.h"
 #include "objectX.h"
+#include "Xmodel.h"
 
 //===============================
 // ƒ}ƒNƒ’è‹`
@@ -20,9 +21,9 @@ CObjectX::CObjectX(int nPriority) : CObject(nPriority)
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_posOld = m_pos;
 	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_size = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_vtxMin = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_vtxMax = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-
 }
 
 //=================================
@@ -41,6 +42,7 @@ HRESULT CObjectX::Init(void)
 	m_pos = D3DXVECTOR3(0.0f, 50.0f, 0.0f);		//‰Šú‰»‚·‚é
 	m_posOld = m_pos;		//‰Šú‰»‚·‚é
 	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		//‰Šú‰»‚·‚é
+	m_size = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
 
 	return S_OK;
 }
@@ -53,6 +55,7 @@ HRESULT CObjectX::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot)		//‰Šú‰»(ƒ
 	m_pos = pos;		//‰Šú‰»‚·‚é
 	m_posOld = m_pos;		//‰Šú‰»‚·‚é
 	m_rot = rot;		//‰Šú‰»‚·‚é
+	m_size = D3DXVECTOR3(1.0f, 1.0f, 1.0f);
 
 	return S_OK;
 }
@@ -73,7 +76,22 @@ void CObjectX::Uninit(void)
 //=================================
 void CObjectX::Update(void)
 {
+	//‘O‰ñ‚ÌˆÊ’u‚ðXV
 	m_posOld = m_pos;
+
+	//ƒTƒCƒY‚Ævtx‚Ì‚·‚è‡‚í‚¹
+	CXModel *pXModel = CManager::GetInstance()->GetXModel();
+	CXModel::Model *pModel = pXModel->GetAddress(m_nIdxModel);
+
+	//operator‚ÅˆêŠ‡‰»‚·‚é‚æ‚¤‚É‚·‚é
+	m_vtxMax.x = m_size.x * pModel->vtxMax.x;
+	m_vtxMax.y = m_size.y * pModel->vtxMax.y;
+	m_vtxMax.z = m_size.z * pModel->vtxMax.z;
+
+	m_vtxMin.x = m_size.x * pModel->vtxMin.x;
+	m_vtxMin.y = m_size.y * pModel->vtxMin.y;
+	m_vtxMin.z = m_size.z * pModel->vtxMin.z;
+
 }
 
 //=================================
@@ -82,15 +100,22 @@ void CObjectX::Update(void)
 void CObjectX::Draw(void)
 {
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();		//ƒfƒoƒCƒX‚ÌŽæ“¾
-	D3DXMATRIX mtxRot, mtxTrans;		//ŒvŽZ—pƒ}ƒgƒŠƒbƒNƒX
+	D3DXMATRIX mtxRot, mtxTrans, mtxScal;		//ŒvŽZ—pƒ}ƒgƒŠƒbƒNƒX
 	D3DMATERIAL9 matDef;				//Œ»Ý‚Ìƒ}ƒeƒŠƒAƒ‹•Û‘¶—p
 	D3DXMATERIAL *pMat;					//ƒ}ƒeƒŠƒAƒ‹ƒf[ƒ^‚Ö‚Ìƒ|ƒCƒ“ƒ^
 
 	CXModel *pXModel = CManager::GetInstance()->GetXModel();
 	CXModel::Model *pModel = pXModel->GetAddress(m_nIdxModel);
 
+
 	//ƒ[ƒ‹ƒhƒ}ƒgƒŠƒbƒNƒX‚Ì‰Šú‰»
 	D3DXMatrixIdentity(&pModel->mtxWorld);
+
+	//ƒTƒCƒY”½‰f
+	D3DXMatrixScaling(&mtxScal,
+		m_size.x, m_size.y, m_size.z);
+
+	D3DXMatrixMultiply(&pModel->mtxWorld, &pModel->mtxWorld, &mtxScal);
 
 	//Œü‚«‚ð”½‰f
 	D3DXMatrixRotationYawPitchRoll(&mtxRot,
@@ -103,9 +128,6 @@ void CObjectX::Draw(void)
 		m_pos.x, m_pos.y, m_pos.z);
 
 	D3DXMatrixMultiply(&pModel->mtxWorld, &pModel->mtxWorld, &mtxTrans);
-
-	//D3DXMatrixOrthoLH(&mtxTrans,
-	//	m_pos.x, m_pos.y, m_pos.z);
 
 	//ƒ[ƒ‹ƒhƒ}ƒgƒŠƒbƒNƒX‚ÌÝ’è
 	pDevice->SetTransform(D3DTS_WORLD, &pModel->mtxWorld);
@@ -138,7 +160,7 @@ void CObjectX::Draw(void)
 void CObjectX::Draw(const D3DMATERIAL9 mat)
 {
 	LPDIRECT3DDEVICE9 pDevice = CManager::GetInstance()->GetRenderer()->GetDevice();		//ƒfƒoƒCƒX‚ÌŽæ“¾
-	D3DXMATRIX mtxRot, mtxTrans;		//ŒvŽZ—pƒ}ƒgƒŠƒbƒNƒX
+	D3DXMATRIX mtxRot, mtxTrans,mtxScal;		//ŒvŽZ—pƒ}ƒgƒŠƒbƒNƒX
 	D3DMATERIAL9 matDef;				//Œ»Ý‚Ìƒ}ƒeƒŠƒAƒ‹•Û‘¶—p
 	D3DXMATERIAL *pMat;					//ƒ}ƒeƒŠƒAƒ‹ƒf[ƒ^‚Ö‚Ìƒ|ƒCƒ“ƒ^
 
@@ -147,6 +169,12 @@ void CObjectX::Draw(const D3DMATERIAL9 mat)
 
 	//ƒ[ƒ‹ƒhƒ}ƒgƒŠƒbƒNƒX‚Ì‰Šú‰»
 	D3DXMatrixIdentity(&pModel->mtxWorld);
+
+	//ƒTƒCƒY”½‰f
+	D3DXMatrixScaling(&mtxScal,
+		m_size.x, m_size.y, m_size.z);
+
+	D3DXMatrixMultiply(&pModel->mtxWorld, &pModel->mtxWorld, &mtxScal);
 
 	//Œü‚«‚ð”½‰f
 	D3DXMatrixRotationYawPitchRoll(&mtxRot,

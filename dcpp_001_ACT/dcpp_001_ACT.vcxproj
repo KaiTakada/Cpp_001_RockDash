@@ -177,6 +177,7 @@
     <ClCompile Include="light.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="manager.cpp" />
+    <ClCompile Include="map.cpp" />
     <ClCompile Include="motion.cpp" />
     <ClCompile Include="multibg.cpp" />
     <ClCompile Include="number.cpp" />
@@ -232,6 +233,7 @@
     <ClInclude Include="light.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="manager.h" />
+    <ClInclude Include="map.h" />
     <ClInclude Include="motion.h" />
     <ClInclude Include="multibg.h" />
     <ClInclude Include="number.h" />

@@ -41,6 +41,7 @@ public:
 
 	void SetPos(const D3DXVECTOR3 pos) { m_pos = pos; }			//位置設定
 	void SetRot(const D3DXVECTOR3 rot) { m_rot = rot; }			//向き設定
+	void SetSize(const D3DXVECTOR3 size) { m_size = size; }		//サイズ設定
 	void SetVtx(const D3DXVECTOR3 vtxMin, const D3DXVECTOR3 vtxMax) { m_vtxMin = vtxMin; m_vtxMax = vtxMax; }			//向き設定
 	D3DXVECTOR3 GetPos(void) { return m_pos; }		//現在位置取得
 	D3DXVECTOR3 GetRot(void) { return m_rot; }		//向き取得
@@ -59,6 +60,7 @@ private:
 	D3DXVECTOR3 m_pos;					//位置
 	D3DXVECTOR3 m_posOld;				//位置
 	D3DXVECTOR3 m_rot;					//移動量
+	D3DXVECTOR3 m_size;					//サイズ
 	D3DXVECTOR3 m_vtxMin;				//矩形の最小座標
 	D3DXVECTOR3 m_vtxMax;				//矩形の最大座標
 	int m_nIdxModel;					//モデル番号
