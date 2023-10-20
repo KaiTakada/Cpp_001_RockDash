@@ -19,6 +19,7 @@
 #include "fade.h"
 #include "timer.h"
 #include "growselecter.h"
+#include "map.h"
 
 #include "block.h"
 
@@ -48,6 +49,7 @@ CGame::CGame()
 	m_pField = nullptr;
 	m_pPause = nullptr;
 	m_pTimer = nullptr;
+	m_pMap = nullptr;
 }
 
 //============================
@@ -95,17 +97,13 @@ HRESULT CGame::Init()
 	m_pTimer = CTimer::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.45f, SCREEN_HEIGHT * 0.1f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(30.0f, 50.0f, 0.0f));
 	m_pTimer->SetValue(START_TIME);
 
-	CBlock *pBlock;
-
-	pBlock = CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.3f, 250.0f, 0.0f));
-	pBlock = CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.5f, 10.0f, 0.0f));
-	pBlock = CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.1f, 80.0f, 0.0f));
-	pBlock = CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.7f, 200.0f, 0.0f));
-
-	pBlock = CBlock::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.7f, 80.0f, 0.0f));
-	pBlock->SetSize(D3DXVECTOR3(2.0f, 1.0f, 1.0f));
-
 	CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_BGM_GAME);
+
+	m_pMap = CMap::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f));
+	m_pMap->Load("data\\SET\\MAP\\load.txt");
+	m_pMap->Uninit();
+	delete m_pMap;
+	m_pMap = nullptr;
 
 	return S_OK;
 }
@@ -139,6 +137,13 @@ void CGame::Uninit()
 		m_pTimer = nullptr;
 	}
 
+	if (m_pMap != nullptr)
+	{
+		m_pMap->Uninit();
+		delete m_pMap;
+		m_pMap = nullptr;
+	}
+	
 	CScene::Uninit();
 
 	CManager::GetInstance()->GetSound()->Stop();
@@ -153,8 +158,31 @@ void CGame::Update()
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
 	CInputGamepad *pInputPad = CManager::GetInstance()->GetInputGamepad();
 	bool bPause = CManager::GetInstance()->GetPause();
+	bool bEdit = CManager::GetInstance()->GetEdit();
 
 	CScene::Update();
+
+	if (pInputKeyboard->GetTrigger(DIK_M))
+	{//[ M ]キーでエディット
+
+		if (m_pMap == nullptr)
+		{
+			m_pMap = CMap::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f));
+		}
+		else
+		{
+			m_pMap->Uninit();
+			delete m_pMap;
+			m_pMap = nullptr;
+		}
+
+		CManager::GetInstance()->InvEdit();
+	}
+
+	if (m_pMap != nullptr && bEdit == true)
+	{
+		m_pMap->Update();
+	}
 
 	if (pInputKeyboard->GetTrigger(DIK_P) || pInputPad->GetPress(CInputGamepad::BUTTON_START, 0) == true)
 	{//[ P ]キーでポーズ
@@ -186,7 +214,7 @@ void CGame::Update()
 		}
 	}
 
-	if (pInputKeyboard->GetTrigger(DIK_F))
+	if (pInputKeyboard->GetTrigger(DIK_RETURN))
 	{
 		CManager::GetInstance()->SetResult(CManager::RT_WIN);
 	}

@@ -200,6 +200,10 @@ public:
 	bool GetGrow(void) { return m_bGrow; }								//進化シーン状態取得
 	void InvGrow(void) { m_bGrow = m_bGrow ? false : true; }				//進化シーン切り替え
 
+	void SetEdit(bool bEdit) { m_bEdit = bEdit; }						//進化シーン状態設定
+	bool GetEdit(void) { return m_bEdit; }								//進化シーン状態取得
+	void InvEdit(void) { m_bEdit = m_bEdit ? false : true; }				//進化シーン切り替え
+
 	void SetResult(RESULT_TYPE result) { m_result = result; }			//勝敗状態設定
 	RESULT_TYPE GetResult(void) { return m_result; }						//勝敗状態取得
 
@@ -215,14 +219,15 @@ private:
 	CSpawn *m_pSpawn;							//敵スポーン
 
 	CInputKeyboard *m_pCInputKeyboard;			//入力(キーボード)
-	CInputGamepad *m_pCInputGamepad;				//入力(Pad[X])
-	CInputMouse *m_pCInputMouse;					//入力(マウス)
+	CInputGamepad *m_pCInputGamepad;			//入力(Pad[X])
+	CInputMouse *m_pCInputMouse;				//入力(マウス)
 
 	CDebugProc *m_pDebugProc;					//デバッグ
 	CScene *m_pScene;							//シーン
 
 	bool m_bPause;				//ポーズフラグ(※ゲームシーンで使用※Renderer干渉)
 	bool m_bGrow;				//進化シーンフラグ(※ゲームシーンで使用※Renderer干渉)
+	bool m_bEdit;				//エディットフラグ(※ゲームシーンで使用※Renderer干渉)
 	RESULT_TYPE m_result;		//勝敗フラグ(※ゲーム→リザルトシーンで使用)
 	
 	static CManager *m_pManager;		//インスタンス保持

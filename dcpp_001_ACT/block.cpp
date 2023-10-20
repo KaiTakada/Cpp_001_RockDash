@@ -64,10 +64,10 @@ HRESULT CBlock::Init(void)
 //=======================
 HRESULT CBlock::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot)
 {
+	CObjectX::Init(pos, rot);
+
 	m_posOld = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_type = TYPE_NORMAL;
-
-	CObjectX::Init(pos, rot);
 
 	SetType(TYPE_BLOCK);
 

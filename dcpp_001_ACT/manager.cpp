@@ -105,6 +105,7 @@ CManager::CManager()
 
 	m_bPause = false;			//ポーズフラグ
 	m_bGrow = false;			//進化シーンフラグ
+	m_bEdit = false;			//エディットシーンフラグ
 	m_result = RT_NONE;			//勝敗内容
 
 	m_pManager = this;
@@ -514,7 +515,7 @@ void CManager::Update(void)
 	{
 		m_pCInputMouse->Update();
 	}
-	if (m_pRenderer != nullptr && m_bPause == false && m_bGrow == false)
+	if (m_pRenderer != nullptr && m_bPause == false && m_bGrow == false && m_bEdit == false)
 	{
 		m_pRenderer->Update();
 	}

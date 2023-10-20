@@ -433,6 +433,7 @@ void CPlayer::Draw(void)
 	CDebugProc *pDebug = CManager::GetInstance()->GetDebugProc();
 	pDebug->Print("--- ƒvƒŒƒCƒ„[î•ñ ---\n");
 	pDebug->Print("Œ»Ý‚Ì•ûŒü:%f\n", m_rot.y);
+	pDebug->Print("Œ»Ý‚Ì•ûŒü:%f %f %f\n", m_pos.x, m_pos.y, m_pos.z);
 }
 
 //============================

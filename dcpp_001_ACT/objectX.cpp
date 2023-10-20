@@ -24,6 +24,7 @@ CObjectX::CObjectX(int nPriority) : CObject(nPriority)
 	m_size = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_vtxMin = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_vtxMax = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_col = D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 //=================================

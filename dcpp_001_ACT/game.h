@@ -21,6 +21,7 @@ class CPause;
 class CGrowSelecter;
 class CTimer;
 class CEnemy_Boss;
+class CMap;
 
 //=========================
 // 画面(シーン)クラス
@@ -48,6 +49,7 @@ private:
 	static CPlayer *m_pPlayer;					//プレイヤー
 	static CPause *m_pPause;					//ポーズ
 	static CTimer *m_pTimer;					//タイマー
+	CMap *m_pMap;								//マップ
 	CField *m_pField;							//地面
 };
 
