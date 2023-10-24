@@ -17,6 +17,7 @@
 //============================
 #define NUM_SPEED (20.0f)	//移動量
 #define NUM_SIZE D3DXVECTOR2(125.0f,200.0f)				//デフォルトサイズ
+#define NUMBER_PASS "data\\TEXTURE\\NUMBER\\number000.png"				//デフォルトサイズ
 
 //============================
 // 静的メンバ変数宣言
@@ -123,7 +124,7 @@ CNumber *CNumber::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3D
 			pNumber->SetSize(size);		//サイズ設定
 
 			CTexture *pTexture = CManager::GetInstance()->GetTexture();
-			pNumber->SetIdxTexture(pTexture->Regist("data\\TEXTURE\\number000.png"));
+			pNumber->SetIdxTexture(pTexture->Regist(NUMBER_PASS));
 
 			pNumber->SetNumber(nValue);		//数値割り当て
 		}
