@@ -33,6 +33,7 @@ CScore::CScore()
 	}
 
 	m_nValue = 0;
+	m_nNum = 0;
 }
 
 //============================
@@ -73,19 +74,15 @@ HRESULT CScore::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot)
 HRESULT CScore::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3DXVECTOR3 size, int nNum)
 {
 	D3DXVECTOR3 posDif = pos;
+	m_nNum = nNum;
 
 	for (int nCntCrt = 0; nCntCrt < nNum; nCntCrt++)
 	{
-		for (int nCntAll = 0; nCntAll < MAX_SCORE; nCntAll++)
+		if (m_apNumber[nCntCrt] == nullptr)
 		{
-			if (m_apNumber[nCntAll] == nullptr)
-			{
-				m_apNumber[nCntAll] = CNumber::Create(posDif, rot, size, 0);		//自身を代入
+			m_apNumber[nCntCrt] = CNumber::Create(posDif, rot, size, 0);		//自身を代入
 
-				posDif.x += size.x * 2;
-
-				break;
-			}
+			posDif.x += size.x * 2;
 		}
 	}
 
@@ -185,13 +182,13 @@ void CScore::SetValue(int nValue)
 	//数値の設定
 
 	//テクスチャ座標の計測
-	for (int nCntScore = MAX_SCORE - 1; nCntScore >= 0; nCntScore--)
+	for (int nCntScore = m_nNum - 1; nCntScore >= 0; nCntScore--)
 	{
 		aTex[nCntScore] = nCalc % 10;
 		nCalc /= 10;
 	}
 
-	for (int nCntSet = 0; nCntSet < MAX_SCORE; nCntSet++)
+	for (int nCntSet = 0; nCntSet < m_nNum; nCntSet++)
 	{
 		m_apNumber[nCntSet]->SetNumber(aTex[nCntSet]);
 	}

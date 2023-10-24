@@ -9,11 +9,16 @@
 // インクルードファイル
 //============================
 #include "timer.h"
-#include "number.h"
+#include "score.h"
+#include "object2D.h"
+#include "texture.h"
 
 //============================
 // マクロ定義
 //============================
+#define MAX_TIME_SCORE_DIGIT (2)	//スコア桁数
+#define MAX_TIME_SCORE_DIGIT_LIMIT (60)	//スコア桁数の上昇値
+#define TIME_COLON_PASS "data\\TEXTURE\\NUMBER\\colon.png"	//コロン.png
 
 //============================
 // 静的メンバ変数宣言
@@ -24,16 +29,25 @@
 //============================
 CTimer::CTimer()
 {
-	for (int nCntCrt = 0; nCntCrt < MAX_TIME; nCntCrt++)
+	for (int nCntCrt = 0; nCntCrt < MAX_TIME_SCORE; nCntCrt++)
 	{
-		if (m_apNumber[nCntCrt] != nullptr)
+		if (m_apScore[nCntCrt] != nullptr)
 		{
-			m_apNumber[nCntCrt] = nullptr;
+			m_apScore[nCntCrt] = nullptr;
+		}
+
+		if (m_apColon[nCntCrt] != nullptr && nCntCrt < MAX_TIME_SCORE - 1)
+		{
+			m_apColon[nCntCrt] = nullptr;
 		}
 	}
 
 	m_nValue = 0;
 	m_nSecond = 0;
+	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_rot = D3DXVECTOR3();
+
+	ZeroMemory(&m_time, sizeof(m_time));
 }
 
 //============================
@@ -49,7 +63,7 @@ CTimer::~CTimer()
 //====================================
 HRESULT CTimer::Init(void)
 {
-	SetType(TYPE_SCORE);
+	SetType(TYPE_TIMER);
 
 	return S_OK;
 }
@@ -62,7 +76,7 @@ HRESULT CTimer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot)
 	pos;
 	rot;
 
-	SetType(TYPE_SCORE);
+	SetType(TYPE_TIMER);
 
 	return S_OK;
 }
@@ -74,17 +88,29 @@ HRESULT CTimer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3DXVEC
 {
 	D3DXVECTOR3 posDif = pos;
 
-	for (int nCntAll = 0; nCntAll < MAX_TIME; nCntAll++)
+	for (int nCntAll = 0; nCntAll < MAX_TIME_SCORE; nCntAll++)
 	{
-		if (m_apNumber[nCntAll] == nullptr)
+		if (m_apScore[nCntAll] == nullptr)
 		{
-			m_apNumber[nCntAll] = CNumber::Create(posDif, rot, size, 0);		//自身を代入
+			m_apScore[nCntAll] = CScore::Create(posDif, rot, size, 2);		//自身を代入
 
-			posDif.x += size.x * 2;
+			posDif.x += (size.x * 2) * 2;		//数字1つ分×2つ分(00)
+		}
+
+		if (m_apColon[nCntAll] == nullptr && nCntAll < MAX_TIME_SCORE - 1)
+		{
+			m_apColon[nCntAll] = CObject2D::Create(posDif, rot, size, CObject2D::UPDATE_TYPE_NONE);
+		
+			CTexture *pTex = CManager::GetInstance()->GetTexture();
+			
+			//テクスチャ付与
+			m_apColon[nCntAll]->SetIdxTexture(pTex->Regist(TIME_COLON_PASS));
+
+			posDif.x += (size.x * 2);		//数字1つ分×1つ分(:)
 		}
 	}
 
-	SetType(TYPE_SCORE);
+	SetType(TYPE_TIMER);
 
 	return S_OK;
 }
@@ -94,12 +120,18 @@ HRESULT CTimer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3DXVEC
 //============================
 void CTimer::Uninit(void)
 {
-	for (int nCntCrt = 0; nCntCrt < MAX_TIME; nCntCrt++)
+	for (int nCntDel = 0; nCntDel < MAX_TIME_SCORE; nCntDel++)
 	{
-		if (m_apNumber[nCntCrt] != nullptr)
+		if (m_apScore[nCntDel] != nullptr)
 		{
-			m_apNumber[nCntCrt]->Uninit();
-			m_apNumber[nCntCrt] = nullptr;
+			m_apScore[nCntDel]->Uninit();
+			m_apScore[nCntDel] = nullptr;
+		}
+	
+		if (m_apColon[nCntDel] != nullptr && nCntDel < MAX_TIME_SCORE - 1)
+		{
+			m_apColon[nCntDel]->Uninit();
+			m_apColon[nCntDel] = nullptr;
 		}
 	}
 
@@ -174,22 +206,7 @@ void CTimer::SetValue(int nValue)
 {
 	m_nValue = nValue;
 
-	int aTex[MAX_TIME] = {};				//各桁の数字を格納
-	int nCalc = nValue;
-
-	//数値の設定
-
-	//テクスチャ座標の計測
-	for (int nCntScore = MAX_TIME - 1; nCntScore >= 0; nCntScore--)
-	{
-		aTex[nCntScore] = nCalc % 10;
-		nCalc /= 10;
-	}
-
-	for (int nCntSet = 0; nCntSet < MAX_TIME; nCntSet++)
-	{
-		m_apNumber[nCntSet]->SetNumber(aTex[nCntSet]);
-	}
+	SetTime(m_time);
 }
 
 //============================
@@ -198,8 +215,56 @@ void CTimer::SetValue(int nValue)
 void CTimer::CntValue(int nValue)
 {
 	m_nValue += nValue;
+	m_time.nMilliSecond += nValue;
 
 	SetValue(m_nValue);
+}
+
+//============================
+// タイム設定
+//============================
+void CTimer::SetTime(STime time)
+{
+	m_time = time;
+	
+	STime lTime = time;
+	//各桁の数字を格納
+	int aTex[MAX_TIME_SCORE] = 
+	{
+		lTime.nMinute,
+		lTime.nSecond,
+		lTime.nMilliSecond,
+	};
+
+	//数値の設定
+
+	//テクスチャ座標の計測
+	for (int nCntScore = MAX_TIME_SCORE - 1; nCntScore > 0; nCntScore--)
+	{
+		int nCntNext = nCntScore - 1;
+		aTex[nCntNext] = aTex[nCntScore] / MAX_TIME_SCORE_DIGIT_LIMIT;
+		aTex[nCntScore] %= MAX_TIME_SCORE_DIGIT_LIMIT;
+	}
+
+	lTime.nMinute = aTex[0];
+	lTime.nSecond = aTex[1];
+	lTime.nMilliSecond = aTex[2];
+
+	for (int nCntSet = 0; nCntSet < MAX_TIME_SCORE; nCntSet++)
+	{
+		m_apScore[nCntSet]->SetValue(aTex[nCntSet]);
+	}
+}
+
+//============================
+// タイム加算
+//============================
+void CTimer::CntTime(STime time)
+{
+	//オペレーターを使用した加算入
+	m_time += time;
+
+	SetTime(m_time);
 }
 
 
@@ -208,7 +273,9 @@ void CTimer::CntValue(int nValue)
 //============================
 void CTimer::SetPos(const D3DXVECTOR3 pos)
 {
-	pos;
+	m_pos = pos;
+
+	//スコア群にも与える
 }
 
 //============================
@@ -216,21 +283,19 @@ void CTimer::SetPos(const D3DXVECTOR3 pos)
 //============================
 void CTimer::SetRot(const D3DXVECTOR3 rot)
 {
-	rot;
+	m_rot = rot;
+
+	//スコア群にも与える
 }
 
 //============================
-// 位置取得
+// 時間型の加算入のオーバーロード[演算]
 //============================
-D3DXVECTOR3 CTimer::GetPos(void)
+CTimer::STime & CTimer::STime::operator+=(const STime &time)
 {
-	return D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-}
+	nMinute += time.nMinute;
+	nSecond += time.nSecond;
+	nMilliSecond += time.nMilliSecond;
 
-//============================
-// 2Dサイズ取得
-//============================
-D3DXVECTOR3 CTimer::GetSize(void)
-{
-	return D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	return *this;
 }

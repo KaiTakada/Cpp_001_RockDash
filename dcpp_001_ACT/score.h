@@ -51,8 +51,10 @@ public:
 	//純粋仮装関数で仕方なしに作った。後で消したい
 	void SetPos(const D3DXVECTOR3 pos);			//位置設定
 	void SetRot(const D3DXVECTOR3 rot);			//向き設定
+	void SetNum(const int nNum) { m_nNum = nNum; }			//ナンバー数設定
 	D3DXVECTOR3 GetPos(void);		//位置取得
 	D3DXVECTOR3 GetSize(void);		//2Dサイズ取得
+	int GetNum(void) { return m_nNum; }		//ナンバー数取得
 	bool GetJump(void) { return false; }		//ジャンプ判定
 	D3DXVECTOR3 GetPosOld(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }		//前回位置取得
 
@@ -61,6 +63,7 @@ protected:
 private:
 	CNumber *m_apNumber[MAX_SCORE];		//スコア情報
 	int m_nValue;		//スコアの値
+	int m_nNum;		//ナンバーの数
 };
 
 #endif

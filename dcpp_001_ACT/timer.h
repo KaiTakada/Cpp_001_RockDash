@@ -16,12 +16,14 @@
 //=========================
 // マクロ定義
 //=========================
-#define MAX_TIME (3)	//スコア桁数
+#define MAX_TIME_SCORE (3)	//スコア桁数
 
 //=========================
 // 前方宣言
 //=========================
 class CNumber;
+class CScore;
+class CObject2D;
 
 //=========================
 // オブジェクト2D背景クラス
@@ -29,6 +31,15 @@ class CNumber;
 class CTimer : public CObject
 {
 public:
+	struct STime
+	{
+		int nMinute;		//分
+		int nSecond;		//秒
+		int nMilliSecond;		//コンマ秒
+		
+		STime &operator+=(const STime &time);
+	};
+
 	CTimer();		//コンストラクタ
 	~CTimer();		//デストラクタ
 
@@ -46,20 +57,26 @@ public:
 	void CntValue(int nValue);		//スコア値加算
 	int GetValue() { return m_nValue; }		//スコア値取得
 
+	void SetTime(STime time);		//スコア値設定
+	void CntTime(STime time);		//スコア値加算
+	STime GetTime() { return m_time; }		//スコア値取得
+
 	//純粋仮装関数で仕方なしに作った。後で消したい
 	void SetPos(const D3DXVECTOR3 pos);			//位置設定
 	void SetRot(const D3DXVECTOR3 rot);			//向き設定
-	D3DXVECTOR3 GetPos(void);		//位置取得
-	D3DXVECTOR3 GetSize(void);		//2Dサイズ取得
-	bool GetJump(void) { return false; }		//ジャンプ判定
-	D3DXVECTOR3 GetPosOld(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }		//前回位置取得
+	D3DXVECTOR3 GetPos(void) { return m_pos; }		//位置取得
+	D3DXVECTOR3 GetRot(void) { return m_rot; }		//向き取得
 
 protected:
 
 private:
-	CNumber *m_apNumber[MAX_TIME];		//スコア情報
+	CScore *m_apScore[MAX_TIME_SCORE];		//スコア情報
+	CObject2D *m_apColon[MAX_TIME_SCORE - 1];		//スコア情報
+	STime m_time;		//時間型データ
 	int m_nValue;		//スコアの値
 	int m_nSecond;		//1秒判定数値
+	D3DXVECTOR3 m_pos;	//位置
+	D3DXVECTOR3 m_rot;	//向き
 };
 
 #endif
