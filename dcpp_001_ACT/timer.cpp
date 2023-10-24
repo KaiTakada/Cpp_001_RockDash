@@ -111,14 +111,7 @@ void CTimer::Uninit(void)
 //============================
 void CTimer::Update(void)
 {
-	m_nSecond++;
 
-	if (m_nSecond >= 60)
-	{
-		CntValue(-1);
-	
-		m_nSecond = 0;
-	}
 }
 
 //============================
@@ -179,7 +172,7 @@ CTimer * CTimer::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3DX
 //============================
 void CTimer::SetValue(int nValue)
 {
-	m_nValue = nValue; 
+	m_nValue = nValue;
 
 	int aTex[MAX_TIME] = {};				//äeåÖÇÃêîéöÇäiî[
 	int nCalc = nValue;

@@ -22,6 +22,7 @@
 #include "map.h"
 
 #include "block.h"
+#include "blk_goal.h"
 
 //=========================
 // マクロ定義
@@ -104,6 +105,9 @@ HRESULT CGame::Init()
 	m_pMap->Uninit();
 	delete m_pMap;
 	m_pMap = nullptr;
+
+	CBlk_Goal *goal = CBlk_Goal::Create(D3DXVECTOR3(4000.0f, 0.0f, 0.0f));
+	goal->SetSize(D3DXVECTOR3(10.0f, 10.0f, 10.0f));
 
 	return S_OK;
 }
@@ -206,12 +210,10 @@ void CGame::Update()
 	}
 
 	if (m_pTimer != nullptr)
-	{//時間切れ
-		if (m_pTimer->GetValue() <= 0)
-		{
-			m_pTimer->Uninit();
-			m_pTimer = nullptr;
-		}
+	{//タイマー更新
+
+		//加算
+		m_pTimer->CntValue(1);
 	}
 
 	if (pInputKeyboard->GetTrigger(DIK_RETURN))

@@ -245,6 +245,7 @@ bool CBlock::CollisionRect(void)
 
 							move.y = (pos.y + sizeMax.y) - (sizeMinC.y) + 0.1f;
 							pObject->SetJump(false);
+							pObject->SetBoost(false);
 							Collision = true;
 							bLand = true;
 						}
@@ -326,6 +327,7 @@ bool CBlock::CollisionRect(void)
 
 							move.y = (pos.y + sizeMax.y) - (sizeMinC.y) + 0.1f;
 							pObject->SetJump(false);
+							pObject->SetBoost(false);
 							Collision = true;
 							bLand = true;
 						}

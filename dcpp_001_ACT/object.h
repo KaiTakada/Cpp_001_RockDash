@@ -89,12 +89,14 @@ public:
 	virtual void SetPos(const D3DXVECTOR3 pos) { pos; }			//位置設定
 	virtual void SetRot(const D3DXVECTOR3 rot) { rot; }			//向き設定
 	virtual void SetJump(const bool bJump) { bJump; }		//ジャンプ判定設定
+	virtual void SetBoost(const bool bBoost) { bBoost; }		//ブースト判定設定
 	virtual void SetMove(const D3DXVECTOR3 move) { move; }		//移動量設定
 	virtual D3DXVECTOR3 GetPos(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }			//現在位置取得
 	virtual D3DXVECTOR3 GetRot(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }			//向き取得
 	virtual D3DXVECTOR3 GetPosOld(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }		//前回位置取得
 	virtual D3DXVECTOR3 GetSize(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }			//2Dサイズ取得
 	virtual bool GetJump(void) { return FALSE; }		//ジャンプ判定取得
+	virtual bool GetBoost(void) { return FALSE; }		//ブースト判定取得
 	virtual D3DXVECTOR3 GetMove(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }			//移動量取得
 	virtual void GetPolyPos(D3DXVECTOR3 Vtx0, D3DXVECTOR3 Vtx1, D3DXVECTOR3 Vtx2, D3DXVECTOR3 Vtx3) { Vtx0, Vtx1, Vtx2, Vtx3; }		//移動量取得
 	virtual D3DXVECTOR3 GetMinVtx(void) { return D3DXVECTOR3(0.0f, 0.0f, 0.0f); }			//最小座標取得

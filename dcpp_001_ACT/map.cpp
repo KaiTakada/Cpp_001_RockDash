@@ -13,6 +13,7 @@
 #include "game.h"
 #include "input.h"
 #include "block.h"
+#include "blk_goal.h"
 
 //=======================
 //ƒ}ƒNƒ’è‹`

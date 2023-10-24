@@ -81,6 +81,7 @@ CPlayer::CPlayer(int nPriority) : CObject(nPriority)
 	m_mtxWorld = {};
 	m_fHeart = 0.0f;
 	m_bJump = false;
+	m_bBoost = false;
 	m_pMotion = nullptr;
 	m_pGaugeBoost = nullptr;
 	ZeroMemory(&m_param, sizeof(m_param));
@@ -301,14 +302,27 @@ void CPlayer::Update(void)
 	{//[ - ]キーでジャンプ
 		if (pInputKeyboard->GetPress(DIK_S))
 		{
-			m_move.x += sinf(m_rot.y * D3DX_PI) * NUM_BOOST;		//x
-			m_pMotion->Set(MOTIONTYPE_SLIDING);
+			if ((m_bJump == false) && m_pMotion->GetType() != MOTIONTYPE_SLIDING)
+			{//下キー押下＆ジャンプしていない＆スライディング中ではない
+				m_move.x += sinf(m_rot.y * D3DX_PI) * NUM_BOOST;		//x
+				m_pMotion->Set(MOTIONTYPE_SLIDING);
+			}
+			else if (m_bBoost == false)
+			{//ジャンプ使用済み  orスライディング中なら
+			 //かつブーストゲージが残っていれば
+			 //ブースト
+				m_bJump = true;
+				m_bBoost = true;
+				m_move.y = NUM_JUMP * 1.5f;
+				m_pMotion->Set(MOTIONTYPE_BOOST);
+			}
 		}
-		else if ((m_bJump == true) || m_pMotion->GetType() == MOTIONTYPE_SLIDING)
+		else if (((m_bJump == true) || m_pMotion->GetType() == MOTIONTYPE_SLIDING) && (m_bBoost == false))
 		{//ジャンプ使用済み  orスライディング中なら
 			//かつブーストゲージが残っていれば
 			 //ブースト
 			m_bJump = true;
+			m_bBoost = true;
 			m_move.y = NUM_JUMP * 1.5f;
 			m_pMotion->Set(MOTIONTYPE_BOOST);
 		}
@@ -339,6 +353,7 @@ void CPlayer::Update(void)
 		pos.y = -50.0f;
 		m_move.y = 0.0f;
 		m_bJump = false;
+		m_bBoost = false;
 		//static_assert(true, "沼");
 	}
 
@@ -1098,6 +1113,7 @@ void CPlayer::CollisionField(D3DXVECTOR3 pos)
 		pos.y = fHeight;
 		m_move.y = 0.0f;
 		m_bJump = false;
+		m_bBoost = false;
 
 		if (m_pMotion->GetType() == MOTIONTYPE_JUMP)
 		{

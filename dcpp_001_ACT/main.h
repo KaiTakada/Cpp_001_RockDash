@@ -26,6 +26,7 @@
 #define FVF_VERTEX_2D (D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 #define FVF_VERTEX_3D (D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_DIFFUSE | D3DFVF_TEX1)
 #define WINDOW_NAME "世紀末"					//ウィンドウの名前(キャプションに表示)
+#define TIMER_FPS (60)							//平均FPS
 
 //=================================
 // マクロ定義

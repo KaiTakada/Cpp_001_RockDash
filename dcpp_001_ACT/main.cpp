@@ -16,7 +16,7 @@
 //=========================
 #define CLASS_NAME "WindowClass"				//ウィンドウクラスの名前
 #define ID_TIMER (131)							//タイマーのID
-#define TIMER_INTERVAL (1000/60)				//タイマーの発生間隔(ミリ秒)
+#define TIMER_INTERVAL (1000/TIMER_FPS)				//タイマーの発生間隔(ミリ秒)
 
 //=========================
 // プロトタイプ宣言

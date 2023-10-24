@@ -46,7 +46,7 @@ public:
 	void Draw(void);			//描画
 
 	static CBlock *Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f), TYPE type = TYPE_NORMAL);		//生成
-	bool CollisionRect(void);		//当たり判定
+	virtual bool CollisionRect(void);		//当たり判定
 	static int GetNumAll(void) { return m_nNumAll; }		//総数取得
 	bool GetJump(void) { return false; }		//ジャンプ判定
 	D3DXVECTOR3 GetPosOld(void) { return m_posOld; }		//前回位置取得

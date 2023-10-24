@@ -77,6 +77,7 @@ public:
 	static CPlayer *Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot);		//生成
 	
 	bool GetJump(void) { return m_bJump; }						//ジャンプ判定
+	bool GetBoost(void) { return m_bBoost; }						//ジャンプ判定
 	D3DXVECTOR3 GetPosOld(void) { return m_posOld; }			//前回位置取得
 	D3DXVECTOR3 GetPos(void) { return m_pos; }					//現在位置取得
 	D3DXVECTOR3 GetRot(void) { return m_rot; }					//向き取得
@@ -85,6 +86,7 @@ public:
 	float GetHeartPos(void) { return m_fHeart; }				//心臓位置取得
 	Param GetParam(void) { return m_param; }					//現在パラメータ取得
 	void SetJump(const bool bJump) { m_bJump = bJump; }				//ジャンプ判定設定
+	void SetBoost(const bool bBoost) { m_bBoost = bBoost; }			//ジャンプ判定設定
 	void SetMove(const D3DXVECTOR3 move) { m_move = move; }			//移動量設定
 	void SetPos(const D3DXVECTOR3 pos) { m_pos = pos; }				//現在位置設定
 	void SetRot(const D3DXVECTOR3 rot) { m_rot = rot; }				//向き設定
@@ -115,6 +117,7 @@ private:
 	D3DXMATRIX m_mtxWorld;		//ワールドマトリックス
 	float m_fHeart;			//プレイヤーの中心y軸(心臓座標)
 	bool m_bJump;			//ジャンプ判定(falseはジャンプ可能状態)
+	bool m_bBoost;			//ブースト判定(falseはジャンプ可能状態)
 	CMotion *m_pMotion;		//モーション情報
 	Param m_param;			//パラメータ
 	CBoost *m_pBoost[MAX_PLAYER_WEAPON];		//武器情報[両足分]

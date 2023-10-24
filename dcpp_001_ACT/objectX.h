@@ -41,7 +41,7 @@ public:
 
 	void SetPos(const D3DXVECTOR3 pos) { m_pos = pos; }			//位置設定
 	void SetRot(const D3DXVECTOR3 rot) { m_rot = rot; }			//向き設定
-	void SetSize(const D3DXVECTOR3 size) { m_size = size; }		//サイズ設定
+	void SetSize(const D3DXVECTOR3 size);						//サイズ設定
 	void SetVtx(const D3DXVECTOR3 vtxMin, const D3DXVECTOR3 vtxMax) { m_vtxMin = vtxMin; m_vtxMax = vtxMax; }			//向き設定
 	void SetCol(const D3DXCOLOR col) { m_col = col; }		//色設定
 	D3DXVECTOR3 GetPos(void) { return m_pos; }		//現在位置取得

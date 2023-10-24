@@ -79,20 +79,6 @@ void CObjectX::Update(void)
 {
 	//前回の位置を更新
 	m_posOld = m_pos;
-
-	//サイズとvtxのすり合わせ
-	CXModel *pXModel = CManager::GetInstance()->GetXModel();
-	CXModel::Model *pModel = pXModel->GetAddress(m_nIdxModel);
-
-	//operatorで一括化するようにする
-	m_vtxMax.x = m_size.x * pModel->vtxMax.x;
-	m_vtxMax.y = m_size.y * pModel->vtxMax.y;
-	m_vtxMax.z = m_size.z * pModel->vtxMax.z;
-
-	m_vtxMin.x = m_size.x * pModel->vtxMin.x;
-	m_vtxMin.y = m_size.y * pModel->vtxMin.y;
-	m_vtxMin.z = m_size.z * pModel->vtxMin.z;
-
 }
 
 //=================================
@@ -212,6 +198,24 @@ void CObjectX::Draw(const D3DMATERIAL9 mat)
 
 	//保存していたマテリアルを戻す
 	pDevice->SetMaterial(&matDef);
+}
+
+//=================================
+// サイズ設定
+//=================================
+void CObjectX::SetSize(const D3DXVECTOR3 size)
+{
+	m_size = size;
+
+	//サイズとvtxのすり合わせ
+	//operatorで一括化するようにする
+	m_vtxMax.x = m_size.x * m_vtxMax.x;
+	m_vtxMax.y = m_size.y * m_vtxMax.y;
+	m_vtxMax.z = m_size.z * m_vtxMax.z;
+
+	m_vtxMin.x = m_size.x * m_vtxMin.x;
+	m_vtxMin.y = m_size.y * m_vtxMin.y;
+	m_vtxMin.z = m_size.z * m_vtxMin.z;
 }
 
 //=================================

@@ -157,6 +157,7 @@
     <ClCompile Include="Anim.cpp" />
     <ClCompile Include="bg.cpp" />
     <ClCompile Include="block.cpp" />
+    <ClCompile Include="blk_goal.cpp" />
     <ClCompile Include="bullet.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="cursor.cpp" />
@@ -213,6 +214,7 @@
     <ClInclude Include="Anim.h" />
     <ClInclude Include="bg.h" />
     <ClInclude Include="block.h" />
+    <ClInclude Include="blk_goal.h" />
     <ClInclude Include="bullet.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="cursor.h" />
