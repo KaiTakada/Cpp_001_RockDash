@@ -26,6 +26,7 @@ public:
 	enum TEX
 	{
 		TEX_000 = 0,
+		TEX_SMOKE,
 		TEX_MAX,
 	};
 
@@ -39,7 +40,8 @@ public:
 	void Draw(void);							//描画
 
 	static CEffect *Create(void);		//生成
-	static CEffect *Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3DXVECTOR3 move, const D3DXVECTOR3 size, int nLife, const TEX TexType);		//生成
+	static CEffect *Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f), const D3DXVECTOR3 move = D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+		const D3DXVECTOR3 size = D3DXVECTOR3(0.0f, 0.0f, 0.0f), int nLife = 10, const TEX TexType = TEX_000);		//生成
 
 protected:
 
@@ -47,6 +49,7 @@ private:
 	static LPDIRECT3DTEXTURE9 m_pTexture[TEX_MAX];				//テクスチャバッファ
 	int m_nLife;		//残り寿命
 	int m_nLifeMax;		//寿命
+	TEX m_type;			//種類
 };
 
 #endif

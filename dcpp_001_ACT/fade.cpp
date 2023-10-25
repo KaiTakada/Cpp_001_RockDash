@@ -49,6 +49,8 @@ HRESULT CFade::Init(CScene::MODE modeNext)
 	
 	//SetState(m_modeNext);
 
+	SetType(TYPE_FADE);
+
 	return S_OK;
 }
 

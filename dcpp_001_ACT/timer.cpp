@@ -46,6 +46,7 @@ CTimer::CTimer()
 	m_nSecond = 0;
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_rot = D3DXVECTOR3();
+	m_bStop = false;
 
 	ZeroMemory(&m_time, sizeof(m_time));
 }
@@ -87,6 +88,7 @@ HRESULT CTimer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot)
 HRESULT CTimer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3DXVECTOR3 size)
 {
 	D3DXVECTOR3 posDif = pos;
+	m_bStop = false;
 
 	for (int nCntAll = 0; nCntAll < MAX_TIME_SCORE; nCntAll++)
 	{
@@ -143,7 +145,8 @@ void CTimer::Uninit(void)
 //============================
 void CTimer::Update(void)
 {
-
+	DWORD dwTimeNow = timeGetTime();
+	DWORD dwTimeOld = timeGetTime();
 }
 
 //============================
@@ -204,9 +207,21 @@ CTimer * CTimer::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3DX
 //============================
 void CTimer::SetValue(int nValue)
 {
+	if (m_bStop != false)
+	{//‚·‚Å‚É’âŽ~‚³‚ê‚Ä‚¢‚½ê‡
+		return;
+	}
+
 	m_nValue = nValue;
 
-	SetTime(m_time);
+	STime lTime =
+	{
+	0,
+	0,
+	nValue
+	};
+
+	SetTime(lTime);
 }
 
 //============================
@@ -214,6 +229,11 @@ void CTimer::SetValue(int nValue)
 //============================
 void CTimer::CntValue(int nValue)
 {
+	if (m_bStop != false)
+	{//‚·‚Å‚É’âŽ~‚³‚ê‚Ä‚¢‚½ê‡
+		return;
+	}
+
 	m_nValue += nValue;
 	m_time.nMilliSecond += nValue;
 
@@ -225,9 +245,14 @@ void CTimer::CntValue(int nValue)
 //============================
 void CTimer::SetTime(STime time)
 {
+	if (m_bStop != false)
+	{//‚·‚Å‚É’âŽ~‚³‚ê‚Ä‚¢‚½ê‡
+		return;
+	}
+
 	m_time = time;
-	
 	STime lTime = time;
+
 	//ŠeŒ…‚Ì”Žš‚ðŠi”[
 	int aTex[MAX_TIME_SCORE] = 
 	{
@@ -261,12 +286,16 @@ void CTimer::SetTime(STime time)
 //============================
 void CTimer::CntTime(STime time)
 {
+	if(m_bStop != false)
+	{//‚·‚Å‚É’âŽ~‚³‚ê‚Ä‚¢‚½ê‡
+		return;
+	}
+
 	//ƒIƒyƒŒ[ƒ^[‚ðŽg—p‚µ‚½‰ÁŽZ“ü
 	m_time += time;
 
 	SetTime(m_time);
 }
-
 
 //============================
 // ˆÊ’uÝ’è

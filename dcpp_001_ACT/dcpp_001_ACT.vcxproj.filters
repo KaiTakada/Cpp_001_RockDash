@@ -183,11 +183,11 @@
     <ClCompile Include="light.cpp">
       <Filter>ソース ファイル\必須</Filter>
     </ClCompile>
-    <ClCompile Include="fade.cpp">
-      <Filter>ソース ファイル\必須</Filter>
-    </ClCompile>
     <ClCompile Include="blk_goal.cpp">
       <Filter>ソース ファイル</Filter>
+    </ClCompile>
+    <ClCompile Include="fade.cpp">
+      <Filter>ソース ファイル\scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

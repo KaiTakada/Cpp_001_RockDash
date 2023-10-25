@@ -61,7 +61,7 @@
 //============================
 // 定数定義
 //============================
-int g_anParts[MAX_PLAYER_WEAPON] = { 14,17 };
+int g_anParts[MAX_PLAYER_WEAPON] = { 14,17 };		//両足の番号設定
 
 //============================
 // 静的メンバ変数宣言
@@ -75,6 +75,7 @@ CPlayer::CPlayer(int nPriority) : CObject(nPriority)
 	m_nNumModel = 0;
 	m_move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_size = MAX_PLAYER_SIZE;
 	m_posOld = m_pos;
 	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_rotDest = m_rot;
@@ -113,6 +114,7 @@ HRESULT CPlayer::Init(void)
 {
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_size = MAX_PLAYER_SIZE;
 	m_rotDest = m_rot;
 	m_fHeart = NUM_HEART;
 	m_param.fLife = NUM_HP;
@@ -136,6 +138,7 @@ HRESULT CPlayer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, int nNumPart
 {
 	m_pos = pos;
 	m_posOld = pos;
+	m_size = MAX_PLAYER_SIZE;
 	m_rot = rot;
 	m_rotDest = rot;
 	m_nNumModel = nNumParts;
@@ -306,6 +309,9 @@ void CPlayer::Update(void)
 			{//下キー押下＆ジャンプしていない＆スライディング中ではない
 				m_move.x += sinf(m_rot.y * D3DX_PI) * NUM_BOOST;		//x
 				m_pMotion->Set(MOTIONTYPE_SLIDING);
+				
+				//しゃがみサイズに変更
+				m_size = D3DXVECTOR3(MAX_PLAYER_SIZE.x, MAX_PLAYER_SIZE.y * 0.5f, MAX_PLAYER_SIZE.z);
 			}
 			else if (m_bBoost == false)
 			{//ジャンプ使用済み  orスライディング中なら
@@ -325,6 +331,7 @@ void CPlayer::Update(void)
 			m_bBoost = true;
 			m_move.y = NUM_JUMP * 1.5f;
 			m_pMotion->Set(MOTIONTYPE_BOOST);
+
 		}
 		else if (m_bJump == false)
 		{//ジャンプ未使用
@@ -337,6 +344,12 @@ void CPlayer::Update(void)
 #if _DEBUG
 	DebugKey(pInputKeyboard);
 #endif
+
+	if (m_pMotion->GetType() != MOTIONTYPE_SLIDING)
+	{
+		//サイズに通常に修正
+		m_size = MAX_PLAYER_SIZE;
+	}
 
 	//重力
 	m_move.y -= NUM_GRAV;

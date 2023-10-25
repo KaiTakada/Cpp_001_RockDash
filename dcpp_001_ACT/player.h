@@ -82,7 +82,7 @@ public:
 	D3DXVECTOR3 GetPos(void) { return m_pos; }					//現在位置取得
 	D3DXVECTOR3 GetRot(void) { return m_rot; }					//向き取得
 	D3DXVECTOR3 GetMove(void) { return m_move; }				//移動量取得
-	D3DXVECTOR3 GetSize(void) { return MAX_PLAYER_SIZE; }				//サイズ取得
+	D3DXVECTOR3 GetSize(void) { return m_size; }				//サイズ取得
 	float GetHeartPos(void) { return m_fHeart; }				//心臓位置取得
 	Param GetParam(void) { return m_param; }					//現在パラメータ取得
 	void SetJump(const bool bJump) { m_bJump = bJump; }				//ジャンプ判定設定
@@ -112,6 +112,7 @@ private:
 	D3DXVECTOR3 m_move;			//移動量
 	D3DXVECTOR3 m_posOld;		//前回位置
 	D3DXVECTOR3 m_pos;			//現在位置
+	D3DXVECTOR3 m_size;			//現在サイズ
 	D3DXVECTOR3 m_rot;			//向き
 	D3DXVECTOR3 m_rotDest;		//目標の向き
 	D3DXMATRIX m_mtxWorld;		//ワールドマトリックス

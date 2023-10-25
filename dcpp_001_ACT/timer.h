@@ -21,7 +21,6 @@
 //=========================
 // 前方宣言
 //=========================
-class CNumber;
 class CScore;
 class CObject2D;
 
@@ -51,21 +50,24 @@ public:
 	void Draw(void);							//描画
 
 	static CTimer *Create(void);		//生成
-	static CTimer *Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3DXVECTOR3 size);		//生成
+	static CTimer *Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f), const D3DXVECTOR3 size = D3DXVECTOR3(30.0f, 50.0f, 0.0f));		//生成
 
 	void SetValue(int nValue);		//スコア値設定
 	void CntValue(int nValue);		//スコア値加算
 	int GetValue() { return m_nValue; }		//スコア値取得
 
-	void SetTime(STime time);		//スコア値設定
-	void CntTime(STime time);		//スコア値加算
-	STime GetTime() { return m_time; }		//スコア値取得
+	void SetTime(STime time);		//タイム設定
+	void CntTime(STime time);		//タイム加算
+	STime GetTime() { return m_time; }		//タイム取得
 
 	//純粋仮装関数で仕方なしに作った。後で消したい
 	void SetPos(const D3DXVECTOR3 pos);			//位置設定
 	void SetRot(const D3DXVECTOR3 rot);			//向き設定
-	D3DXVECTOR3 GetPos(void) { return m_pos; }		//位置取得
-	D3DXVECTOR3 GetRot(void) { return m_rot; }		//向き取得
+	void SetStop(const bool bStop) { m_bStop = bStop; }			//ストップ設定
+	D3DXVECTOR3 GetPos() { return m_pos; }		//位置取得
+	D3DXVECTOR3 GetRot() { return m_rot; }		//向き取得
+	bool GetStop() { return m_bStop; }		//ストップ取得
+	void CntStop() { m_bStop = m_bStop ? false : true; }		//ストップ取得
 
 protected:
 
@@ -77,6 +79,7 @@ private:
 	int m_nSecond;		//1秒判定数値
 	D3DXVECTOR3 m_pos;	//位置
 	D3DXVECTOR3 m_rot;	//向き
+	bool m_bStop;		//加算許さないマン
 };
 
 #endif

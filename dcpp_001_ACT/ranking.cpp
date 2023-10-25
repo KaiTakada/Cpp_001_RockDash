@@ -14,14 +14,13 @@
 #include "sound.h"
 #include "object2D.h"
 #include "texture.h"
-#include "score.h"
+#include "timer.h"
 
 //=========================
 // マクロ定義
 //=========================
 
-#define RANK_WIN_READ_FILE "data\\SET\\RANKING\\rank_win.txt"
-#define RANK_LOSE_READ_FILE "data\\SET\\RANKING\\rank_lose.txt"
+#define RANK_READ_FILE "data\\SET\\RANKING\\rank.txt"
 
 //=========================
 // 静的メンバ変数
@@ -34,7 +33,7 @@ CRanking::CRanking()
 {
 	for (int nCnt = 0; nCnt < RK_NUM_SCORE; nCnt++)
 	{
-		m_apScore[nCnt] = nullptr;
+		m_apTimer[nCnt] = nullptr;
 	}
 
 	m_nScore = 0;
@@ -62,6 +61,7 @@ HRESULT CRanking::Init()
 
 	CManager::RESULT_TYPE type = CManager::GetInstance()->GetResult();
 
+	//今回の結果を取得
 	m_nScore = GetNowTime();
 
 	//背景
@@ -71,17 +71,14 @@ HRESULT CRanking::Init()
 	pPolygon->SetIdxTexture(pTexture->Regist("data\\TEXTURE\\null.jpg"));
 	pPolygon->SetTexCol(D3DXCOLOR(0.5f, 0.5f, 0.5f, 0.2f));
 
-	//勝敗どちらか
-	pPolygon = CObject2D::Create(D3DXVECTOR3(fWidth * 0.2f, fHeight * 0.1f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-		D3DXVECTOR3(200.0f, 40.0f, 0.0f), CObject2D::UPDATE_TYPE_NONE);
+	//新記録だったら追加表示
+	if (0)
+	{
+		pPolygon = CObject2D::Create(D3DXVECTOR3(fWidth * 0.2f, fHeight * 0.1f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+			D3DXVECTOR3(200.0f, 40.0f, 0.0f), CObject2D::UPDATE_TYPE_NONE);
 	
-	if (type == CManager::RT_WIN)
-	{
-		pPolygon->SetIdxTexture(pTexture->Regist("data\\TEXTURE\\SCENE\\SOURCE\\RANKING\\result_win.png"));
-	}
-	else if (type == CManager::RT_LOSE)
-	{
-		pPolygon->SetIdxTexture(pTexture->Regist("data\\TEXTURE\\SCENE\\SOURCE\\RANKING\\result_lose.png"));
+		//新記録画像パス
+		pPolygon->SetIdxTexture(pTexture->Regist("data\\TEXTURE\\null.jpg"));
 	}
 
 	for (int nCnt = 0; nCnt < RK_NUM_SCORE; nCnt++)
@@ -97,50 +94,28 @@ HRESULT CRanking::Init()
 		pPolygon->SetTexPos(D3DXVECTOR2(nCnt * 0.2f + 0.2f, 1.0f), D3DXVECTOR2(nCnt * 0.2f, 0.0f));
 
 		//スコア
-		if (m_apScore[nCnt] != nullptr)
+		if (m_apTimer[nCnt] != nullptr)
 		{
-			m_apScore[nCnt]->Uninit();
-			m_apScore[nCnt] = nullptr;
+			m_apTimer[nCnt]->Uninit();
+			m_apTimer[nCnt] = nullptr;
 		}
 
-		m_apScore[nCnt] = CScore::Create(D3DXVECTOR3(fWidth * 0.5f, fHeight, 0.0f));
+		m_apTimer[nCnt] = CTimer::Create(D3DXVECTOR3(fWidth * 0.5f, fHeight, 0.0f));
 
-		if (m_apScore[nCnt] == nullptr)
+		if (m_apTimer[nCnt] == nullptr)
 		{
 			return S_FALSE;
 		}
 	}
 
 	//読込
-	if (type == CManager::RT_WIN)
-	{
-		Read(RANK_WIN_READ_FILE);
-	}
-	else if (type == CManager::RT_LOSE)
-	{
-		Read(RANK_LOSE_READ_FILE);
-	}
-	else
-	{
-		Read();
-	}
+	Read();
 
 	//ソート
 	Sort();
 
 	//書き込み
-	if (type == CManager::RT_WIN)
-	{
-		Write(RANK_WIN_READ_FILE);
-	}
-	else if (type == CManager::RT_LOSE)
-	{
-		Write(RANK_LOSE_READ_FILE);
-	}
-	else
-	{
-		Write();
-	}
+	Write();
 
 	CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_BGM_RANKING);
 
@@ -154,10 +129,10 @@ void CRanking::Uninit()
 {
 	for (int nCnt = 0; nCnt < RK_NUM_SCORE; nCnt++)
 	{
-		if (m_apScore[nCnt] != nullptr)
+		if (m_apTimer[nCnt] != nullptr)
 		{
-			m_apScore[nCnt]->Uninit();
-			m_apScore[nCnt] = nullptr;
+			m_apTimer[nCnt]->Uninit();
+			m_apTimer[nCnt] = nullptr;
 		}
 	}
 
@@ -239,13 +214,15 @@ void CRanking::Sort()
 
 	for (int nCnt = 0; nCnt < RK_NUM_SCORE; nCnt++)
 	{//データ代入
-		if (m_apScore[nCnt] != nullptr)
+		if (m_apTimer[nCnt] != nullptr)
 		{
-			aScore[nCnt] = m_apScore[nCnt]->GetValue();
+			aScore[nCnt] = m_apTimer[nCnt]->GetValue();
 		}
 	}
 
-	if (m_nScore > aScore[RK_NUM_SCORE - 1])
+	//降順に並べ替える(>)(小が上)
+	//昇順に並べ替える(<)(大が上)
+	if (m_nScore < aScore[RK_NUM_SCORE - 1])
 	{
 		aScore[RK_NUM_SCORE - 1] = m_nScore;
 
@@ -255,7 +232,7 @@ void CRanking::Sort()
 
 			for (int nCntSort = nCntMax + 1; nCntSort < RK_NUM_SCORE; nCntSort++)
 			{
-				if (aScore[nHidata] < aScore[nCntSort])
+				if (aScore[nHidata] > aScore[nCntSort])
 				{
 					nHidata = nCntSort;
 				}
@@ -272,9 +249,9 @@ void CRanking::Sort()
 		for (int nCntComp = 0; nCntComp < RK_NUM_SCORE; nCntComp++)
 		{//データ再代入
 
-			if (m_apScore[nCntComp] != nullptr)
+			if (m_apTimer[nCntComp] != nullptr)
 			{
-				m_apScore[nCntComp]->SetValue(aScore[nCntComp]);
+				m_apTimer[nCntComp]->SetValue(aScore[nCntComp]);
 			}
 		}
 	}
@@ -291,25 +268,26 @@ void CRanking::Read(char *pReadFile)
 
 	pFile = fopen(pReadFile, "r");
 
-	if (pFile != NULL)
-	{//ファイル開けたら
-		for (int nCnt = 0; nCnt < RK_NUM_SCORE; nCnt++)
-		{
-			fscanf(pFile, "%d", &aRankScore[nCnt]);
-		}
-
-		fclose(pFile);
+	if (pFile == NULL)
+	{//ファイル開けなかったら
+		return;
 	}
 
 	for (int nCnt = 0; nCnt < RK_NUM_SCORE; nCnt++)
 	{
-		if (m_apScore[nCnt] != nullptr)
+		fscanf(pFile, "%d", &aRankScore[nCnt]);
+	}
+
+	fclose(pFile);
+
+	for (int nCnt = 0; nCnt < RK_NUM_SCORE; nCnt++)
+	{
+		if (m_apTimer[nCnt] != nullptr)
 		{
-			m_apScore[nCnt]->SetValue(aRankScore[nCnt]);
+			m_apTimer[nCnt]->SetValue(aRankScore[nCnt]);
 		}
 	}
 }
-
 //==========================
 //ランキングのリセット処理
 //==========================
@@ -319,17 +297,18 @@ void CRanking::Write(char *pReadFile)
 
 	pFile = fopen(pReadFile, "w");
 
-	if (pFile != NULL)
-	{//ファイル開けたら
-	
-		for (int nCnt = 0; nCnt < RK_NUM_SCORE; nCnt++)
-		{
-			if (m_apScore[nCnt] != nullptr)
-			{
-				fprintf(pFile, "%d\n", m_apScore[nCnt]->GetValue());
-			}
-		}
-
-		fclose(pFile);
+	if (pFile == NULL)
+	{//ファイル開けなかったら
+		return;
 	}
+
+	for (int nCnt = 0; nCnt < RK_NUM_SCORE; nCnt++)
+	{
+		if (m_apTimer[nCnt] != nullptr)
+		{
+			fprintf(pFile, "%d\n", m_apTimer[nCnt]->GetValue());
+		}
+	}
+
+	fclose(pFile);
 }

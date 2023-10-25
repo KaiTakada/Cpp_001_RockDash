@@ -22,6 +22,7 @@
 //=========================
 // 前方宣言
 //=========================
+class CTimer;
 
 //=========================
 // 画面(シーン)クラス
@@ -47,7 +48,7 @@ private:
 	void Read(char *pReadFile = RANK_READ_FILE);			//ファイル読込
 	void Write(char *pReadFile = RANK_READ_FILE);			//ファイル書込
 
-	CScore *m_apScore[RK_NUM_SCORE];
+	CTimer *m_apTimer[RK_NUM_SCORE];
 	int m_nScore;		//今回のスコア
 	int m_nCntTitle;	//タイトル遷移
 };

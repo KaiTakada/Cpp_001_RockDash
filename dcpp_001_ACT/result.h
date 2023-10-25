@@ -18,6 +18,7 @@
 // 前方宣言
 //=========================
 //class CRenderer;
+class CTimer;
 
 //=========================
 // 画面(シーン)クラス
@@ -37,7 +38,7 @@ public:
 protected:
 
 private:
-	CScore *m_pScore;		//スコア
+	CTimer *m_pTimer;		//スコア
 };
 
 #endif

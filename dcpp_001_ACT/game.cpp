@@ -166,6 +166,7 @@ void CGame::Update()
 
 	CScene::Update();
 
+	//エディット
 	if (pInputKeyboard->GetTrigger(DIK_M))
 	{//[ M ]キーでエディット
 
@@ -188,6 +189,7 @@ void CGame::Update()
 		m_pMap->Update();
 	}
 
+	//ポーズ
 	if (pInputKeyboard->GetTrigger(DIK_P) || pInputPad->GetPress(CInputGamepad::BUTTON_START, 0) == true)
 	{//[ P ]キーでポーズ
 
@@ -202,18 +204,16 @@ void CGame::Update()
 		}
 
 		CManager::GetInstance()->InvPause();
+
+		if (m_pTimer != nullptr)
+		{
+			m_pTimer->CntStop();
+		}
 	}
 
 	if (m_pPause != nullptr && bPause == true)
 	{
 		m_pPause->Update();
-	}
-
-	if (m_pTimer != nullptr)
-	{//タイマー更新
-
-		//加算
-		m_pTimer->CntValue(1);
 	}
 
 	if (pInputKeyboard->GetTrigger(DIK_RETURN))
@@ -227,17 +227,20 @@ void CGame::Update()
 	{//結果が確定したら
 		
 		pFade->SetState(CScene::MODE_RESULT);
+
+		if (m_pTimer != nullptr)
+		{//タイマー保存
+
+			m_pTimer->SetStop(true);
+			SetNowTime(m_pTimer->GetValue());
+		}
 	}
 
-	int nNumCsr = 0;
+	if (m_pTimer != nullptr)
+	{//タイマー更新
 
-	if (bPause == true)
-	{
-		nNumCsr = ShowCursor(true);
-	}
-	else
-	{
-		nNumCsr = ShowCursor(false);
+	 //加算
+		m_pTimer->CntValue(1);
 	}
 }
 

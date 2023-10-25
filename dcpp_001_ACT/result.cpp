@@ -15,7 +15,7 @@
 #include "object2D.h"
 #include "texture.h"
 #include "game.h"
-#include "score.h"
+#include "timer.h"
 
 //=========================
 // ƒ}ƒNƒ’è‹`
@@ -30,7 +30,7 @@
 //============================
 CResult::CResult()
 {
-	m_pScore = nullptr;
+	m_pTimer = nullptr;
 }
 
 //============================
@@ -83,20 +83,15 @@ HRESULT CResult::Init()
 
 	pPolygon->SetIdxTexture(pTexture->Regist("data\\TEXTURE\\score.png"));
 
-	if (m_pScore != nullptr)
+	if (m_pTimer != nullptr)
 	{
-		m_pScore->Uninit();
-		m_pScore = nullptr;
+		m_pTimer->Uninit();
+		m_pTimer = nullptr;
 	}
 
-	m_pScore = CScore::Create(D3DXVECTOR3(fWidth * 0.5f, fHeight * 0.7f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(40.0f, 60.0f, 0.0f));
+	m_pTimer = CTimer::Create(D3DXVECTOR3(fWidth * 0.5f, fHeight * 0.7f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(40.0f, 60.0f, 0.0f));
 
-	CScene *pScene = CManager::GetInstance()->GetScene();
-
-	if (pScene != nullptr)
-	{
-		m_pScore->SetValue(pScene->GetNowTime());
-	}
+	m_pTimer->SetValue(GetNowTime());
 
 	return S_OK;
 }
@@ -106,10 +101,10 @@ HRESULT CResult::Init()
 //============================
 void CResult::Uninit()
 {
-	if (m_pScore != nullptr)
+	if (m_pTimer != nullptr)
 	{
-		m_pScore->Uninit();
-		m_pScore = nullptr;
+		m_pTimer->Uninit();
+		m_pTimer = nullptr;
 	}
 
 	CScene::Uninit();

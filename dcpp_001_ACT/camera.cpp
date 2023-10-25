@@ -21,7 +21,7 @@
 #define CAMERA_RADJT (400.0f)				//注視点のずらし値
 #define CAMERA_VISDISTANCE (40000.0f)		//可視距離の値
 #define CAMERA_LIMIT_Z (D3DX_PI * 0.48f)	//z軸回転の限界値
-#define CAMERA_VR_ROT (1.0f)	//視点と注視点の角度
+#define CAMERA_VR_ROT (0.9f)	//視点と注視点の角度
 #define CAMERA_Y_STALK (300.0f)	//プレイヤ―のy値に合わせて上を向くスタート値
 
 //============================
@@ -105,6 +105,7 @@ void CCamera::Update()
 		pDebug->Print("マウスの位置 = X:%f \n", mousepos.x);
 		pDebug->Print("マウスの位置 = Y:%f \n", mousepos.y);
 		pDebug->Print("マウスの位置 = Z:%f \n", mousepos.z);
+		pDebug->Print("カメラのアングル：%f \n", m_fAngle);
 	}
 
 	//プレイヤーに追従する

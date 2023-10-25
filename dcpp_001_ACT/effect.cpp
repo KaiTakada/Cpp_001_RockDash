@@ -26,6 +26,7 @@ LPDIRECT3DTEXTURE9 CEffect::m_pTexture[CEffect::TEX_MAX] = {};
 static const char *c_apTexpass[CEffect::TEX_MAX] =
 {
 	"data\\TEXTURE\\effect000.jpg",
+	"data\\TEXTURE\\effect002.jpg",
 };
 
 //============================
@@ -34,6 +35,8 @@ static const char *c_apTexpass[CEffect::TEX_MAX] =
 CEffect::CEffect(int nPriority) : CObjectBillboard(nPriority)
 {
 	m_nLife = 0;
+	m_nLifeMax = 0;
+	m_type = TEX_000;
 }
 
 //============================
@@ -185,6 +188,7 @@ CEffect * CEffect::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3
 			pEffect->SetMove(move);
 			pEffect->m_nLife = nLife;
 			pEffect->m_nLifeMax = nLife;
+			pEffect->m_type = TexType;
 
 			CTexture *pTexture = CManager::GetInstance()->GetTexture();
 			pEffect->SetIdxTexture(pTexture->Regist(c_apTexpass[TexType]));

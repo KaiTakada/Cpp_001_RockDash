@@ -256,10 +256,13 @@ void CObject::DrawAll(void)
 	{
 		pCamera->SetCamera();
 	}
-	CObject *pObject = m_apTop[0];
+
+	CObject *pObject = nullptr;
 
 	for (int nCnt = 0; nCnt < PRIORITY_MAX; nCnt++)
 	{
+		pObject = m_apTop[nCnt];
+
 		while ((pObject != nullptr))
 		{
 			if (pObject != nullptr)
@@ -273,7 +276,6 @@ void CObject::DrawAll(void)
 				break;
 			}
 		}
-		pObject = m_apTop[nCnt];
 	}
 
 	CDebugProc *pDebug = CManager::GetInstance()->GetDebugProc();
