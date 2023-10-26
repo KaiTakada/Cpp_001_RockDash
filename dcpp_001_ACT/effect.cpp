@@ -25,8 +25,8 @@ LPDIRECT3DTEXTURE9 CEffect::m_pTexture[CEffect::TEX_MAX] = {};
 //============================
 static const char *c_apTexpass[CEffect::TEX_MAX] =
 {
-	"data\\TEXTURE\\effect000.jpg",
-	"data\\TEXTURE\\effect002.jpg",
+	"data\\TEXTURE\\EFFECT\\effect000.jpg",
+	"data\\TEXTURE\\EFFECT\\effect002.jpg",
 };
 
 //============================
@@ -61,7 +61,7 @@ HRESULT CEffect::Init(void)
 	CObjectBillboard::SetZtest(true);
 	CObjectBillboard::SetAbrend(true);
 
-	SetType(TYPE_EFFECT);
+	CObject::SetType(TYPE_EFFECT);
 
 	return S_OK;
 }
@@ -86,7 +86,7 @@ HRESULT CEffect::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot)
 	CObjectBillboard::SetZtest(true);
 	CObjectBillboard::SetAbrend(true);
 
-	SetType(TYPE_EFFECT);
+	CObject::SetType(TYPE_EFFECT);
 
 	return S_OK;
 }

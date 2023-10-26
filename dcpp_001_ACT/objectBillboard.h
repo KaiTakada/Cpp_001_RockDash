@@ -54,6 +54,7 @@ public:
 	D3DXVECTOR3 GetPos(void) { return m_pos; }		//現在位置取得
 	D3DXVECTOR3 GetSize(void) { return m_size; }		//2Dサイズ取得
 	D3DXVECTOR3 GetMove(void) { return m_move; }		//2Dサイズ取得
+	D3DXCOLOR GetColor();			//テクスチャ色設定()
 	bool GetZtest(void) { return m_bZtest; }		//Zテスト取得
 	bool GetAtest(void) { return m_bAtest; }		//αテスト取得
 	bool GetAbrend(void) { return m_bAbrend; }		//αブレンド取得

@@ -419,7 +419,7 @@ void CObjectBillboard::SetColor(const D3DXCOLOR col)
 	//頂点バッファをロックし、頂点情報へのポインタを取得
 	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
 
-	//テクスチャ座標の設定
+	//頂点情報から色の設定
 	pVtx[0].col = col;
 	pVtx[1].col = col;
 	pVtx[2].col = col;
@@ -427,6 +427,25 @@ void CObjectBillboard::SetColor(const D3DXCOLOR col)
 
 	//頂点バッファをアンロックする
 	m_pVtxBuff->Unlock();
+}
+
+//============================
+// 色取得
+//============================
+D3DXCOLOR CObjectBillboard::GetColor()
+{
+	VERTEX_3D *pVtx;
+
+	//頂点バッファをロックし、頂点情報へのポインタを取得
+	m_pVtxBuff->Lock(0, 0, (void**)&pVtx, 0);
+
+	//頂点情報から色の取得
+	D3DXCOLOR col = pVtx[0].col;
+
+	//頂点バッファをアンロックする
+	m_pVtxBuff->Unlock();
+
+	return col;
 }
 
 //==========================================

@@ -1,6 +1,6 @@
 //===============================================
 //
-// プレイヤー(player.cpp)
+// モーションmotion.cpp)
 // Author 髙田 佳依
 //
 //===============================================
@@ -59,6 +59,7 @@ CMotion::CMotion()
 	m_nKey = 0;
 	m_nCounter = 0;
 	m_bFinish = true;		//終了したかどうか
+	m_nTotalCtr = 0;
 
 	m_ppParts = nullptr;	//モデルへのポインタ
 	m_nNumModel = 0;	//モデルの総数
@@ -83,6 +84,7 @@ HRESULT CMotion::Init(void)
 	m_nKey = 0;
 	m_nCounter = 0;
 	m_bFinish = true;		//終了したかどうか
+	m_nTotalCtr = 0;
 
 	m_ppParts = nullptr;	//モデルへのポインタ
 	m_nNumModel = 0;	//モデルの総数
@@ -147,6 +149,7 @@ void CMotion::Set(int nType)
 	m_nNumKey = m_aInfo[nType].nNumKey;
 	m_nKey = 0;
 	m_nCounter = 0;
+	m_nTotalCtr = 0;
 	m_bFinish = false;
 }
 
@@ -173,6 +176,8 @@ void CMotion::Update(void)
 		{
 			nNextKey = m_nKey;
 			m_bFinish = true;
+			m_nCounter = 0;
+			m_nTotalCtr = 0;
 		}
 	}
 
@@ -205,6 +210,7 @@ void CMotion::Update(void)
 	}
 
 	m_nCounter++;
+	m_nTotalCtr++;
 
 	if (m_nCounter >= m_aInfo[m_nType].aKeyInfo[m_nKey].nFrame)
 	{

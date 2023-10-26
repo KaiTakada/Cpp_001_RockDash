@@ -39,6 +39,15 @@ public:
 	void Update(void);							//更新
 	void Draw(void);							//描画
 
+	void SetLife(int nLife) { m_nLife = nLife; }				//残り寿命
+	int GetLife() { return m_nLife; }							//残り寿命
+
+	void SetLifeMax(int nLife) { m_nLifeMax = nLife; }				//寿命
+	int GetLifeMax() { return m_nLifeMax; }							//寿命
+
+	void SetType(TEX type) { m_type = type; }				//寿命
+	TEX GetType() { return m_type; }						//寿命
+
 	static CEffect *Create(void);		//生成
 	static CEffect *Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f), const D3DXVECTOR3 move = D3DXVECTOR3(0.0f, 0.0f, 0.0f),
 		const D3DXVECTOR3 size = D3DXVECTOR3(0.0f, 0.0f, 0.0f), int nLife = 10, const TEX TexType = TEX_000);		//生成

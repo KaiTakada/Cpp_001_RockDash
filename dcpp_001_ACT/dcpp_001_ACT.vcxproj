@@ -163,6 +163,7 @@
     <ClCompile Include="cursor.cpp" />
     <ClCompile Include="debugproc.cpp" />
     <ClCompile Include="effect.cpp" />
+    <ClCompile Include="ef_smoke.cpp" />
     <ClCompile Include="enemy.cpp" />
     <ClCompile Include="enemy_boss.cpp" />
     <ClCompile Include="experience.cpp" />
@@ -220,6 +221,7 @@
     <ClInclude Include="cursor.h" />
     <ClInclude Include="debugproc.h" />
     <ClInclude Include="effect.h" />
+    <ClInclude Include="ef_smoke.h" />
     <ClInclude Include="enemy.h" />
     <ClInclude Include="enemy_boss.h" />
     <ClInclude Include="experience.h" />

@@ -57,7 +57,7 @@ HRESULT CExperience::Init(void)
 
 	CEffect::Init();
 
-	SetType(TYPE_EXP);
+	CObject::SetType(TYPE_EXP);
 
 	return S_OK;
 }
@@ -74,7 +74,7 @@ HRESULT CExperience::Init(const D3DXVECTOR3 pos)
 	//CObjectBillboard::SetAbrend(false);
 
 	//É^ÉCÉvê›íË
-	SetType(TYPE_EXP);
+	CObject::SetType(TYPE_EXP);
 
 	return S_OK;
 }

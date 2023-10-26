@@ -24,16 +24,17 @@
 #include "growselecter.h"		//進化・成長シーン
 #include "debugproc.h"	//デバッグ
 #include "state_life.h"		//状態管理
+#include "ef_smoke.h"		//煙演出
 
 //デバッグ用(おそらく消す)
 #include "bullet.h"
 #include "block.h"
 #include "enemy.h"
-#include "effect.h"
 #include "item.h"
 #include "explosion.h"
 #include "score.h"
 #include "experience.h"
+#include "effect.h"
 
 //============================
 // マクロ定義
@@ -44,11 +45,11 @@
 #define NUM_COLL (30.0f)			//当たり判定半径
 #define NUM_HP (1.0f)				//HP量
 #define NUM_ATTACK (1.0f)			//攻撃力
-#define NUM_SPEED (1.5f)			//移動量
+#define NUM_SPEED (1.0f)			//移動量
 #define NUM_SPEED_STOP (0.0001f)	//移動量を0にする条件値
 #define NUM_HEART (50.0f)			//心臓位置
 #define NUM_JUMP (15.0f)			//ジャンプ力
-#define NUM_BOOST (20.0f)			//ブースト力
+#define NUM_BOOST (40.0f)			//ブースト力
 #define NUM_GRAV (0.5f)				//重力
 #define MOTION_FILE "data\\SET\\MOTION\\motion_player.txt"		//モーションファイルパス
 #define READ_PSIZE (256)			//読込ポインタサイズ
@@ -307,9 +308,9 @@ void CPlayer::Update(void)
 		{
 			if ((m_bJump == false) && m_pMotion->GetType() != MOTIONTYPE_SLIDING)
 			{//下キー押下＆ジャンプしていない＆スライディング中ではない
-				m_move.x += sinf(m_rot.y * D3DX_PI) * NUM_BOOST;		//x
+				m_move.x = sinf(m_rot.y * D3DX_PI) * NUM_BOOST;		//x
 				m_pMotion->Set(MOTIONTYPE_SLIDING);
-				
+
 				//しゃがみサイズに変更
 				m_size = D3DXVECTOR3(MAX_PLAYER_SIZE.x, MAX_PLAYER_SIZE.y * 0.5f, MAX_PLAYER_SIZE.z);
 			}
@@ -321,6 +322,11 @@ void CPlayer::Update(void)
 				m_bBoost = true;
 				m_move.y = NUM_JUMP * 1.5f;
 				m_pMotion->Set(MOTIONTYPE_BOOST);
+	
+				//煙演出
+				CEf_Smoke * pSmoke = CEf_Smoke::Create(m_pos);
+				pSmoke->SetLife(10);
+				pSmoke->SetLifeMax(10);
 			}
 		}
 		else if (((m_bJump == true) || m_pMotion->GetType() == MOTIONTYPE_SLIDING) && (m_bBoost == false))
@@ -332,12 +338,21 @@ void CPlayer::Update(void)
 			m_move.y = NUM_JUMP * 1.5f;
 			m_pMotion->Set(MOTIONTYPE_BOOST);
 
+			//煙演出
+			CEf_Smoke * pSmoke = CEf_Smoke::Create(m_pos);
+			pSmoke->SetLife(10);
+			pSmoke->SetLifeMax(10);
 		}
 		else if (m_bJump == false)
 		{//ジャンプ未使用
 			m_bJump = true;
 			m_move.y += NUM_JUMP;
 			m_pMotion->Set(MOTIONTYPE_JUMP);
+
+			//煙演出
+			CEf_Smoke * pSmoke = CEf_Smoke::Create(m_pos);
+			pSmoke->SetLife(10);
+			pSmoke->SetLifeMax(10);
 		}
 	}
 	
@@ -349,6 +364,18 @@ void CPlayer::Update(void)
 	{
 		//サイズに通常に修正
 		m_size = MAX_PLAYER_SIZE;
+	}
+	else
+	{//スライディング中だったら
+	
+		if (m_pMotion->GetTotalCtr() % 8 == 0)
+		{//8カウント毎に煙生成
+			
+			//煙演出
+			CEf_Smoke * pSmoke = CEf_Smoke::Create(m_pos);
+			pSmoke->SetLife(30);
+			pSmoke->SetLifeMax(30);
+		}
 	}
 
 	//重力
@@ -1122,16 +1149,30 @@ void CPlayer::CollisionField(D3DXVECTOR3 pos)
 	}
 
 	if (pos.y < fHeight && m_posOld.y >= fHeight)
-	{
+	{//着地時
+
+		if (m_bJump || m_bBoost)
+		{
+			D3DXVECTOR3 move = { 3.0f, 0.0f, 0.0f };
+
+			//煙演出
+			for (int nCnt = 0; nCnt < 2; nCnt++)
+			{
+				CEf_Smoke * pSmoke = CEf_Smoke::Create(m_pos);
+				pSmoke->SetMove(move);
+				pSmoke->SetLife(15);
+				pSmoke->SetLifeMax(15);
+			
+				move.x *= -1.0f;
+			}
+
+			m_pMotion->Set(MOTIONTYPE_GROUND);
+		}
+	
 		pos.y = fHeight;
 		m_move.y = 0.0f;
 		m_bJump = false;
 		m_bBoost = false;
-
-		if (m_pMotion->GetType() == MOTIONTYPE_JUMP)
-		{
-			m_pMotion->Set(MOTIONTYPE_GROUND);
-		}
 	}
 
 	//座標設定(更新)

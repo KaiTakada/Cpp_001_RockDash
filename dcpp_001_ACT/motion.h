@@ -84,6 +84,8 @@ public:
 	int GetKey(void) { return m_nKey; }		//現在のキー取得
 	INFO *GetInfo(void) { return m_aInfo; }		//現在のキー取得
 
+	int GetTotalCtr() { return m_nTotalCtr; }		//トータルカウント取得
+
 protected:
 
 private:
@@ -98,6 +100,7 @@ private:
 	int m_nKey;			//現在のキーNo.
 	bool m_bLoop;		//ループするかどうか
 	bool m_bFinish;		//終了したかどうか
+	int m_nTotalCtr;	//1つのトータルカウンター
 
 	CParts **m_ppParts;	//モデルへのポインタ
 	int m_nNumModel;	//モデルの総数
