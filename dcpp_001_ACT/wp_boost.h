@@ -31,6 +31,7 @@ public:
 	void Uninit(void);			//èIóπ
 	void Update(void);			//çXêV
 	void Draw(void);			//ï`âÊ
+	virtual void Attack(const D3DXVECTOR3 rot, const int nDamage = 1);			//çUåÇ
 
 	static CBoost *Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f));		//ê∂ê¨
 

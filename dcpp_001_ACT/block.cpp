@@ -7,6 +7,9 @@
 #include "block.h"
 #include "manager.h"
 
+#include "blk_break.h"
+#include "blk_goal.h"
+
 //=======================
 // マクロ定義
 //=======================
@@ -17,8 +20,9 @@
 //=======================
 const char *c_apFileBlock[CBlock::TYPE_MAX] =
 {
-	//"data\\MODEL\\BLOCK\\brick.x",		//通常ブロック
-	"data\\MODEL\\BLOCK\\BIGbrick.x",		//通常ブロック
+	"data\\MODEL\\BLOCK\\brick.x",		//通常ブロック
+	"data\\MODEL\\BLOCK\\brick_break.x",		//通常ブロック
+	"data\\MODEL\\GOAL\\ring.x",		//通常ブロック
 };
 
 //=======================
@@ -54,6 +58,12 @@ HRESULT CBlock::Init(void)
 	
 	m_posOld = GetPos();
 	
+	CXModel *pXmodel = CManager::GetInstance()->GetXModel();
+
+	D3DXVECTOR3 vtxMin = pXmodel->GetAddress(GetIdxModel())->vtxMin;
+	D3DXVECTOR3 vtxMax = pXmodel->GetAddress(GetIdxModel())->vtxMax;
+	SetVtx(vtxMin, vtxMax);
+
 	SetType(TYPE_BLOCK);
 
 	return S_OK;
@@ -62,12 +72,22 @@ HRESULT CBlock::Init(void)
 //=======================
 //ブロックの初期化処理
 //=======================
-HRESULT CBlock::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot)
+HRESULT CBlock::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, TYPE_Blk type)
 {
 	CObjectX::Init(pos, rot);
 
 	m_posOld = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	m_type = TYPE_NORMAL;
+	m_type = type;
+
+	D3DXVECTOR3 vtxMin = DEF_VEC3;
+	D3DXVECTOR3 vtxMax = DEF_VEC3;
+
+	CXModel *pXmodel = CManager::GetInstance()->GetXModel();
+	SetIdxModel(pXmodel->Regist(c_apFileBlock[type], &vtxMin, &vtxMax));		//モデル割り当て
+
+	vtxMin = pXmodel->GetAddress(GetIdxModel())->vtxMin;
+	vtxMax = pXmodel->GetAddress(GetIdxModel())->vtxMax;
+	SetVtx(vtxMin, vtxMax);
 
 	SetType(TYPE_BLOCK);
 
@@ -105,31 +125,39 @@ void CBlock::Draw(void)
 //=======================
 //ブロックの設定処理
 //=======================
-CBlock *CBlock::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, TYPE type)
+CBlock *CBlock::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot, TYPE_Blk type)
 {
 	D3DXVECTOR3 vtxMin = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 vtxMax = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	CBlock *pBlock = nullptr;
 
 	//オブジェクト生成&初期化
-	pBlock = new CBlock;
+	switch (type)
+	{
+	case TYPE_BREAK:
+		pBlock = new CBlk_Break;
+		break;
+
+	case TYPE_GOAL:
+		pBlock = new CBlk_Goal;
+		break;
+
+	default:
+		pBlock = new CBlock;
+		break;
+	}
+
 
 	if (pBlock != nullptr)
 	{
-		if (FAILED(pBlock->Init(pos, rot)))
+		if (FAILED(pBlock->Init(pos, rot, type)))
 		{
 			return nullptr;
 		}
 		else
 		{
 			pBlock->m_posOld = pos;
-
-			CXModel *pXmodel = CManager::GetInstance()->GetXModel();
-			pBlock->SetIdxModel(pXmodel->Regist(c_apFileBlock[type], &vtxMin, &vtxMax));		//モデル割り当て
-		
-			vtxMin = pXmodel->GetAddress(pBlock->GetIdxModel())->vtxMin;
-			vtxMax = pXmodel->GetAddress(pBlock->GetIdxModel())->vtxMax;
-			pBlock->SetVtx(vtxMin, vtxMax);
+			pBlock->m_type = type;
 		}
 	}
 	else
@@ -150,14 +178,15 @@ bool CBlock::CollisionRect(void)
 	D3DXVECTOR3 sizeMax = GetMaxVtx();		//最大値
 
 	D3DXVECTOR3 posC = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	D3DXVECTOR3 posOldC = D3DXVECTOR3(0.0f,0.0f,0.0f);
+	D3DXVECTOR3 posOldC = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 sizeC = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 moveC = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 move = D3DXVECTOR3(0.0f, 0.0f, 0.0f);		//押し戻す分
 
 	bool bLand = false;			//着地したかどうか
-	bool Collision = false;			//当たり判定があったかどうか
+	bool bCollision = false;			//当たり判定があったかどうか
 
+	//x
 	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
 	{
 		CObject *pObject = CObject::GetTop(nCntPrt);
@@ -193,7 +222,7 @@ bool CBlock::CollisionRect(void)
 									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
 						{//ブロック西
 							move.x = (pos.x + sizeMin.x) - (sizeMaxC.x) - 0.1f;
-							Collision = true;
+							bCollision = true;
 						}
 						else if (sizeOldMinC.x >= pos.x + sizeMax.x
 							&& sizeMinC.x <= pos.x + sizeMax.x
@@ -205,62 +234,7 @@ bool CBlock::CollisionRect(void)
 									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
 						{//ブロック左
 							move.x = (pos.x + sizeMax.x) - (sizeMinC.x) + 0.1f;
-							Collision = true;
-						}
-
-						if (sizeOldMaxC.z <= pos.z + sizeMin.z
-							&& sizeMaxC.z > pos.z + sizeMin.z
-							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
-							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
-							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
-								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
-								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
-									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
-						{//ブロック北
-							move.z = (pos.z + sizeMin.z) - (sizeMaxC.z) - 0.1f;
-							Collision = true;
-						}
-						else if (sizeOldMinC.z >= pos.z + sizeMax.z
-							&& sizeMinC.z <= pos.z + sizeMax.z
-							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
-							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
-							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
-								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
-								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
-									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
-						{//ブロック南
-							move.z = (pos.z + sizeMax.z) - (sizeMinC.z) + 0.1f;
-							Collision = true;
-						}
-
-						if (sizeOldMinC.y >= pos.y + sizeMax.y
-							&& sizeMinC.y <= pos.y + sizeMax.y
-							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
-							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
-							&& sizeMaxC.z > pos.z + sizeMin.z + 0.1f
-							&& sizeMinC.z < pos.z + sizeMax.z + 0.1f)
-						{//ブロック上
-							D3DXVECTOR3 Objmove = pObject->GetMove();
-							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
-
-							move.y = (pos.y + sizeMax.y) - (sizeMinC.y) + 0.1f;
-							pObject->SetJump(false);
-							pObject->SetBoost(false);
-							Collision = true;
-							bLand = true;
-						}
-						else if (sizeOldMaxC.y <= pos.y + sizeMin.y
-							&& sizeMaxC.y >= pos.y + sizeMin.y
-							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
-							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
-							&& sizeMaxC.z > pos.z + sizeMin.z + 0.1f
-							&& sizeMinC.z < pos.z + sizeMax.z + 0.1f)
-						{//ブロック下
-							D3DXVECTOR3 Objmove = pObject->GetMove();
-							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
-
-							move.y = (pos.y + sizeMin.y) - (sizeMaxC.y) - 0.1f;
-							Collision = true;
+							bCollision = true;
 						}
 					}
 					else
@@ -275,7 +249,7 @@ bool CBlock::CollisionRect(void)
 									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
 						{//ブロック西
 							move.x = (pos.x + sizeMin.x) - (sizeMaxC.x) - 0.1f;
-							Collision = true;
+							bCollision = true;
 						}
 						else if (sizeOldMinC.x >= pos.x + sizeMax.x
 							&& sizeMinC.x <= pos.x + sizeMax.x
@@ -287,34 +261,53 @@ bool CBlock::CollisionRect(void)
 									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
 						{//ブロック左
 							move.x = (pos.x + sizeMax.x) - (sizeMinC.x) + 0.1f;
-							Collision = true;
+							bCollision = true;
 						}
+					}
+				}
 
-						if (sizeOldMaxC.z <= pos.z + sizeMin.z
-							&& sizeMaxC.z > pos.z + sizeMin.z
-							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
-							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
-							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
-								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
-								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
-									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
-						{//ブロック北
-							move.z = (pos.z + sizeMin.z) - (sizeMaxC.z) - 0.1f;
-							Collision = true;
-						}
-						else if (sizeOldMinC.z >= pos.z + sizeMax.z
-							&& sizeMinC.z <= pos.z + sizeMax.z
-							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
-							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
-							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
-								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
-								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
-									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
-						{//ブロック南
-							move.z = (pos.z + sizeMax.z) - (sizeMinC.z) + 0.1f;
-							Collision = true;
-						}
+				if (bCollision)
+				{
+					pObject->SetPos(posC + move);
+					bCollision = false;
+					break;
+				}
 
+				pObject = pObject->GetNext();
+			}
+			else
+			{// (pObject == NULL) == Endまで行ったってことでこの優先度は終了
+				break;
+			}
+		}
+	}
+
+	//y
+	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
+	{
+		CObject *pObject = CObject::GetTop(nCntPrt);
+
+		while ((pObject != nullptr))
+		{
+			if (pObject != nullptr)
+			{
+				CObject::TYPE type = pObject->GetType();	//今回のオブジェクトのタイプ
+
+				if (type == CObject::TYPE_PLAYER)
+				{//プレイヤ―だったら
+					posC = pObject->GetPos();
+					posOldC = pObject->GetPosOld();
+					sizeC = pObject->GetSize();
+					moveC = pObject->GetMove();
+
+					D3DXVECTOR3 sizeOldMinC = D3DXVECTOR3(posOldC.x - sizeC.x, posOldC.y, posOldC.z - sizeC.z);		//キャラ最小値
+					D3DXVECTOR3 sizeOldMaxC = D3DXVECTOR3(posOldC.x + sizeC.x, posOldC.y + (sizeC.y * 2), posOldC.z + sizeC.z);		//キャラ最大値
+
+					D3DXVECTOR3 sizeMinC = D3DXVECTOR3(posC.x - sizeC.x, posC.y, posC.z - sizeC.z);		//キャラ最小値
+					D3DXVECTOR3 sizeMaxC = D3DXVECTOR3(posC.x + sizeC.x, posC.y + (sizeC.y * 2), posC.z + sizeC.z);		//キャラ最大値
+
+					if (pObject->GetJump() == false)
+					{
 						if (sizeOldMinC.y >= pos.y + sizeMax.y
 							&& sizeMinC.y <= pos.y + sizeMax.y
 							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
@@ -328,7 +321,7 @@ bool CBlock::CollisionRect(void)
 							move.y = (pos.y + sizeMax.y) - (sizeMinC.y) + 0.1f;
 							pObject->SetJump(false);
 							pObject->SetBoost(false);
-							Collision = true;
+							bCollision = true;
 							bLand = true;
 						}
 						else if (sizeOldMaxC.y <= pos.y + sizeMin.y
@@ -342,14 +335,143 @@ bool CBlock::CollisionRect(void)
 							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
 
 							move.y = (pos.y + sizeMin.y) - (sizeMaxC.y) - 0.1f;
-							Collision = true;
+							bCollision = true;
+						}
+					}
+					else
+					{
+						if (sizeOldMinC.y >= pos.y + sizeMax.y
+							&& sizeMinC.y <= pos.y + sizeMax.y
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& sizeMaxC.z > pos.z + sizeMin.z + 0.1f
+							&& sizeMinC.z < pos.z + sizeMax.z + 0.1f)
+						{//ブロック上
+							D3DXVECTOR3 Objmove = pObject->GetMove();
+							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
+
+							move.y = (pos.y + sizeMax.y) - (sizeMinC.y) + 0.1f;
+							pObject->SetJump(false);
+							pObject->SetBoost(false);
+							bCollision = true;
+							bLand = true;
+						}
+						else if (sizeOldMaxC.y <= pos.y + sizeMin.y
+							&& sizeMaxC.y >= pos.y + sizeMin.y
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& sizeMaxC.z > pos.z + sizeMin.z + 0.1f
+							&& sizeMinC.z < pos.z + sizeMax.z + 0.1f)
+						{//ブロック下
+							D3DXVECTOR3 Objmove = pObject->GetMove();
+							pObject->SetMove(D3DXVECTOR3(Objmove.x, 0.0f, Objmove.z));
+
+							move.y = (pos.y + sizeMin.y) - (sizeMaxC.y) - 0.1f;
+							bCollision = true;
 						}
 					}
 				}
 
-				if (Collision)
+				if (bCollision)
 				{
 					pObject->SetPos(posC + move);
+					bCollision = false;
+					break;
+				}
+
+				pObject = pObject->GetNext();
+			}
+			else
+			{// (pObject == NULL) == Endまで行ったってことでこの優先度は終了
+				break;
+			}
+		}
+	}
+
+	//z
+	for (int nCntPrt = 0; nCntPrt < PRIORITY_MAX; nCntPrt++)
+	{
+		CObject *pObject = CObject::GetTop(nCntPrt);
+
+		while ((pObject != nullptr))
+		{
+			if (pObject != nullptr)
+			{
+				CObject::TYPE type = pObject->GetType();	//今回のオブジェクトのタイプ
+
+				if (type == CObject::TYPE_PLAYER)
+				{//プレイヤ―だったら
+					posC = pObject->GetPos();
+					posOldC = pObject->GetPosOld();
+					sizeC = pObject->GetSize();
+					moveC = pObject->GetMove();
+
+					D3DXVECTOR3 sizeOldMinC = D3DXVECTOR3(posOldC.x - sizeC.x, posOldC.y, posOldC.z - sizeC.z);		//キャラ最小値
+					D3DXVECTOR3 sizeOldMaxC = D3DXVECTOR3(posOldC.x + sizeC.x, posOldC.y + (sizeC.y * 2), posOldC.z + sizeC.z);		//キャラ最大値
+
+					D3DXVECTOR3 sizeMinC = D3DXVECTOR3(posC.x - sizeC.x, posC.y, posC.z - sizeC.z);		//キャラ最小値
+					D3DXVECTOR3 sizeMaxC = D3DXVECTOR3(posC.x + sizeC.x, posC.y + (sizeC.y * 2), posC.z + sizeC.z);		//キャラ最大値
+
+					if (pObject->GetJump() == false)
+					{
+						if (sizeOldMaxC.z <= pos.z + sizeMin.z
+							&& sizeMaxC.z > pos.z + sizeMin.z
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
+								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
+								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
+									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
+						{//ブロック北
+							move.z = (pos.z + sizeMin.z) - (sizeMaxC.z) - 0.1f;
+							bCollision = true;
+						}
+						else if (sizeOldMinC.z >= pos.z + sizeMax.z
+							&& sizeMinC.z <= pos.z + sizeMax.z
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
+								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
+								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
+									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
+						{//ブロック南
+							move.z = (pos.z + sizeMax.z) - (sizeMinC.z) + 0.1f;
+							bCollision = true;
+						}
+					}
+					else
+					{
+						if (sizeOldMaxC.z <= pos.z + sizeMin.z
+							&& sizeMaxC.z > pos.z + sizeMin.z
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
+								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
+								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
+									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
+						{//ブロック北
+							move.z = (pos.z + sizeMin.z) - (sizeMaxC.z) - 0.1f;
+							bCollision = true;
+						}
+						else if (sizeOldMinC.z >= pos.z + sizeMax.z
+							&& sizeMinC.z <= pos.z + sizeMax.z
+							&& sizeMaxC.x > pos.x + sizeMin.x + 0.1f
+							&& sizeMinC.x < pos.x + sizeMax.x + 0.1f
+							&& ((sizeMaxC.y >= pos.y + sizeMin.y + 0.1f
+								&& sizeMaxC.y <= pos.y + sizeMax.y - 0.1f)
+								|| (sizeMinC.y >= pos.y + sizeMin.y + 0.1f
+									&& sizeMinC.y <= pos.y + sizeMax.y - 0.1f)))
+						{//ブロック南
+							move.z = (pos.z + sizeMax.z) - (sizeMinC.z) + 0.1f;
+							bCollision = true;
+						}
+					}
+				}
+
+				if (bCollision)
+				{
+					pObject->SetPos(posC + move);
+					bCollision = false;
 					break;
 				}
 

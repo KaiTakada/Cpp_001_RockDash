@@ -37,13 +37,10 @@ public:
 	void Draw(void);							//描画
 	static CNumber *Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3DXVECTOR3 size, int nValue);		//生成
 	void CNumber::SetNumber(int nNumber);		//数字設定
-	static int GetNumAll(void) { return m_nNumAll; }		//総数取得
 
 protected:
 
 private:
-	static LPDIRECT3DTEXTURE9 m_pTexture;				//共通テクスチャバッファ
-	static int m_nNumAll;		//総数
 	int m_nValue;		//表示する数字値
 };
 

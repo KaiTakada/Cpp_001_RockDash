@@ -8,21 +8,20 @@
 //============================
 // インクルードファイル
 //============================
+#include "player.h"
 #include "manager.h"	//ほぼ確で必要
 #include "game.h"		//ほぼ確で必要
-#include "player.h"
-#include "input.h"		//操作
-#include "camera.h"		//移動方向
-#include "sound.h"		//演出等に必要
-#include "parts.h"		//親子関係
-#include "motion.h"		//モーション
-#include "Field.h"		//地面との当たり判定
-//#include "weapon.h"		//武器
+#include "input.h"			//操作
+#include "camera.h"			//移動方向
+#include "sound.h"			//演出等に必要
+#include "parts.h"			//親子関係
+#include "motion.h"			//モーション
+#include "Field.h"			//地面との当たり判定
 #include "wp_boost.h"		//ブースト
-#include "gauge.h"		//HPゲージ
-#include "Xmodel.h"		//モデル
+#include "gauge.h"			//HPゲージ
+#include "Xmodel.h"			//モデル
 #include "growselecter.h"		//進化・成長シーン
-#include "debugproc.h"	//デバッグ
+#include "debugproc.h"		//デバッグ
 #include "state_life.h"		//状態管理
 #include "ef_smoke.h"		//煙演出
 
@@ -114,7 +113,7 @@ CPlayer::~CPlayer()
 HRESULT CPlayer::Init(void)
 {
 	m_pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
-	m_rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	m_rot = D3DXVECTOR3(0.0f, D3DX_PI * 0.5f, 0.0f);
 	m_size = MAX_PLAYER_SIZE;
 	m_rotDest = m_rot;
 	m_fHeart = NUM_HEART;
@@ -140,7 +139,8 @@ HRESULT CPlayer::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, int nNumPart
 	m_pos = pos;
 	m_posOld = pos;
 	m_size = MAX_PLAYER_SIZE;
-	m_rot = rot;
+	//m_rot = rot;
+	m_rot = D3DXVECTOR3(0.0f, D3DX_PI * 0.5f, 0.0f);
 	m_rotDest = rot;
 	m_nNumModel = nNumParts;
 	m_fHeart = NUM_HEART;
@@ -301,42 +301,22 @@ void CPlayer::Update(void)
 	fRotDiff = fRotDest - fRotMove;
 	RotAdj(fRotDiff);
 
+	//ブーストorジャンプ
 	if (pInputKeyboard->GetTrigger(DIK_SPACE) ||
 		pInputGamepad->GetPress(CInputGamepad::BUTTON_A,0))
-	{//[ - ]キーでジャンプ
-		if (pInputKeyboard->GetPress(DIK_S))
-		{
-			if ((m_bJump == false) && m_pMotion->GetType() != MOTIONTYPE_SLIDING)
-			{//下キー押下＆ジャンプしていない＆スライディング中ではない
-				m_move.x = sinf(m_rot.y * D3DX_PI) * NUM_BOOST;		//x
-				m_pMotion->Set(MOTIONTYPE_SLIDING);
+	{//[ - ]キー
 
-				//しゃがみサイズに変更
-				m_size = D3DXVECTOR3(MAX_PLAYER_SIZE.x, MAX_PLAYER_SIZE.y * 0.5f, MAX_PLAYER_SIZE.z);
-			}
-			else if (m_bBoost == false)
-			{//ジャンプ使用済み  orスライディング中なら
-			 //かつブーストゲージが残っていれば
-			 //ブースト
-				m_bJump = true;
-				m_bBoost = true;
-				m_move.y = NUM_JUMP * 1.5f;
-				m_pMotion->Set(MOTIONTYPE_BOOST);
-	
-				//煙演出
-				CEf_Smoke * pSmoke = CEf_Smoke::Create(m_pos);
-				pSmoke->SetLife(10);
-				pSmoke->SetLifeMax(10);
-			}
-		}
-		else if (((m_bJump == true) || m_pMotion->GetType() == MOTIONTYPE_SLIDING) && (m_bBoost == false))
+		if (((m_bJump == true) || m_pMotion->GetType() == MOTIONTYPE_SLIDING) && (m_bBoost == false))
 		{//ジャンプ使用済み  orスライディング中なら
 			//かつブーストゲージが残っていれば
 			 //ブースト
 			m_bJump = true;
 			m_bBoost = true;
 			m_move.y = NUM_JUMP * 1.5f;
+			m_move.x *= 1.2f;
 			m_pMotion->Set(MOTIONTYPE_BOOST);
+			m_pBoost[0]->Attack(m_move, 0);
+			m_pBoost[1]->Attack(m_move, 0);
 
 			//煙演出
 			CEf_Smoke * pSmoke = CEf_Smoke::Create(m_pos);
@@ -356,6 +336,18 @@ void CPlayer::Update(void)
 		}
 	}
 	
+	//スライディング
+	if (pInputKeyboard->GetPress(DIK_S) && (m_bJump == false) && (m_pMotion->GetType() != MOTIONTYPE_SLIDING))
+	{
+		{//下キー押下＆ジャンプしていない＆スライディング中ではない
+			m_move.x = sinf(fRotDest * D3DX_PI) * NUM_BOOST;		//x
+			m_pMotion->Set(MOTIONTYPE_SLIDING);
+
+			//しゃがみサイズに変更
+			m_size = D3DXVECTOR3(MAX_PLAYER_SIZE.x, MAX_PLAYER_SIZE.y * 0.5f, MAX_PLAYER_SIZE.z);
+		}
+	}
+
 #if _DEBUG
 	DebugKey(pInputKeyboard);
 #endif
@@ -375,6 +367,17 @@ void CPlayer::Update(void)
 			CEf_Smoke * pSmoke = CEf_Smoke::Create(m_pos);
 			pSmoke->SetLife(30);
 			pSmoke->SetLifeMax(30);
+		}
+
+		if (m_pMotion->GetTotalCtr() % 3 == 0 && 
+			(m_pMotion->GetType() == MOTIONTYPE_SLIDING || m_pMotion->GetType() == MOTIONTYPE_BOOST))
+		{//残像的な青エフェクト
+
+			CEffect *pEffect = CEffect::Create(D3DXVECTOR3(m_pos.x, m_pos.y + m_fHeart, m_pos.z));
+			pEffect->SetSize(D3DXVECTOR3(50.0f, 50.0f, 50.0f));
+			pEffect->SetColor(D3DXCOLOR(0.0f, 0.0f, 1.0f, 1.0f));
+			pEffect->SetLifeMax(60);
+			pEffect->SetLife(60);
 		}
 	}
 
@@ -637,60 +640,25 @@ void CPlayer::MoveOperate2D(float *pRotDest)
 
 	D3DXVECTOR3 cameraRot = pCamera->GetRot();
 
-	//if (pInputKeyboard->GetPress(DIK_S) == true ||
-	//	pInputGamepad->GetPress(CInputGamepad::BUTTON_DOWN, 0) || pInputGamepad->GetGameStickLYPress(0) < 0)
-	//{
-	//	if (pInputKeyboard->GetPress(DIK_A) == true ||
-	//		pInputGamepad->GetPress(CInputGamepad::BUTTON_LEFT, 0) || pInputGamepad->GetGameStickLXPress(0) < 0)
-	//	{//下かつ左キーを押したとき
-
-	//	}
-	//	else if (pInputKeyboard->GetPress(DIK_D) == true ||
-	//		pInputGamepad->GetPress(CInputGamepad::BUTTON_RIGHT, 0) || pInputGamepad->GetGameStickLXPress(0) > 0)
-	//	{//下かつ右キーを押したとき
-
-	//	}
-	//	else
-	//	{//下キーのみを押したとき
-	//		//しゃがみたい(願望)
-	//	}
-	//}
-	//else if (pInputKeyboard->GetPress(DIK_W) == true ||
-	//	pInputGamepad->GetPress(CInputGamepad::BUTTON_UP, 0) || pInputGamepad->GetGameStickLYPress(0) > 0)
-	//{
-	//	if (pInputKeyboard->GetPress(DIK_A) == true ||
-	//		pInputGamepad->GetPress(CInputGamepad::BUTTON_LEFT, 0) || pInputGamepad->GetGameStickLXPress(0) < 0)
-	//	{//上かつ左キーを押したとき
-
-	//	}
-	//	else if (pInputKeyboard->GetPress(DIK_D) == true ||
-	//		pInputGamepad->GetPress(CInputGamepad::BUTTON_RIGHT, 0) || pInputGamepad->GetGameStickLXPress(0) > 0)
-	//	{//上かつ右キーを押したとき
-
-	//	}
-	//	else
-	//	{//上キーのみを押したとき
-
-	//	}
-	//}
-	//else if (pInputKeyboard->GetPress(DIK_A) == true ||
-	if (pInputKeyboard->GetPress(DIK_A) == true ||
-		pInputGamepad->GetPress(CInputGamepad::BUTTON_LEFT, 0) || pInputGamepad->GetGameStickLXPress(0) < 0)
-	{//左キーのみを押したとき
-		m_move.x += sinf(cameraRot.y + -0.5f * D3DX_PI) * m_param.fSpeed;
-		m_move.z += cosf(cameraRot.y + -0.5f * D3DX_PI) * m_param.fSpeed;
-		*pRotDest = cameraRot.y + 0.5f * D3DX_PI;
-		bInput = true;
+	if (m_pMotion->GetType() != MOTIONTYPE_SLIDING)
+	{
+		if (pInputKeyboard->GetPress(DIK_A) == true ||
+			pInputGamepad->GetPress(CInputGamepad::BUTTON_LEFT, 0) || pInputGamepad->GetGameStickLXPress(0) < 0)
+		{//左キーのみを押したとき
+			m_move.x += sinf(cameraRot.y + -0.5f * D3DX_PI) * m_param.fSpeed;
+			m_move.z += cosf(cameraRot.y + -0.5f * D3DX_PI) * m_param.fSpeed;
+			*pRotDest = cameraRot.y + 0.5f * D3DX_PI;
+			bInput = true;
+		}
+		else if (pInputKeyboard->GetPress(DIK_D) == true ||
+			pInputGamepad->GetPress(CInputGamepad::BUTTON_RIGHT, 0) || pInputGamepad->GetGameStickLXPress(0) > 0)
+		{//右キーのみを押したとき
+			m_move.x += sinf(cameraRot.y + 0.5f * D3DX_PI) * m_param.fSpeed;
+			m_move.z += cosf(cameraRot.y + 0.5f * D3DX_PI) * m_param.fSpeed;
+			*pRotDest = cameraRot.y + -0.5f * D3DX_PI;
+			bInput = true;
+		}
 	}
-	else if (pInputKeyboard->GetPress(DIK_D) == true ||
-		pInputGamepad->GetPress(CInputGamepad::BUTTON_RIGHT, 0) || pInputGamepad->GetGameStickLXPress(0) > 0)
-	{//右キーのみを押したとき
-		m_move.x += sinf(cameraRot.y + 0.5f * D3DX_PI) * m_param.fSpeed;
-		m_move.z += cosf(cameraRot.y + 0.5f * D3DX_PI) * m_param.fSpeed;
-		*pRotDest = cameraRot.y + -0.5f * D3DX_PI;
-		bInput = true;
-	}
-
 	if (bInput == true)
 	{
 		m_rotDest.y = *pRotDest;
@@ -1066,6 +1034,14 @@ void CPlayer::Damage(float fDamege)
 	}
 
 	m_pStateLife->Set(CState_Life::STATE_DAMAGE, DAMAGE_CT);
+}
+
+//============================
+// モーション情報取得 (.hでは前方宣言のみのため、中身は.cppに書く)
+//============================
+CMotion *CPlayer::GetMotion(void)
+{
+	return m_pMotion;
 }
 
 //============================

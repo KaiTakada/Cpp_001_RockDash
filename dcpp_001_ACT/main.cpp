@@ -52,6 +52,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hInstancePrev, LPSTR lpCmdLine
 		LoadIcon(NULL,IDI_APPLICATION),			//タスクバーのアイコン
 		LoadCursor(NULL,IDC_ARROW),				//マウスカーソル
 		(HBRUSH)(COLOR_WINDOW + 1),				//クライアント領域の背景色(+ 0～26の数値を変えることで色が変わる)
+		//(HBRUSH)(COLOR_WINDOW + 1),			//変えれない？
 		NULL,									//メニューバー
 		CLASS_NAME,								//ウィンドウクラスの名前
 		LoadIcon(NULL,IDI_APPLICATION)			//ファイルのアイコン

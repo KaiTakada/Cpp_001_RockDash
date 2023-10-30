@@ -69,7 +69,7 @@ public:
 
 	HRESULT Init(void);							//初期化(デフォ)
 	HRESULT Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot) { pos; rot; return E_FAIL; }		//初期化(オバロ)
-	HRESULT Init(const D3DXVECTOR3 pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f), const D3DXVECTOR3 rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f), int nNumParts = 1);		//初期化(オバロ)
+	HRESULT Init(const D3DXVECTOR3 pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f), const D3DXVECTOR3 rot = D3DXVECTOR3(0.0f, D3DX_PI * 0.5f, 0.0f), int nNumParts = 1);		//初期化(オバロ)
 	void Uninit(void);							//終了
 	void Update(void);							//更新
 	void Draw(void);							//描画
@@ -94,6 +94,9 @@ public:
 	void SetParam(const Param param) { m_param = param; }			//現在パラメータ設定
 	void ReadFile(void);	//ファイル読込
 	void Damage(float fDamege = 1.0f);
+
+	CMotion *GetMotion(void);					//現在パラメータ取得
+
 
 protected:
 

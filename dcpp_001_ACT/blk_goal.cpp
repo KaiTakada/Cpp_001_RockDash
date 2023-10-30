@@ -43,7 +43,31 @@ CBlk_Goal::~CBlk_Goal()
 HRESULT CBlk_Goal::Init(void)
 {
 	CBlock::Init();
-	
+
+	D3DXVECTOR3 vtxMin = DEF_VEC3;
+	D3DXVECTOR3 vtxMax = DEF_VEC3;
+
+	SetType_Blk(CBlock::TYPE_GOAL);
+
+	CXModel *pXmodel = CManager::GetInstance()->GetXModel();
+	SetIdxModel(pXmodel->Regist(GOAL_MODEL, &vtxMin, &vtxMax));		//モデル割り当て
+
+	vtxMin = pXmodel->GetAddress(GetIdxModel())->vtxMin;
+	vtxMax = pXmodel->GetAddress(GetIdxModel())->vtxMax;
+	SetVtx(vtxMin, vtxMax);
+
+	//90度回転させる
+	SetRot(D3DXVECTOR3(0.0f, D3DX_PI * 0.5f, 0.0f));
+	D3DXVECTOR3 vtxCom = vtxMin;
+	vtxMin.x = vtxCom.z;
+	vtxMin.z = vtxCom.x;
+
+	vtxCom = vtxMax;
+
+	vtxMax.x = vtxCom.z;
+	vtxMax.z = vtxCom.x;
+	SetVtx(vtxMin, vtxMax);
+
 	SetType(TYPE_BLOCK);
 
 	return S_OK;
@@ -52,9 +76,33 @@ HRESULT CBlk_Goal::Init(void)
 //=======================
 //ブロックの初期化処理
 //=======================
-HRESULT CBlk_Goal::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot)
+HRESULT CBlk_Goal::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, TYPE_Blk type)
 {
-	CBlock::Init(pos, rot);
+	CBlock::Init(pos, rot, type);
+
+	D3DXVECTOR3 vtxMin = DEF_VEC3;
+	D3DXVECTOR3 vtxMax = DEF_VEC3;
+
+	SetType_Blk(type);
+
+	CXModel *pXmodel = CManager::GetInstance()->GetXModel();
+	SetIdxModel(pXmodel->Regist(GOAL_MODEL, &vtxMin, &vtxMax));		//モデル割り当て
+
+	vtxMin = pXmodel->GetAddress(GetIdxModel())->vtxMin;
+	vtxMax = pXmodel->GetAddress(GetIdxModel())->vtxMax;
+	SetVtx(vtxMin, vtxMax);
+
+	//90度回転させる
+	SetRot(D3DXVECTOR3(0.0f, D3DX_PI * 0.5f, 0.0f));
+	D3DXVECTOR3 vtxCom = vtxMin;
+	vtxMin.x = vtxCom.z;
+	vtxMin.z = vtxCom.x;
+
+	vtxCom = vtxMax;
+
+	vtxMax.x = vtxCom.z;
+	vtxMax.z = vtxCom.x;
+	SetVtx(vtxMin, vtxMax);
 
 	SetType(TYPE_BLOCK);
 
@@ -105,23 +153,10 @@ CBlk_Goal *CBlk_Goal::Create(D3DXVECTOR3 pos, D3DXVECTOR3 rot)
 		}
 		else
 		{
+			pGoal->SetType_Blk(CBlock::TYPE_GOAL);
+
 			CXModel *pXmodel = CManager::GetInstance()->GetXModel();
 			pGoal->SetIdxModel(pXmodel->Regist(GOAL_MODEL, &vtxMin, &vtxMax));		//モデル割り当て
-		
-			vtxMin = pXmodel->GetAddress(pGoal->GetIdxModel())->vtxMin;
-			vtxMax = pXmodel->GetAddress(pGoal->GetIdxModel())->vtxMax;
-			pGoal->SetVtx(vtxMin, vtxMax);
-
-			pGoal->SetRot(D3DXVECTOR3(0.0f, D3DX_PI * 0.5f, 0.0f));
-			D3DXVECTOR3 vtxCom = vtxMin;
-			vtxMin.x = vtxCom.z;
-			vtxMin.z = vtxCom.x;
-			
-			vtxCom = vtxMax;
-
-			vtxMax.x = vtxCom.z;
-			vtxMax.z = vtxCom.x;
-			pGoal->SetVtx(vtxMin, vtxMax);
 		}
 	}
 	else

@@ -57,6 +57,7 @@ public:
 		TYPE_ITEM2D,
 		TYPE_SPAWN,
 		TYPE_BOSS,
+		TYPE_ENTER,
 		TYPE_MAX
 	}TYPE;
 
@@ -108,7 +109,9 @@ public:
 	static int GetNumAll(void) { return m_nNumAll; }		//総数取得
 
 	void SetType(CObject::TYPE type) { m_type = type; }		//タイプ取得
-	CObject::TYPE GetType(void) { return m_type; }		//タイプ取得
+	CObject::TYPE GetType() { return m_type; }		//タイプ取得
+	virtual int GetLocalType() { assert(false); return 0; }			//それぞれのクラスで作ったタイプを取得(使用時は継承宣言をしてください)
+
 	void SetDeath(bool bDeath) { m_bDeath = bDeath; }		//死亡フラグ取得
 	bool GetDeath(void) { return m_bDeath; }				//死亡フラグ取得
 

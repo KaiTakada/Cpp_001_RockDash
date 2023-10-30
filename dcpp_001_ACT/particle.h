@@ -33,6 +33,7 @@ public:
 	{
 		TYPE_NONE = 0,	//無し
 		TYPE_EXPLODE,	//爆発
+		TYPE_BOOST,	//ブースト
 		TYPE_MAX,
 	};
 

@@ -156,6 +156,8 @@
   <ItemGroup>
     <ClCompile Include="Anim.cpp" />
     <ClCompile Include="bg.cpp" />
+    <ClCompile Include="bg3D.cpp" />
+    <ClCompile Include="blk_break.cpp" />
     <ClCompile Include="block.cpp" />
     <ClCompile Include="blk_goal.cpp" />
     <ClCompile Include="bullet.cpp" />
@@ -196,6 +198,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="press_enter.cpp" />
     <ClCompile Include="ranking.cpp" />
     <ClCompile Include="renderer.cpp" />
     <ClCompile Include="result.cpp" />
@@ -214,6 +217,8 @@
   <ItemGroup>
     <ClInclude Include="Anim.h" />
     <ClInclude Include="bg.h" />
+    <ClInclude Include="bg3D.h" />
+    <ClInclude Include="blk_break.h" />
     <ClInclude Include="block.h" />
     <ClInclude Include="blk_goal.h" />
     <ClInclude Include="bullet.h" />
@@ -251,6 +256,7 @@
     <ClInclude Include="pause.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="precompile.h" />
+    <ClInclude Include="press_enter.h" />
     <ClInclude Include="ranking.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="result.h" />

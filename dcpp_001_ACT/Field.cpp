@@ -15,8 +15,8 @@
 //==================================
 // マクロ定義
 //==================================
-#define TEX_FIELD "data\\TEXTURE\\FIELD\\grass.jpg"
-#define DEF_NUM_DIF (50)
+#define TEX_FIELD "data\\TEXTURE\\FIELD\\rock.jpg"
+#define DEF_NUM_DIF (8)
 
 //==================================
 // 静的メンバ変数宣言
@@ -125,7 +125,9 @@ CField * CField::Create(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, const D3DX
 
 		pField->SetSize(size);
 
-		pField->SetDivTex(DEF_NUM_DIF, DEF_NUM_DIF);
+		int tex0 = int(size.x / 128.0f);
+		int tex1 = int(size.z / 128.0f);
+		pField->SetDivTex(tex0, tex1);
 
 		CTexture *pTexture = CManager::GetInstance()->GetTexture();
 		pField->SetIdxTexture(pTexture->Regist(TEX_FIELD));

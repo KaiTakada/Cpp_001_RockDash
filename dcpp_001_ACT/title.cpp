@@ -64,13 +64,13 @@ HRESULT CTitle::Init()
 
 	CTexture *pTexture = CManager::GetInstance()->GetTexture();
 
-	CObject2D *pPolygon = CObject2D::Create(D3DXVECTOR3(fWidth * 0.5f, fHeight * 0.5f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-		D3DXVECTOR3(fWidth * 0.5f, fHeight * 0.5f, 0.0f), CObject2D::UPDATE_TYPE_NONE);
+	CObject2D *pPolygon = CObject2D::Create(D3DXVECTOR3(fWidth * 0.3f, fHeight * 0.3f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),
+		D3DXVECTOR3(fWidth * 0.3f, fHeight * 0.3f, 0.0f), CObject2D::UPDATE_TYPE_NONE);
 
 	pPolygon->SetIdxTexture(pTexture->Regist("data\\TEXTURE\\SCENE\\title.png"));
 
 	m_pEnter = CObject2D::Create(D3DXVECTOR3(fWidth * 0.75f, fHeight * 0.8f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f),
-		D3DXVECTOR3(fWidth * 0.2f, fHeight * 0.1f, 0.0f), CObject2D::UPDATE_TYPE_NONE);
+		D3DXVECTOR3(fWidth * 0.15f, fHeight * 0.08f, 0.0f), CObject2D::UPDATE_TYPE_NONE);
 
 	m_pEnter->SetIdxTexture(pTexture->Regist("data\\TEXTURE\\PressEnter00.png"));
 

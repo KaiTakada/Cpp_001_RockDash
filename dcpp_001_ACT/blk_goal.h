@@ -30,7 +30,7 @@ public:
 	~CBlk_Goal();
 
 	HRESULT Init(void);			//初期化
-	HRESULT Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot);		//初期化(オバロ)
+	HRESULT Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, TYPE_Blk type = TYPE_GOAL);		//初期化(オバロ)
 	void Uninit(void);			//終了
 	void Update(void);			//更新
 	void Draw(void);			//描画

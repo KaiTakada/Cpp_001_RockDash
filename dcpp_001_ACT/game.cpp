@@ -20,9 +20,11 @@
 #include "timer.h"
 #include "growselecter.h"
 #include "map.h"
+#include "bg3D.h"
 
 #include "block.h"
 #include "blk_goal.h"
+#include "blk_break.h"
 
 //=========================
 // マクロ定義
@@ -72,26 +74,12 @@ HRESULT CGame::Init()
 	m_pPlayer = CPlayer::Create(D3DXVECTOR3(0.0f, 100.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
 
 	m_pField = CField::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-
-	////============ スポーン ============
-	////NULLチェック
-	//if (m_pSpawn != nullptr)
-	//{
-	//	m_pSpawn->Uninit();
-	//	m_pSpawn = nullptr;
-	//}
-
-	//if (m_pSpawn == nullptr)
-	//{
-	//	m_pSpawn = CSpawn::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f), D3DXVECTOR3(0.0f, 0.0f, 0.0f));
-	//}
-	//else
-	//{
-	//	return -1;
-	//}
 	
+	CBg3D::Create(D3DXVECTOR3(0.0f, 0.0f, 0.0f));
+
 	if (m_pTimer != nullptr)
 	{
+		m_pTimer->Uninit();
 		m_pTimer = nullptr;
 	}
 
@@ -100,14 +88,12 @@ HRESULT CGame::Init()
 
 	CManager::GetInstance()->GetSound()->PlaySound(CSound::SOUND_LABEL_BGM_GAME);
 
+	//マップ生成
 	m_pMap = CMap::Create(D3DXVECTOR3(SCREEN_WIDTH * 0.5f, SCREEN_HEIGHT * 0.5f, 0.0f));
 	m_pMap->Load("data\\SET\\MAP\\load.txt");
 	m_pMap->Uninit();
 	delete m_pMap;
 	m_pMap = nullptr;
-
-	CBlk_Goal *goal = CBlk_Goal::Create(D3DXVECTOR3(4000.0f, 0.0f, 0.0f));
-	goal->SetSize(D3DXVECTOR3(10.0f, 10.0f, 10.0f));
 
 	return S_OK;
 }
@@ -166,6 +152,7 @@ void CGame::Update()
 
 	CScene::Update();
 
+#if _DEBUG
 	//エディット
 	if (pInputKeyboard->GetTrigger(DIK_M))
 	{//[ M ]キーでエディット
@@ -187,7 +174,10 @@ void CGame::Update()
 	if (m_pMap != nullptr && bEdit == true)
 	{
 		m_pMap->Update();
+		return;
 	}
+
+#endif
 
 	//ポーズ
 	if (pInputKeyboard->GetTrigger(DIK_P) || pInputPad->GetPress(CInputGamepad::BUTTON_START, 0) == true)
@@ -270,7 +260,7 @@ CGame * CGame::Create()
 		}
 		else
 		{
-			//pGame->m_mode = CScene::MODE_GAME;
+
 		}
 	}
 	else

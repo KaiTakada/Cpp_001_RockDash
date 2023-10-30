@@ -99,31 +99,91 @@ void CMap::Update(void)
 {
 	//キーボード取得
 	CInputKeyboard *pInputKeyboard = CManager::GetInstance()->GetInputKeyboard();
-	D3DXVECTOR3 pos;
 	
 	if (m_pBlock == nullptr)
 	{
 		return;
 	}
 	
-	pos = m_pBlock->GetPos();
+	D3DXVECTOR3 pos = m_pBlock->GetPos();
+	D3DXVECTOR3 size = m_pBlock->GetSize();
+
+	if (pInputKeyboard->GetTrigger(DIK_B))
+	{
+		//壊して
+		int nType = m_pBlock->GetType_Blk();
+		m_pBlock->SetDeath(true);
+
+		//1個ずらし
+		nType++;
+		nType %= CBlock::TYPE_MAX;
+
+		//作り直す
+		m_pBlock = CBlock::Create(pos,DEF_VEC3,(CBlock::TYPE_Blk)nType);
+		m_pBlock->SetCol(D3DXCOLOR(0.0f, 0.0f, 0.0f, 0.0f));
+	}
+
+	//ブロックサイズ変更
+	if (pInputKeyboard->GetTrigger(DIK_UP))
+	{
+		size.y += 1.0f;
+		m_pBlock->SetSize(size);
+	}
+	if (pInputKeyboard->GetTrigger(DIK_DOWN))
+	{
+		size.y -= 1.0f;
+		m_pBlock->SetSize(size);
+	}
+	if (pInputKeyboard->GetTrigger(DIK_RIGHT))
+	{
+		size.x += 1.0f;
+		m_pBlock->SetSize(size);
+	}
+	if (pInputKeyboard->GetTrigger(DIK_LEFT))
+	{
+		size.x -= 1.0f;
+		m_pBlock->SetSize(size);
+	}
+
 
 	//カーソルの移動
-	if (pInputKeyboard->GetPress(DIK_W))
-	{//上
-		pos.y += 10.0f;
+	if (pInputKeyboard->GetPress(DIK_SPACE))
+	{
+		if (pInputKeyboard->GetPress(DIK_W))
+		{//上
+			pos.y += 10.0f;
+		}
+		if (pInputKeyboard->GetPress(DIK_S))
+		{//下
+			pos.y -= 10.0f;
+		}
+		if (pInputKeyboard->GetPress(DIK_A))
+		{//西
+			pos.x -= 10.0f;
+		}
+		if (pInputKeyboard->GetPress(DIK_D))
+		{//東
+			pos.x += 10.0f;
+		}
 	}
-	if (pInputKeyboard->GetPress(DIK_S))
-	{//下
-		pos.y -= 10.0f;
-	}
-	if (pInputKeyboard->GetPress(DIK_A))
-	{//西
-		pos.x -= 10.0f;
-	}
-	if (pInputKeyboard->GetPress(DIK_D))
-	{//東
-		pos.x += 10.0f;
+	else
+	{
+		if (pInputKeyboard->GetPress(DIK_W))
+		{//上
+			pos.y += 10.0f;
+		}
+		if (pInputKeyboard->GetPress(DIK_S))
+		{//下
+			pos.y -= 10.0f;
+		}
+		if (pInputKeyboard->GetPress(DIK_A))
+		{//西
+			pos.x -= 10.0f;
+		}
+		if (pInputKeyboard->GetPress(DIK_D))
+		{//東
+			pos.x += 10.0f;
+		}
 	}
 
 	m_pBlock->SetPos(pos);
@@ -131,7 +191,7 @@ void CMap::Update(void)
 
 	if (pInputKeyboard->GetTrigger(DIK_RETURN))
 	{//ブロック設置
-		CBlock *pBlock = CBlock::Create(pos);
+		CBlock *pBlock = CBlock::Create(pos, DEF_VEC3, m_pBlock->GetType_Blk());
 		pBlock->SetSize(m_pBlock->GetSize());
 	}
 
@@ -189,6 +249,8 @@ void CMap::Load(const char * pFilepass)
 	D3DXVECTOR3 pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 size = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	int nType = CBlock::TYPE_NORMAL;
+	CBlock *pBlock = nullptr;		//生成内容
 
 	char *pComp = new char[256];
 	FILE *pFile = nullptr;
@@ -242,11 +304,16 @@ void CMap::Load(const char * pFilepass)
 					fscanf(pFile, "%f %f %f", &size.x, &size.y, &size.z);
 					continue;
 				}
+				else if (strcmp(pComp, "TYPE") == 0)
+				{
+					fscanf(pFile, "%s", pComp);
+					fscanf(pFile, "%d", &nType);
+					continue;
+				}
 			}
 
 			//読み込んだパラメータを元に生成
-			CBlock *pBlock;
-			pBlock = CBlock::Create(pos, rot);
+			pBlock = CBlock::Create(pos, rot,(CBlock::TYPE_Blk)nType);
 			pBlock->SetSize(size);
 		}
 	}
@@ -270,6 +337,7 @@ void CMap::Save(const char * pFilepass)
 	D3DXVECTOR3 pos = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 rot = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 	D3DXVECTOR3 size = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
+	int nType = CBlock::TYPE_NORMAL;
 
 	FILE *pFile = nullptr;
 
@@ -303,10 +371,13 @@ void CMap::Save(const char * pFilepass)
 					rot = pObject->GetRot();
 					size = pObject->GetSize();
 
+					nType = pObject->GetLocalType();
+
 					fprintf(pFile, "SET_PARAM\n");
 					fprintf(pFile, "POS = %.2f %.2f %.2f\n", pos.x, pos.y, pos.z);
 					fprintf(pFile, "ROT = %.2f %.2f %.2f\n", rot.x, rot.y, rot.z);
 					fprintf(pFile, "SIZE = %.2f %.2f %.2f\n", size.x, size.y, size.z);
+					fprintf(pFile, "TYPE = %d\n", nType);
 					fprintf(pFile, "END_PARAM\n\n");
 				}
 

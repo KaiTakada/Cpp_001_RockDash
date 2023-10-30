@@ -73,6 +73,7 @@ HRESULT CParticle::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, D3DXVECTOR
 {
 	int nNum = 0;
 	int nLife = 0;
+	D3DXVECTOR3 vec = rot * 100.0f;
 	D3DXVECTOR3 moveR = D3DXVECTOR3(0.0f, 0.0f, 0.0f);
 
 	//タイプで
@@ -82,6 +83,28 @@ HRESULT CParticle::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, D3DXVECTOR
 
 		nNum = 30;
 		nLife = 20;
+
+		break;
+
+	case TYPE_BOOST:
+
+		nNum = 30;
+		nLife = 40;
+
+		if (vec.x < 1.0f && vec.x > -1.0f)
+		{
+			vec.x = 1.0f;
+		}
+		if (vec.y < 1.0f && vec.y > -1.0f)
+		{
+			vec.y = 1.0f;
+		}
+		if (vec.z < 1.0f && vec.z > -1.0f)
+		{
+			vec.z = 1.0f;
+		}
+
+		vec *= 100.0f;
 
 		break;
 
@@ -100,12 +123,35 @@ HRESULT CParticle::Init(const D3DXVECTOR3 pos, const D3DXVECTOR3 rot, D3DXVECTOR
 			break;
 		}
 
-		moveR.x = sinf((float)(rand() % 629 - 314) / 100.0f) * move.x;
-		moveR.y = cosf((float)(rand() % 629 - 314) / 100.0f) * move.y;
-		moveR.z = sinf((float)(rand() % 629 - 314) / 100.0f) * move.z;
-	
+		//タイプで
+		switch (type)
+		{
+		case TYPE_EXPLODE:
+			moveR.x = sinf((float)(rand() % 629 - 314) / 100.0f) * move.x;
+			moveR.y = cosf((float)(rand() % 629 - 314) / 100.0f) * move.y;
+			moveR.z = sinf((float)(rand() % 629 - 314) / 100.0f) * move.z;
+			break;
+
+		case TYPE_BOOST:
+			moveR.x = sinf((float)(rand() % int(vec.x) - 79) / 100.0f) * move.x;
+			moveR.y = cosf((float)(rand() % int(vec.y) - 79) / 100.0f) * move.y;
+			moveR.z = sinf((float)(rand() % int(vec.z) - 79) / 100.0f) * move.z;
+			break;
+
+		default:
+			moveR.x = sinf((float)(rand() % 629 - 314) / 100.0f) * move.x;
+			moveR.y = cosf((float)(rand() % 629 - 314) / 100.0f) * move.y;
+			moveR.z = sinf((float)(rand() % 629 - 314) / 100.0f) * move.z;
+			break;
+		}
+
 		//CEffect::Create(pos, rot, moveR, size, nLife, CEffect::TEX_000);		//自身を代入
 		m_apEffect[nCntCrt] = CEffect::Create(pos, rot, moveR, size, nLife, CEffect::TEX_000);		//自身を代入
+	
+		if (type == TYPE_BOOST)
+		{
+			m_apEffect[nCntCrt]->SetColor(D3DXCOLOR(1.0f, 0.0f, 0.0f, 1.0f));
+		}
 	}
 
 	SetType(TYPE_PARTICLE);
